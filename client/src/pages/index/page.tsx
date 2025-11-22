@@ -1,9 +1,6 @@
 import { Button } from '@heroui/react';
+import Navigation from '../../components/navigation/Navigation';
 
 export default function IndexPage() {
-  return (
-    <div>
-      <Button>dette er en knap</Button>
-    </div>
-  );
+  return <div className="">hejsa</div>;
 }

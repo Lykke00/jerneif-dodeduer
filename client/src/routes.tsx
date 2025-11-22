@@ -1,15 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
-import { routes } from './routes.ts';
+import IndexPage from './pages/index/page.tsx';
+import { Layout } from './pages/layout.tsx';
 
 function AppRoutes() {
   return (
     <Routes>
-      {routes.map((route) => {
-        const Component = route.component;
-        return (
-          <Route key={route.path} path={route.path} element={<Component {...route.props} />} />
-        );
-      })}
+      <Route element={<Layout />}>
+        <Route index element={<IndexPage />} />
+      </Route>
     </Routes>
   );
 }
