@@ -3,3 +3,25 @@
 /* Note: You may need to change the path to fit your project structure */
 @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary: #f44336;
+  --color-secondary: #ffecec;
+  --color-secondary-hover: #ffd2d2;
+  --color-focus: #bef264;
+  --border-new: #f16c6c;
+  --border-card: #f1dfdf;
+  --divider: #f1dfdf;
+}
+
+.border-new {
+  border-color: var(--border-new);
+}
+
+.border-card {
+  border-color: var(--border-card);
+}
+
+.color-secondary-hover {
+  background-color: var(--color-secondary) !important;
+}

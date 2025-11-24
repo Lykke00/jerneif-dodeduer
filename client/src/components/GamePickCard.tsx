@@ -11,10 +11,24 @@ export default function GamePickCard({ number, value }: GamePickCardProps) {
 
   return (
     <Button
-      className={`w-auto h-30 ${isChecked && 'bg-secondary border-secondary'}`}
       onPress={() => setIsChecked(!isChecked)}
+      className={`
+        relative w-auto h-20 overflow-hidden
+        ${
+          isChecked
+            ? 'bg-primary border border-new text-white'
+            : `bg-secondary [&[data-hover='true']]:bg-secondary-hover`
+        }
+      `}
     >
-      {value}
+      <span
+        className="
+          inline-block transition-transform duration-200
+          group-hover:-translate-y-1
+        "
+      >
+        {value}
+      </span>
     </Button>
   );
 }
