@@ -1,16 +1,8 @@
-import {
-  NavbarBrand,
-  NavbarContent,
-  NavbarMenu,
-  Navbar,
-  NavbarItem,
-  Link,
-  Button,
-} from '@heroui/react';
+import { NavbarBrand, NavbarContent, Navbar, NavbarItem, Link } from '@heroui/react';
 
 export default function Navigation() {
   return (
-    <Navbar isBlurred isBordered>
+    <Navbar className="bg-neutral-50" isBlurred isBordered>
       <NavbarBrand>
         <p className="font-bold text-inherit">JerneIF</p>
       </NavbarBrand>
@@ -21,7 +13,7 @@ export default function Navigation() {
           </Link>
         </NavbarItem>
         <NavbarItem isActive>
-          <Link aria-current="page" href="#">
+          <Link aria-current="true" href="#">
             Indbetal
           </Link>
         </NavbarItem>
@@ -34,11 +26,6 @@ export default function Navigation() {
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
           <Link href="#">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
-            Registrering
-          </Button>
         </NavbarItem>
       </NavbarContent>
     </Navbar>
