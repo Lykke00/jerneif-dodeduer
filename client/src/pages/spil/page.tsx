@@ -180,8 +180,8 @@ export default function DeadPigeonsGame() {
                         <NumberInput
                           hideStepper
                           type="number"
-                          min={MIN}
-                          max={MAX}
+                          minValue={MIN}
+                          maxValue={MAX}
                           size="sm"
                           radius="sm"
                           value={quantity}
