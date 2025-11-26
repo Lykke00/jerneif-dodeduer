@@ -35,7 +35,7 @@ export default function Navigation() {
 
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link to="/login">Login</Link>
+          <Link to="/">Login</Link>
         </NavbarItem>
       </NavbarContent>
     </Navbar>
