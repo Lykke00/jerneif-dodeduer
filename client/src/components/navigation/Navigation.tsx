@@ -14,8 +14,14 @@ export default function Navigation() {
 
   return (
     <Navbar className="bg-neutral-50" isBlurred isBordered>
-      <NavbarBrand>
-        <p className="font-bold text-inherit">JerneIF</p>
+      <NavbarBrand className="flex flex-row gap-3">
+        <img
+          className="w-10 h-10 object-contain drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]"
+          src="/logo.png"
+          alt="Logo"
+        />
+
+        <p className="font-bold text-neutral-800">JerneIF</p>
       </NavbarBrand>
 
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
