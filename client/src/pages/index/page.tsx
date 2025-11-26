@@ -1,10 +1,3 @@
-import { Button } from '@heroui/react';
-import Navigation from '../../components/navigation/Navigation';
-
 export default function IndexPage() {
-  return (
-    <div className="">
-      hejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejshejsahejsahejsahejsahejsahejsaahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsahejsa
-    </div>
-  );
+  return <div className="">Login</div>;
 }

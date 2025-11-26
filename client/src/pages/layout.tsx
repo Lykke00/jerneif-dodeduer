@@ -6,8 +6,8 @@ export function Layout() {
     <div className="min-h-screen flex flex-col">
       <Navigation />
 
-      <main className="flex justify-center p-4">
-        <div className="w-full max-w-5xl px-6 mx-auto wrap-break-word">
+      <main className="flex justify-center">
+        <div className="w-full max-w-5xl px-4 mx-auto wrap-break-word">
           <Outlet />
         </div>
       </main>

@@ -1,7 +1,6 @@
-'use client';
-
 import { motion } from 'framer-motion';
 import { Button } from '@heroui/react';
+import { IoCheckmarkSharp } from 'react-icons/io5';
 
 interface GamePickCardProps {
   number: number;
@@ -11,13 +10,14 @@ interface GamePickCardProps {
 
 export default function GamePickCard({ number, isSelected, onToggle }: GamePickCardProps) {
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="h-full">
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.99 }} className="h-full">
       <Button
-        onClick={onToggle}
+        disableRipple
+        onPress={onToggle}
         className={`relative w-full h-20 font-bold text-xl transition-all duration-200 overflow-hidden group ${
           isSelected
-            ? 'bg-gradient-to-br from-primary to-red-400 text-primary-foreground dark:from-primary dark:to-red-400 dark:text-primary-foreground shadow-lg border-2 border-accent/50 dark:border-accent/40'
-            : 'bg-secondary/40 dark:bg-secondary/50 text-foreground dark:text-foreground hover:bg-secondary/60 dark:hover:bg-secondary/70 border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50'
+            ? 'bg-gradient-to-br from-primary to-red-400 text-foreground-100 dark:from-primary dark:to-red-400 dark:text-primary-foreground shadow-lg border-1 border-primary/10 dark:border-accent/40'
+            : 'bg-secondary/40 dark:bg-secondary/50 text-foreground-800 dark:text-foreground hover:bg-secondary/60 dark:hover:bg-secondary/70 border border-primary/20 dark:border-primary/30 hover:border-primary/40 dark:hover:border-primary/50'
         }`}
       >
         <motion.div
@@ -34,7 +34,7 @@ export default function GamePickCard({ number, isSelected, onToggle }: GamePickC
 
         <motion.div
           className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold
-             bg-accent/80 dark:bg-accent/70 text-primary-foreground"
+             bg-accent/80 dark:bg-accent/70 text-foreground-100"
           initial={false}
           animate={isSelected ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
           transition={{
@@ -44,7 +44,7 @@ export default function GamePickCard({ number, isSelected, onToggle }: GamePickC
             damping: 14,
           }}
         >
-          ✓
+          <IoCheckmarkSharp className="w-3.5 h-3.5" />
         </motion.div>
       </Button>
     </motion.div>

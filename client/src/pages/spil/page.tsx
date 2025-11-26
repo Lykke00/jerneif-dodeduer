@@ -1,9 +1,17 @@
-'use client';
-
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardHeader, CardBody, CardFooter, Button } from '@heroui/react';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Button,
+  NumberInput,
+  Checkbox,
+} from '@heroui/react';
 import GamePickCard from '../../components/GamePickCard';
+import { BiMinus, BiPlus } from 'react-icons/bi';
+import { FaXmark } from 'react-icons/fa6';
 
 const PRICING = {
   5: 20,
@@ -16,19 +24,19 @@ export default function DeadPigeonsGame() {
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [minSelections] = useState(5);
-  const [maxSelections] = useState(8);
-  const [isDark, setIsDark] = useState(false);
+  const minSelections = 5;
+  const maxSelections = 8;
+  const [quantity, setQuantity] = useState(1);
+  const MIN = 1;
+  const MAX = 20;
 
-  useEffect(() => {
-    const isDarkMode =
-      localStorage.theme === 'dark' ||
-      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setIsDark(isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+  const increment = () => {
+    setQuantity((q) => Math.min(q + 1, MAX));
+  };
+
+  const decrement = () => {
+    setQuantity((q) => Math.max(q - 1, MIN));
+  };
 
   const currentPrice = useMemo(() => {
     if (selectedNumbers.length >= minSelections && selectedNumbers.length <= maxSelections) {
@@ -36,6 +44,11 @@ export default function DeadPigeonsGame() {
     }
     return null;
   }, [selectedNumbers.length, minSelections, maxSelections]);
+
+  const totalPrice = useMemo(() => {
+    if (!currentPrice) return null;
+    return currentPrice * quantity;
+  }, [currentPrice, quantity]);
 
   const toggleNumber = (num: number) => {
     setSelectedNumbers((prev) => {
@@ -65,29 +78,17 @@ export default function DeadPigeonsGame() {
   const progress = (selectedNumbers.length / maxSelections) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 dark:from-background dark:via-background dark:to-secondary/30 flex flex-col items-center justify-center p-4 md:p-6 transition-colors duration-300">
+    <div className="h-full bg-linear-to-b pt-2 from-background via-background to-secondary/20 dark:from-background dark:via-background dark:to-secondary/30 flex flex-col items-center justify-start transition-colors duration-300">
       <div className="w-full max-w-3xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8 text-center"
+          className="mb-5 text-center"
         >
-          <motion.h1
-            className="text-5xl md:text-6xl font-black text-primary dark:text-primary mb-2"
-            animate={{
-              textShadow: [
-                '0px 0px 0px rgba(220, 38, 38, 0)',
-                '0px 0px 20px rgba(220, 38, 38, 0.5)',
-              ],
-            }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatType: 'reverse' }}
-          >
-            Dead Pigeons
-          </motion.h1>
-          <p className="text-muted-foreground text-lg font-medium">
-            Pick your winning sequence for Jerne IF
-          </p>
+          <div className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary">
+            Døde Duer
+          </div>
         </motion.div>
 
         <motion.div
@@ -95,22 +96,15 @@ export default function DeadPigeonsGame() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <Card className="border border-primary/30 shadow-2xl bg-card/80 dark:bg-card/60 backdrop-blur-sm">
-            <CardHeader className="border-b border-primary/10 pb-6">
-              <div className="flex items-start justify-between">
+          <Card className="border border-primary/30 shadow-lg backdrop-blur-sm bg-card/80 dark:bg-card/60">
+            <CardHeader className="border-b border-primary/10 pb-4">
+              <div className="flex w-full text-center flex-col items-center justify-center">
                 <div>
-                  <p className="text-3xl font-bold text-primary dark:text-primary mb-1">Week 48</p>
-                  <p className="text-sm text-muted-foreground">
-                    Select {minSelections}-{maxSelections} numbers from 1-16
+                  <p className="text-3xl font-bold text-foreground-800 mb-1">Uge 48</p>
+                  <p className="text-sm text-foreground-700">
+                    Vælg {minSelections}-{maxSelections} numre fra 1-16
                   </p>
                 </div>
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-                  className="text-5xl"
-                >
-                  🕊
-                </motion.div>
               </div>
             </CardHeader>
 
@@ -135,22 +129,12 @@ export default function DeadPigeonsGame() {
                 </AnimatePresence>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">
-                      {selectedNumbers.length} / {maxSelections} selected
+                      {selectedNumbers.length} / {maxSelections} valgt
                     </span>
-                    {currentPrice && (
-                      <motion.span
-                        key={selectedNumbers.length}
-                        initial={{ scale: 1.2, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="text-sm font-bold text-primary dark:text-primary"
-                      >
-                        {currentPrice} DKK
-                      </motion.span>
-                    )}
                   </div>
                   <div className="space-y-1">
                     <motion.div
@@ -159,19 +143,83 @@ export default function DeadPigeonsGame() {
                       animate={{ opacity: 1 }}
                     >
                       <motion.div
-                        className="h-full bg-gradient-to-r from-primary via-accent to-primary dark:from-primary dark:via-accent dark:to-primary rounded-lg shadow-lg"
+                        className="h-full bg-linear-to-r from-primary via-accent to-primary dark:from-primary dark:via-accent dark:to-primary rounded-lg shadow-lg"
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
                       />
+
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                        className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
                         animate={{ x: ['-100%', '100%'] }}
                         transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                       />
                     </motion.div>
                   </div>
                 </div>
+
+                {currentPrice && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center justify-between pt-2 pb-2 pl-4 pr-4 rounded-lg border border-primary/20 dark:border-primary/30"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-foreground">Antal</span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          isIconOnly
+                          variant="ghost"
+                          className="border border-foreground-200 shadow-sm"
+                          onPress={decrement}
+                          isDisabled={quantity <= MIN}
+                        >
+                          <BiMinus className="w-4 h-4" />
+                        </Button>
+                        <NumberInput
+                          hideStepper
+                          type="number"
+                          min={MIN}
+                          max={MAX}
+                          size="sm"
+                          radius="sm"
+                          value={quantity}
+                          onValueChange={setQuantity}
+                          className="w-20 text-sm"
+                          classNames={{
+                            inputWrapper:
+                              'border border-foreground-200 rounded-md h-8 flex items-center justify-center',
+                            input: 'text-center font-semibold',
+                          }}
+                        />
+                        <Button
+                          size="sm"
+                          isIconOnly
+                          variant="ghost"
+                          className="border border-foreground-200 shadow-sm"
+                          onPress={increment}
+                          isDisabled={quantity >= MAX}
+                        >
+                          <BiPlus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="text-right flex flex-col">
+                      <motion.div
+                        key={totalPrice}
+                        initial={{ scale: 1.1, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="font-bold text-primary text-base"
+                      >
+                        {totalPrice} DKK
+                      </motion.div>
+
+                      <span className="text-xs text-foreground/60">{currentPrice} DKK / bræt</span>
+                    </div>
+                  </motion.div>
+                )}
 
                 <AnimatePresence>
                   {selectedNumbers.length > 0 && (
@@ -180,20 +228,31 @@ export default function DeadPigeonsGame() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="flex flex-wrap gap-2 p-4 bg-gradient-to-br from-secondary/40 to-secondary/20 dark:from-secondary/50 dark:to-secondary/30 rounded-lg border border-primary/20 dark:border-primary/30 shadow-md"
+                      className="flex flex-wrap gap-2 p-4 bg-linear-to-br from-secondary/40 to-secondary/20 dark:from-secondary/50 dark:to-secondary/30 rounded-lg border border-primary/20 dark:border-primary/30 shadow-md"
                     >
                       {selectedNumbers.map((num) => (
-                        <motion.span
+                        <motion.div
                           key={num}
                           layout
                           initial={{ opacity: 0, scale: 0.5 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.5 }}
                           transition={{ duration: 0.15 }}
-                          className="px-4 py-2 bg-linear-to-br from-primary to-red-400 dark:from-primary dark:to-red-400 text-primary-foreground rounded-full text-sm font-bold shadow-md"
+                          onClick={() => toggleNumber(num)}
+                          className="relative h-9 w-9 cursor-pointer group"
                         >
-                          {num}
-                        </motion.span>
+                          <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-primary to-red-400 dark:from-primary dark:to-red-400 text-primary-foreground rounded-full text-sm font-bold shadow-md">
+                            {num}
+                          </div>
+
+                          <div
+                            className="absolute inset-0 rounded-full flex items-center justify-center 
+                          bg-black/60 text-white font-bold opacity-0 
+                          group-hover:opacity-100 transition-opacity duration-200"
+                          >
+                            <FaXmark />
+                          </div>
+                        </motion.div>
                       ))}
                     </motion.div>
                   )}
@@ -201,73 +260,36 @@ export default function DeadPigeonsGame() {
               </div>
             </CardBody>
 
-            <CardFooter className="border-t border-primary/10 pt-6 flex flex-col gap-4">
+            <CardFooter className="border-t border-primary/10 pt-2 flex flex-col">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
                 <Button
-                  onClick={handleSubmit}
+                  onPress={handleSubmit}
+                  isLoading={isSubmitting}
                   disabled={!canSubmit || isSubmitting}
-                  className="w-full h-12 text-lg font-bold bg-gradient-to-r from-primary to-red-400 dark:from-primary dark:to-red-400 hover:from-primary/90 hover:to-red-400/90 text-primary-foreground dark:text-primary-foreground shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="w-full h-12 text-lg font-bold bg-linear-to-r from-primary to-red-400 dark:from-primary dark:to-red-400 hover:from-primary/90 hover:to-red-400/90 text-primary-foreground dark:text-primary-foreground shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  <AnimatePresence mode="wait">
-                    {submitSuccess ? (
-                      <motion.span
-                        key="success"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                      >
-                        ✓ Board Purchased!
-                      </motion.span>
-                    ) : isSubmitting ? (
-                      <motion.span
-                        key="loading"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-2"
-                      >
-                        <motion.span
-                          animate={{ rotate: 360 }}
-                          transition={{
-                            duration: 1,
-                            repeat: Number.POSITIVE_INFINITY,
-                            ease: 'linear',
-                          }}
-                        >
-                          ⚙️
-                        </motion.span>
-                        Processing...
-                      </motion.span>
-                    ) : (
-                      <motion.span key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        Purchase Board
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
+                  <motion.span key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    Køb {quantity > 1 && quantity} bræt
+                  </motion.span>
                 </Button>
               </motion.div>
 
-              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-secondary/20 dark:hover:bg-secondary/30 transition-colors">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-primary accent-primary dark:accent-primary"
-                />
-                <span className="text-sm text-muted-foreground">Auto-subscribe weekly</span>
-              </label>
+              <Checkbox
+                className="p-6"
+                radius="sm"
+                classNames={{
+                  wrapper: 'ring-0 focus:ring-0 data-[focus-visible=true]:outline-none',
+                  label: 'text-sm text-foreground',
+                }}
+              >
+                Auto-køb ugentligt
+              </Checkbox>
             </CardFooter>
           </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-8 text-center text-xs text-muted-foreground"
-        >
-          <p>Support Jerne IF • 70% to prize pool, 30% to the club</p>
         </motion.div>
       </div>
     </div>
