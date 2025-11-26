@@ -269,7 +269,7 @@ export default function DeadPigeonsGame() {
                 <Button
                   onPress={handleSubmit}
                   isLoading={isSubmitting}
-                  disabled={!canSubmit || isSubmitting}
+                  disabled={!canSubmit}
                   className="w-full h-12 text-lg font-bold bg-linear-to-r from-primary to-red-400 dark:from-primary dark:to-red-400 hover:from-primary/90 hover:to-red-400/90 text-primary-foreground dark:text-primary-foreground shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <motion.span key="submit" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
