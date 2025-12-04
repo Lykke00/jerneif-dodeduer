@@ -1,4 +1,5 @@
 ﻿using Resend;
+using Service.Options;
 using Service.Services.Email.Templates;
 
 namespace Service.Services.Email;
@@ -9,13 +10,13 @@ public interface IEmailService
     Task<bool> SendMagicLinkAsync(string to, string token, CancellationToken ct);
 }
 
-public class EmailService(IResend resend)
+public class EmailService(IResend resend, AppOptions appOptions) : IEmailService
 {
     public async Task<bool> SendAsync(string to, string subject, string htmlBody, CancellationToken ct)
     {
         var message = new EmailMessage
         {
-            From = "RealSafety <post@erhvervsportaler.dk>",
+            From = "JerneIF <post@erhvervsportaler.dk>",
             Subject = subject,
             HtmlBody = htmlBody
         };
@@ -29,13 +30,13 @@ public class EmailService(IResend resend)
 
     public async Task<bool> SendMagicLinkAsync(string to, string token, CancellationToken ct)
     {
-        var verifyUrl = $"{appOptions.Value.FrontendUrl}/panel/verify?token={token}";
+        var verifyUrl = $"{appOptions.FrontendUrl}/auth/verify?token={token}";
         var html = MagicLinkEmailTemplate.Render(
             magicLink: verifyUrl,
             expirationMinutes: 15
         );
 
-        return await SendAsync(to, "RealSafety - login anmodning", html, ct);
+        return await SendAsync(to, "JerneIF - Login Anmodning", html, ct);
     }
 
 }

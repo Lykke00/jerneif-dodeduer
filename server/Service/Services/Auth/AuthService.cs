@@ -1,5 +1,7 @@
 ﻿using DataAccess;
 using DataAccess.Models;
+using Microsoft.EntityFrameworkCore;
+using Service.DTO;
 using Service.DTO.Auth;
 using Service.DTO.Auth.Login;
 
@@ -7,23 +9,29 @@ namespace Service.Services.Auth;
 
 public interface IAuthService
 {
-    Task<LoginResponse> LoginAsync(LoginRequest request, AgentDto agentDto);
+    Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto);
 }
 
 public class AuthService(AppDbContext context) : IAuthService
 {
-    public async Task<LoginResponse> LoginAsync(LoginRequest request, AgentDto agentDto)
+    public async Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto)
     {
-        var user = await context.Users.FindAsync(request.Email);
+        // vi tjekker i databasen om brugeren eksisterer
+        var user = await context.Users
+            .SingleOrDefaultAsync(u => u.Email == request.Email);
+        
+        // hvis brugeren er null, så smider vi en fejl
         if (user is null)
-            throw new Exception("User not found");
+            return Result<bool>.NotFound("Brugeren eksisterer ikke.");
 
-        // skal sendes med email
+        // opret en rå token der skal sendes til email
         var raw = TokenService.GenerateRawToken();
         
-        // skal gemmes i databasen sammen med user
+        // opret en hash token fra den rå token til at gemme i databasen
         var hash = TokenService.ComputeHash(raw);
         
+        // opret en bruger login token til at gemme i databasen
+        // så kan vi senere validere den når brugeren klikker på linket i emailen
         var userToken = new UserLoginToken
         {
             UserId = user.Id,
@@ -33,9 +41,12 @@ public class AuthService(AppDbContext context) : IAuthService
             RequestedUserAgent = agentDto.UserAgent
         };
         
+        // gem bruger login token i databasen
         context.UserLoginTokens.Add(userToken);
+        
+        // gem ændringer i databasen
         await context.SaveChangesAsync();
         
-        throw new NotImplementedException();
+        return Result<bool>.Ok(true);
     }
 }

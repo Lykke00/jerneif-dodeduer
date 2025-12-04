@@ -68,7 +68,7 @@ public static class MagicLinkEmailTemplate
       <div class="wrapper">
         <div class="card">
           <h1>JerneIF Døde Duer - Login</h1>
-          <p>Klik på knappen herunder for at logge ind i RealSafety.</p>
+          <p>Klik på knappen herunder for at logge ind i JerneIf Døde Duer.</p>
           <p>Linket udløber om <strong>{ExpirationMinutes} minutter</strong>.</p>
 
           <p style="text-align:center; margin: 28px 0; width:100%;">

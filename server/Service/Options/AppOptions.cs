@@ -5,6 +5,9 @@ namespace Service.Options;
 public sealed class AppOptions
 {
     [Required]
+    public string FrontendUrl { get; set; } = null!;
+    
+    [Required]
     public string DbConnectionString { get; set; } = null!;
     
     [Required]
