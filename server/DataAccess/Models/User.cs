@@ -18,13 +18,13 @@ public partial class User
     public string Email { get; set; } = null!;
 
     [Column("admin")]
-    public bool? Admin { get; set; }
+    public bool Admin { get; set; }
 
     [Column("active")]
-    public bool? Active { get; set; }
+    public bool Active { get; set; }
 
     [Column("created_at")]
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [InverseProperty("User")]
     public virtual ICollection<UserLoginToken> UserLoginTokens { get; set; } = new List<UserLoginToken>();

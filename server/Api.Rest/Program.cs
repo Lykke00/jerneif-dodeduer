@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Serilog;
 using Service.Options;
 using Service.Services.Auth;
 
@@ -19,6 +20,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddSingleton(_ => TimeProvider.System);
+        
+        builder.Logging.ClearProviders();
+        ConfSerilog.Configure();
+        builder.Host.UseSerilog();
         
         builder.AddAppOptions();
 
@@ -34,7 +39,8 @@ public class Program
         
         // services registration
         builder.Services.AddScoped<IAuthService, AuthService>();
-        
+        builder.Services.AddSingleton<IJwtGenerator, JwtGenerator>();
+
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
 

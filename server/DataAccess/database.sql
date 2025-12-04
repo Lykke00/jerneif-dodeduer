@@ -5,11 +5,11 @@ DROP TABLE IF EXISTS "users";
 
 CREATE TABLE "users"
 (
-    "id"         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    "email"       VARCHAR(100) NOT NULL,
-    "admin"      BOOLEAN      DEFAULT FALSE,
-    "active"     BOOLEAN      DEFAULT TRUE,
-    "created_at" TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP
+    "id"            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "email"         VARCHAR(100) NOT NULL,
+    "admin"         BOOLEAN DEFAULT FALSE NOT NULL,
+    "active"        BOOLEAN DEFAULT TRUE NOT NULL ,
+    "created_at"    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL 
 );
 
 CREATE TABLE user_login_tokens (
@@ -18,7 +18,7 @@ CREATE TABLE user_login_tokens (
     "token_hash"             TEXT NOT NULL,
     "expires_at"             TIMESTAMPTZ NOT NULL,
     "used_at"                TIMESTAMPTZ NULL,
-    "created_at"             TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    "created_at"             TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "requested_ip"           TEXT NULL,
     "requested_user_agent"   TEXT NULL,
     "consumed_ip"            TEXT NULL,

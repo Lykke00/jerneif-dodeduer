@@ -12,4 +12,7 @@ public sealed class AppOptions
     
     [Required]
     public string ResendApiKey { get; set; } = null!;
+    
+    [Required]
+    public JwtOptions Jwt { get; set; } = null!;
 }

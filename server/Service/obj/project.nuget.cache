@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Bhs0ZtsPCUE=",
+  "dgSpecHash": "Hs/lOnVfPrk=",
   "success": true,
   "projectFilePath": "C:\\jerneif\\jerneif-dodeduer\\server\\Service\\Service.csproj",
   "expectedPackageFiles": [
@@ -29,6 +29,7 @@
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.4\\npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\resend\\0.1.6\\resend.0.1.6.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.15.0\\system.identitymodel.tokens.jwt.8.15.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512"
   ],

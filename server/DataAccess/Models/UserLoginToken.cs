@@ -26,7 +26,7 @@ public partial class UserLoginToken
     public DateTime? UsedAt { get; set; }
 
     [Column("created_at")]
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [Column("requested_ip")]
     public string? RequestedIp { get; set; }
