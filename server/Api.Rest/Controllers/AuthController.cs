@@ -80,4 +80,11 @@ public class AuthController(IAuthService service, ICookieService cookieService) 
         cookieService.SetRefreshTokenCookie(HttpContext, jwtResult.Jwt);
         return Result<string>.Ok(jwtResult.Jwt.AccessToken);
     }
+    
+    [HttpPost("logout")]
+    public async Task<Result<bool>> Logout()
+    {
+        cookieService.ClearRefreshToken(HttpContext);
+        return await Task.FromResult(Result<bool>.Ok(true));
+    }
 }
