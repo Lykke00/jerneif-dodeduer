@@ -1,0 +1,12 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Service.Options;
+
+public sealed class AppOptions
+{
+    [Required]
+    public string DbConnectionString { get; set; } = null!;
+    
+    [Required]
+    public string ResendApiKey { get; set; } = null!;
+}

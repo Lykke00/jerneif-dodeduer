@@ -7,6 +7,8 @@ CREATE TABLE "users"
 (
     "id"         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "email"       VARCHAR(100) NOT NULL,
+    "admin"      BOOLEAN      DEFAULT FALSE,
+    "active"     BOOLEAN      DEFAULT TRUE,
     "created_at" TIMESTAMPTZ      DEFAULT CURRENT_TIMESTAMP
 );
 

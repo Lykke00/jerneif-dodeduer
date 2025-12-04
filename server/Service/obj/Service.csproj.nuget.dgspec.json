@@ -142,6 +142,10 @@
             "Microsoft.IdentityModel.JsonWebTokens": {
               "target": "Package",
               "version": "[8.*, )"
+            },
+            "Resend": {
+              "target": "Package",
+              "version": "[0.1.6, )"
             }
           },
           "imports": [

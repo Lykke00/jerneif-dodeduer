@@ -17,6 +17,12 @@ public partial class User
     [StringLength(100)]
     public string Email { get; set; } = null!;
 
+    [Column("admin")]
+    public bool? Admin { get; set; }
+
+    [Column("active")]
+    public bool? Active { get; set; }
+
     [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
 
