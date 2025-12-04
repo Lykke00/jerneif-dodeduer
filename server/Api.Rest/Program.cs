@@ -1,4 +1,5 @@
 using Api.Rest.Extensions;
+using Api.Rest.Http;
 using DataAccess;
 using DataAccess.Models;
 using FluentValidation.AspNetCore;
@@ -37,10 +38,14 @@ public class Program
             config.EnableSensitiveDataLogging();
         });
         
-        // services registration
+        //----------------- services registration ----------------- \\
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddSingleton<IJwtGenerator, JwtGenerator>();
-
+        //--------------------------------------------------------- \\
+        
+        //------------------- API registration -------------------- \\
+        builder.Services.AddSingleton<ICookieService, CookieService>();
+        //--------------------------------------------------------- \\
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
 
@@ -82,10 +87,9 @@ public class Program
         });
         app.UseAuthentication();
         app.UseAuthorization();
-
-       
-            app.MapControllers();
-              app.UseStatusCodePages();
+        
+        app.MapControllers();
+        app.UseStatusCodePages();
               
         app.Run();
     }

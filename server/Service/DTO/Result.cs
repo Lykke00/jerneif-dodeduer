@@ -64,4 +64,14 @@ public record Result<T>
             StatusCode = 500,
             Errors = errors.ToList()
         };
+    
+    public static Result<T> FromResult<U>(Result<U> other)
+    {
+        return new Result<T>
+        {
+            Success = other.Success,
+            StatusCode = other.StatusCode,
+            Errors = other.Errors.ToList()
+        };
+    }
 }

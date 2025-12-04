@@ -12,6 +12,7 @@ public interface IAuthService
 {
     Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto);
     Task<Result<LoginVerifyResponse>> VerifyAsync(LoginVerifyRequest request, AgentDto agentDto);
+    Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto);
 }
 
 public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAuthService
@@ -76,6 +77,26 @@ public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAu
         context.UserLoginTokens.Update(token);
         
         await context.SaveChangesAsync();
+        var jwt = jwtGenerator.GenerateTokenPair(user);
+        var response = new LoginVerifyResponse
+        {
+            Jwt = jwt
+        };
+        
+        return Result<LoginVerifyResponse>.Ok(response);
+    }
+    
+    public async Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto)
+    {
+        var tokenUserId = JwtValidator.ValidateRefreshToken(refreshToken);
+        if (tokenUserId == null)
+            return Result<LoginVerifyResponse>.ValidationError("Ugyldig refresh token.");
+
+        var user = await context.Users
+            .SingleOrDefaultAsync(u => u.Id == tokenUserId.Value);
+        if (user == null)
+            return Result<LoginVerifyResponse>.NotFound("Brugeren eksisterer ikke.");
+
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
