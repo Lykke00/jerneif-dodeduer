@@ -1,11 +1,12 @@
 ﻿using DataAccess;
 using DataAccess.Models;
+using DataAccess.Repository;
 using Microsoft.EntityFrameworkCore;
 using Service.DTO;
 using Service.DTO.Auth;
 using Service.DTO.Auth.Login;
 using Service.DTO.Auth.Verify;
-
+using DbUser = DataAccess.Models.User;
 namespace Service.Services.Auth;
 
 public interface IAuthService
@@ -15,13 +16,12 @@ public interface IAuthService
     Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto);
 }
 
-public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAuthService
+public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRepository, IRepository<UserLoginToken> userTokenRepository) : IAuthService
 {
     public async Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto)
     {
         // vi tjekker i databasen om brugeren eksisterer
-        var user = await context.Users
-            .SingleOrDefaultAsync(u => u.Email == request.Email);
+        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Email == request.Email);
         
         // hvis brugeren er null, så smider vi en fejl
         if (user is null)
@@ -47,26 +47,20 @@ public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAu
         };
         
         // gem bruger login token i databasen
-        context.UserLoginTokens.Add(userToken);
-        
-        // gem ændringer i databasen
-        await context.SaveChangesAsync();
-        
+        await userTokenRepository.Add(userToken);
         return Result<bool>.Ok(true);
     }
     
     public async Task<Result<LoginVerifyResponse>> VerifyAsync(LoginVerifyRequest request, AgentDto agentDto)
     {
         var hash = Base64UrlTokenHelper.ComputeHash(request.Token);
-
-        var token = await context.UserLoginTokens
-            .SingleOrDefaultAsync(t => t.TokenHash == hash);
-        
+        var token = await userTokenRepository.Query().SingleOrDefaultAsync(t => t.TokenHash == hash);
+            
         if (token == null || token.UsedAt != null || token.ExpiresAt <= DateTime.UtcNow)
             return Result<LoginVerifyResponse>.ValidationError("Ugyldig eller udløbet token.");
         
-        var user = await context.Users
-            .SingleOrDefaultAsync(u => u.Id == token.UserId);
+        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.UserId);
+        
         if (user == null)
             return Result<LoginVerifyResponse>.NotFound("Brugeren eksisterer ikke.");
         
@@ -74,9 +68,8 @@ public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAu
         token.ConsumedIp = agentDto.IpAddress;
         token.ConsumedUserAgent = agentDto.UserAgent;
         
-        context.UserLoginTokens.Update(token);
-        
-        await context.SaveChangesAsync();
+        await userTokenRepository.Update(token);
+
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
@@ -92,8 +85,7 @@ public class AuthService(AppDbContext context, IJwtGenerator jwtGenerator) : IAu
         if (tokenUserId == null)
             return Result<LoginVerifyResponse>.ValidationError("Ugyldig refresh token.");
 
-        var user = await context.Users
-            .SingleOrDefaultAsync(u => u.Id == tokenUserId.Value);
+        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == tokenUserId.Value);
         if (user == null)
             return Result<LoginVerifyResponse>.NotFound("Brugeren eksisterer ikke.");
 

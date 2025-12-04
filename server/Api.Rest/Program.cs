@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using NSwag;
 using NSwag.Generation.Processors.Security;
 using Serilog;
+using Service;
 using Service.Options;
 using Service.Services.Auth;
 
@@ -39,8 +40,7 @@ public class Program
         });
         
         //----------------- services registration ----------------- \\
-        builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddSingleton<IJwtGenerator, JwtGenerator>();
+        builder.Services.ServiceStartup();
         //--------------------------------------------------------- \\
         
         //------------------- API registration -------------------- \\

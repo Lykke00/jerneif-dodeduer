@@ -7,19 +7,20 @@ using Microsoft.IdentityModel.Tokens;
 using Service.Models;
 using Service.Options;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+using DbUser = DataAccess.Models.User;
 
 namespace Service.Services.Auth;
 
 public interface IJwtGenerator
 {
-    JwtPair GenerateTokenPair(User user);
+    JwtPair GenerateTokenPair(DbUser user);
 }
 
 public class JwtGenerator(IOptions<AppOptions> appOptions) : IJwtGenerator
 {
     private readonly JwtOptions _options = appOptions.Value.Jwt;
 
-    public JwtPair GenerateTokenPair(User user)
+    public JwtPair GenerateTokenPair(DbUser user)
     {
         var now = DateTime.UtcNow;
 
@@ -52,7 +53,7 @@ public class JwtGenerator(IOptions<AppOptions> appOptions) : IJwtGenerator
     }
 
     private string GenerateJwt(
-        User user,
+        DbUser user,
         DateTime expires,
         string audience,
         string issuer,

@@ -5,6 +5,7 @@ using Service.DTO;
 using Service.DTO.Auth;
 using Service.DTO.Auth.Login;
 using Service.DTO.Auth.Verify;
+using Service.DTO.User;
 using Service.Services.Auth;
 using LoginRequest = Service.DTO.Auth.Login.LoginRequest;
 
@@ -87,4 +88,5 @@ public class AuthController(IAuthService service, ICookieService cookieService) 
         cookieService.ClearRefreshToken(HttpContext);
         return await Task.FromResult(Result<bool>.Ok(true));
     }
+    
 }
