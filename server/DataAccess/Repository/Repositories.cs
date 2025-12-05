@@ -20,9 +20,9 @@ public abstract class BaseRepository<T>(AppDbContext context) : IRepository<T>
         await context.SaveChangesAsync();
     }
 
-    public T? Get(Func<T, bool> predicate)
+    public Task<T?> FindAsync(object id)
     {
-        return Set.Where(predicate).SingleOrDefault();
+        return Set.FindAsync(id).AsTask();
     }
 
     public IQueryable<T> Query()

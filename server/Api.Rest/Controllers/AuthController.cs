@@ -1,4 +1,6 @@
-﻿using Api.Rest.Http;
+﻿using Api.Rest.Extensions;
+using Api.Rest.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTO;
@@ -7,13 +9,14 @@ using Service.DTO.Auth.Login;
 using Service.DTO.Auth.Verify;
 using Service.DTO.User;
 using Service.Services.Auth;
+using Service.Services.User;
 using LoginRequest = Service.DTO.Auth.Login.LoginRequest;
 
 namespace Api.Rest.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IAuthService service, ICookieService cookieService) : ControllerBase
+public class AuthController(IAuthService service, IUserService userService, ICookieService cookieService) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<Result<bool>> Login([FromBody] LoginRequest request)
@@ -89,4 +92,13 @@ public class AuthController(IAuthService service, ICookieService cookieService) 
         return await Task.FromResult(Result<bool>.Ok(true));
     }
     
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<Result<UserDto>> Me()
+    {
+        var id = User.GetUserId();
+        if (id == null) return Result<UserDto>.Unauthorized("Not logged in");
+
+        return await userService.GetByIdAsync(id.Value);
+    }
 }

@@ -67,9 +67,10 @@ public class JwtGenerator(IOptions<AppOptions> appOptions) : IJwtGenerator
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new("admin", user.Admin.ToString().ToLower()),
         };
-
+        
+        claims.Add(new Claim(ClaimTypes.Role, user.Admin ? "admin" : "user"));
+        
         if (includeJti)
             claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
 
