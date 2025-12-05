@@ -75,6 +75,10 @@
               "target": "Package",
               "version": "[14.6.3, )"
             },
+            "NSwag.CodeGeneration.TypeScript": {
+              "target": "Package",
+              "version": "[14.6.3, )"
+            },
             "Serilog.AspNetCore": {
               "target": "Package",
               "version": "[9.0.0, )"

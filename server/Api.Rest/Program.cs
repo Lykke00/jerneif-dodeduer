@@ -19,7 +19,7 @@ namespace Api.Rest;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -76,11 +76,12 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-
+        
         app.MapControllers();
-
         app.UseStatusCodePages();
+        
+        await app.GenerateApiClientsFromOpenApi("/../../client/src/generated-ts-client.ts");
 
-        app.Run();
+        await app.RunAsync();
     }
 }
