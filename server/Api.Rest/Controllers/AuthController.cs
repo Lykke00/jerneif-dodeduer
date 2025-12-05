@@ -101,4 +101,11 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
 
         return await userService.GetByIdAsync(id.Value);
     }
+    
+    [Authorize(Roles = "admin")]
+    [HttpGet("test")]
+    public async Task<Result<string>> Test()
+    {
+        return await Task.FromResult(Result<string>.Ok("You are an admin!"));
+    }
 }
