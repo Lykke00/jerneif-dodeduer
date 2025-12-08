@@ -20,10 +20,13 @@ function AppRoutes() {
         <Route element={<Layout />}>
           <Route index element={<IndexPage />} />
           <Route path={PageRoutes.Verify} element={<AuthVerify />} />
-          <Route path={PageRoutes.Game} element={<SpilPage />} />
+          <Route
+            path={PageRoutes.Game}
+            element={<RequireAuth accessLevel={AccessLevel.Anonymous} element={<SpilPage />} />}
+          />
           <Route
             path={PageRoutes.Deposit}
-            element={<RequireAuth accessLevel={AccessLevel.Protected} element={<DepositPage />} />}
+            element={<RequireAuth accessLevel={AccessLevel.Anonymous} element={<DepositPage />} />}
           />
           <Route path={PageRoutes.Contact} element={<ContactPage />} />
         </Route>
