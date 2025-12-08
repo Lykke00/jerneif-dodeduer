@@ -26,6 +26,12 @@ public partial class User
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
+    [InverseProperty("ApprovedByNavigation")]
+    public virtual ICollection<Deposit> DepositApprovedByNavigations { get; set; } = new List<Deposit>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<Deposit> DepositUsers { get; set; } = new List<Deposit>();
+
     [InverseProperty("User")]
     public virtual ICollection<UserLoginToken> UserLoginTokens { get; set; } = new List<UserLoginToken>();
 }
