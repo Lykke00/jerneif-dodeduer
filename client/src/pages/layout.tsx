@@ -7,7 +7,7 @@ export function Layout() {
       <Navigation />
 
       <main className="flex justify-center">
-        <div className="w-full max-w-5xl px-4 mx-auto wrap-break-word">
+        <div className="w-full max-w-5xl px-4 mx-auto wrap-break-word min-h-screen">
           <Outlet />
         </div>
       </main>

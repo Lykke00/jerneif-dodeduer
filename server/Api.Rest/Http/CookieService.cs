@@ -28,7 +28,7 @@ public class CookieService : ICookieService
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            SameSite = _env.IsDevelopment() ? SameSiteMode.Strict : SameSiteMode.None,
+            SameSite = _env.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
             Secure = !_env.IsDevelopment(),
             Expires = tokens.RefreshTokenExpiresAt
         };

@@ -1,10 +1,27 @@
-import { Button, Card, CardBody, CardFooter, CardHeader, Form, Input } from '@heroui/react';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Form,
+  Input,
+  useDisclosure,
+} from '@heroui/react';
 import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { isValidEmail } from '../../helpers/isValidEmail';
+import { useAuth } from '../../hooks';
+import { GeneralModal } from '../../components/modal/GeneralModal';
+import { useModal } from '../../contexts/ModalContext';
+import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function IndexPage() {
+  const { requestLogin } = useAuth();
+  const { showModal } = useModal();
+
   const [email, setEmail] = useState<string>('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errors, setErrors] = useState({});
@@ -15,13 +32,23 @@ export default function IndexPage() {
     e.preventDefault();
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSubmitSuccess(true);
-    setTimeout(() => {
-      setEmail('');
-      setSubmitSuccess(false);
-      setIsSubmitting(false);
-    }, 2000);
+
+    try {
+      await requestLogin(email);
+      showModal({
+        variant: 'success',
+        title: 'Tjek din email',
+        description: 'Vi har sendt et login-link.',
+      });
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+    setEmail('');
+    setIsSubmitting(false);
   };
 
   return (

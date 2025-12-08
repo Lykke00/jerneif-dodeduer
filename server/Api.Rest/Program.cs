@@ -12,6 +12,7 @@ using Service;
 using Service.Options;
 using System.Text;
 using Api.Rest.Documentation;
+using Api.Rest.Middleware;
 using Api.Rest.Security;
 using Service.DTO;
 
@@ -48,6 +49,17 @@ public class Program
 
         //---------------- AUTHENTICATION ----------//
         builder.Services.AddAuthentication(jwtOptions);
+        
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("Frontend", p =>
+            {
+                p.WithOrigins(appOptions.FrontendUrl)
+                    .AllowCredentials()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
 
         //---------------- API ---------------------//
         builder.Services.AddControllers();
@@ -57,9 +69,11 @@ public class Program
 
         //---------------- MIDDLEWARE --------------//
         app.UseHttpsRedirection();
+        
+        
 
         app.UseRouting();
-        app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+        app.UseCors("Frontend");
 
         app.UseOpenApi();
         app.UseSwaggerUi();
@@ -76,6 +90,8 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+        
+        app.UseMiddleware<ResultMiddleware>();
         
         app.MapControllers();
         app.UseStatusCodePages();

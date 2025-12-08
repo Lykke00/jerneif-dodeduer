@@ -1,4 +1,5 @@
-﻿using Resend;
+﻿using Microsoft.Extensions.Options;
+using Resend;
 using Service.Options;
 using Service.Services.Email.Templates;
 
@@ -6,11 +7,11 @@ namespace Service.Services.Email;
 
 public interface IEmailService
 {
-    Task<bool> SendAsync(string to, string subject, string htmlBody, CancellationToken ct);
-    Task<bool> SendMagicLinkAsync(string to, string token, CancellationToken ct);
+    Task<bool> SendAsync(string to, string subject, string htmlBody, CancellationToken ct = default);
+    Task<bool> SendMagicLinkAsync(string to, string token, CancellationToken ct = default);
 }
 
-public class EmailService(IResend resend, AppOptions appOptions) : IEmailService
+public class EmailService(IResend resend, IOptions<AppOptions> appOptions) : IEmailService
 {
     public async Task<bool> SendAsync(string to, string subject, string htmlBody, CancellationToken ct)
     {
@@ -30,7 +31,7 @@ public class EmailService(IResend resend, AppOptions appOptions) : IEmailService
 
     public async Task<bool> SendMagicLinkAsync(string to, string token, CancellationToken ct)
     {
-        var verifyUrl = $"{appOptions.FrontendUrl}/auth/verify?token={token}";
+        var verifyUrl = $"{appOptions.Value.FrontendUrl}/auth/verify?token={token}";
         var html = MagicLinkEmailTemplate.Render(
             magicLink: verifyUrl,
             expirationMinutes: 15
