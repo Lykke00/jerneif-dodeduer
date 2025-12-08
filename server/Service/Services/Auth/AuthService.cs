@@ -21,8 +21,10 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
 {
     public async Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto)
     {
+        var email = request.Email.Trim().ToLower();
+        
         // vi tjekker i databasen om brugeren eksisterer
-        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Email == request.Email);
+        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Email == email);
         
         // hvis brugeren er null, så smider vi en fejl
         if (user is null)
