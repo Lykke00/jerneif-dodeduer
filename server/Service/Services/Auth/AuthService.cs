@@ -6,6 +6,7 @@ using Service.DTO;
 using Service.DTO.Auth;
 using Service.DTO.Auth.Login;
 using Service.DTO.Auth.Verify;
+using Service.DTO.User;
 using Service.Services.Email;
 using DbUser = DataAccess.Models.User;
 namespace Service.Services.Auth;
@@ -80,7 +81,8 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
-            Jwt = jwt
+            Jwt = jwt,
+            User = UserDto.FromDatabase(user)
         };
         
         return Result<LoginVerifyResponse>.Ok(response);

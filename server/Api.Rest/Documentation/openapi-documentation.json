@@ -62,7 +62,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResultOfString"
+                  "$ref": "#/components/schemas/ResultOfLoginSafeVerifyResponse"
                 }
               }
             }
@@ -205,6 +205,97 @@
           }
         }
       },
+      "ResultOfLoginSafeVerifyResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LoginSafeVerifyResponse"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "LoginSafeVerifyResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "user"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "email",
+          "isAdmin",
+          "isActive",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LoginVerifyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "ResultOfString": {
         "type": "object",
         "additionalProperties": false,
@@ -231,18 +322,6 @@
             "items": {
               "type": "string"
             }
-          }
-        }
-      },
-      "LoginVerifyRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "token"
-        ],
-        "properties": {
-          "token": {
-            "type": "string"
           }
         }
       },
@@ -276,36 +355,6 @@
             "items": {
               "type": "string"
             }
-          }
-        }
-      },
-      "UserDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "id",
-          "email",
-          "isAdmin",
-          "isActive",
-          "createdAt"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "email": {
-            "type": "string"
-          },
-          "isAdmin": {
-            "type": "boolean"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       }

@@ -1,16 +1,32 @@
-import { NavbarBrand, NavbarContent, Navbar, NavbarItem } from '@heroui/react';
+import { NavbarBrand, NavbarContent, Navbar, NavbarItem, Button } from '@heroui/react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks';
+import { PageRoutes } from '../../PageRoutes';
+import { useModal } from '../../contexts/ModalContext';
+import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function Navigation() {
   const { pathname } = useLocation();
+  const { user, logout, isLoading } = useAuth();
+  const { showModal } = useModal();
 
   const links = [
-    { label: 'Spil', href: '/spil' },
-    { label: 'Indbetal', href: '/indbetal' },
-    { label: 'Kontakt', href: '/kontakt' },
+    { label: 'Spil', href: PageRoutes.Game },
+    { label: 'Indbetal', href: PageRoutes.Deposit },
+    { label: 'Kontakt', href: PageRoutes.Contact },
   ];
 
-  console.log(pathname);
+  const logUserOut = async () => {
+    try {
+      await logout();
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
 
   return (
     <Navbar className="bg-neutral-50" isBlurred isBordered>
@@ -41,7 +57,13 @@ export default function Navigation() {
 
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link to="/">Login</Link>
+          {user === null ? (
+            <Link to="/">Login</Link>
+          ) : (
+            <Button onPress={logUserOut} variant="light">
+              Log ud
+            </Button>
+          )}
         </NavbarItem>
       </NavbarContent>
     </Navbar>

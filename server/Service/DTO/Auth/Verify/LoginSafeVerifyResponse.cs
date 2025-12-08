@@ -1,10 +1,9 @@
 ﻿using Service.DTO.User;
-using Service.Models;
 
 namespace Service.DTO.Auth.Verify;
 
-public class LoginVerifyResponse
+public class LoginSafeVerifyResponse
 {
-    public JwtPair Jwt { get; set; } = null!;
+    public string Token { get; set; } = null!;
     public UserDto User { get; set; } = null!;
 }

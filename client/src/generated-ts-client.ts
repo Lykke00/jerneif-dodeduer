@@ -54,7 +54,7 @@ export class AuthClient {
         return Promise.resolve<ResultOfBoolean>(null as any);
     }
 
-    verify(request: LoginVerifyRequest): Promise<ResultOfString> {
+    verify(request: LoginVerifyRequest): Promise<ResultOfLoginSafeVerifyResponse> {
         let url_ = this.baseUrl + "/api/Auth/verify";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -74,13 +74,13 @@ export class AuthClient {
         });
     }
 
-    protected processVerify(response: Response): Promise<ResultOfString> {
+    protected processVerify(response: Response): Promise<ResultOfLoginSafeVerifyResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfString;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfLoginSafeVerifyResponse;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -88,7 +88,7 @@ export class AuthClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ResultOfString>(null as any);
+        return Promise.resolve<ResultOfLoginSafeVerifyResponse>(null as any);
     }
 
     refresh(): Promise<ResultOfString> {
@@ -235,22 +235,16 @@ export interface LoginRequest {
     email: string;
 }
 
-export interface ResultOfString {
+export interface ResultOfLoginSafeVerifyResponse {
     success: boolean;
-    value: string | undefined;
+    value: LoginSafeVerifyResponse | undefined;
     statusCode: number;
     errors: string[];
 }
 
-export interface LoginVerifyRequest {
+export interface LoginSafeVerifyResponse {
     token: string;
-}
-
-export interface ResultOfUserDto {
-    success: boolean;
-    value: UserDto | undefined;
-    statusCode: number;
-    errors: string[];
+    user: UserDto;
 }
 
 export interface UserDto {
@@ -259,6 +253,24 @@ export interface UserDto {
     isAdmin: boolean;
     isActive: boolean;
     createdAt: string;
+}
+
+export interface LoginVerifyRequest {
+    token: string;
+}
+
+export interface ResultOfString {
+    success: boolean;
+    value: string | undefined;
+    statusCode: number;
+    errors: string[];
+}
+
+export interface ResultOfUserDto {
+    success: boolean;
+    value: UserDto | undefined;
+    statusCode: number;
+    errors: string[];
 }
 
 export class ApiException extends Error {

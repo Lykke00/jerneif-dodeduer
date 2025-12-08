@@ -1,23 +1,27 @@
 import { useAtom } from 'jotai';
-import { ApiException, type UserDto } from '../generated-ts-client';
-import { jwtAtom } from '../atoms/auth';
+import { type UserDto } from '../generated-ts-client';
+import { jwtAtom, userAtom } from '../atoms/auth';
 import { authClient } from '../api/APIClients';
 import { useState } from 'react';
-import { errorToMessage } from '../helpers/errorToMessage';
 import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
+import { useNavigate } from 'react-router-dom';
+import { PageRoutes } from '../PageRoutes';
 
 type useAuthTypes = {
   requestLogin(email: string): Promise<boolean>;
   verify(token: string): Promise<string>;
   refresh: string;
-  me: UserDto | null;
+  user: UserDto | null;
   logout(): void;
   isLoading: boolean;
 };
 
 export const useAuth = (): useAuthTypes => {
   const [_, setJwt] = useAtom(jwtAtom);
+  const [user, setUser] = useAtom(userAtom);
+
+  const navigate = useNavigate();
   const { isLoading, withLoading } = useLoading();
   const [errors, setErrors] = useState<string[] | null>();
 
@@ -44,13 +48,21 @@ export const useAuth = (): useAuthTypes => {
     try {
       const response = await withLoading(() => authClient.verify({ token }));
 
-      var accessToken = response.value;
+      var accessToken = response.value?.token;
+      var user = response.value?.user;
 
       if (!accessToken) {
         throw new Error('Ingen token modtaget');
       }
 
+      if (!user) {
+        throw new Error('Ingen bruger modtaget');
+      }
+
       setJwt(accessToken);
+      setUser(user);
+
+      navigate(PageRoutes.Game);
       return accessToken;
     } catch (e) {
       const apiError = extractApiErrors(e);
@@ -66,13 +78,27 @@ export const useAuth = (): useAuthTypes => {
 
   const me = null;
 
-  const logout = (): void => {};
+  const logout = async (): Promise<boolean> => {
+    try {
+      const response = await withLoading(() => authClient.logout());
+
+      navigate(PageRoutes.Home);
+      return response.value;
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
 
   return {
     requestLogin,
     verify,
     refresh,
-    me,
+    user,
     logout,
     isLoading,
   };

@@ -12,7 +12,6 @@ export const AuthVerify = () => {
   const token = searchParams.get('token');
 
   const { verify, isLoading } = useAuth();
-  const { showModal } = useModal();
   const [errors, setErrors] = useState<string>();
 
   useEffect(() => {
@@ -21,11 +20,6 @@ export const AuthVerify = () => {
     const run = async () => {
       try {
         await verify(token);
-        showModal({
-          variant: 'success',
-          title: 'Login lykkedes',
-          description: 'Du er nu logget ind.',
-        });
       } catch (e) {
         setErrors(errorToMessage(e));
       }

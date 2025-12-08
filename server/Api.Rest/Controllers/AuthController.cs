@@ -34,7 +34,7 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
     }
 
     [HttpPost("verify")]
-    public async Task<Result<string>> Verify([FromBody] LoginVerifyRequest request)
+    public async Task<Result<LoginSafeVerifyResponse>> Verify([FromBody] LoginVerifyRequest request)
     {
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
         var userAgent = Request.Headers["User-Agent"].ToString();
@@ -47,14 +47,18 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
 
         var result = await service.VerifyAsync(request, agent);
         if (!result.Success)
-            return Result<string>.FromResult(result);
+            return Result<LoginSafeVerifyResponse>.FromResult(result);
         
         if (result.Value is null)
-            return Result<string>.InternalError("Unexpected null value from service.");
+            return Result<LoginSafeVerifyResponse>.InternalError("Unexpected null value from service.");
         
         var jwtResult = result.Value;
         cookieService.SetRefreshTokenCookie(HttpContext, jwtResult.Jwt);
-        return Result<string>.Ok(jwtResult.Jwt.AccessToken);
+        return Result<LoginSafeVerifyResponse>.Ok(new LoginSafeVerifyResponse
+        {
+            Token = jwtResult.Jwt.AccessToken,
+            User = jwtResult.User
+        });
     }
     
     [HttpPost("refresh")]
