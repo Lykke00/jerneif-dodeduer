@@ -26,6 +26,7 @@ export function ImagePreviewModal({ src, alt = 'Preview', thumbSize = 64 }: Prop
       <Image
         src={src}
         alt={alt}
+        isBlurred
         width={thumbSize}
         height={thumbSize}
         className="rounded-lg object-cover shadow-sm cursor-pointer hover:opacity-90"

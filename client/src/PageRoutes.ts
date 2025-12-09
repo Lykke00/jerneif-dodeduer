@@ -9,4 +9,5 @@ export const PageRoutes = {
   Game: '/spil',
   Deposit: '/indbetal',
   Contact: '/kontakt',
+  Admin: '/admin',
 } as const;

@@ -11,10 +11,13 @@ import { AccessLevel } from './helpers/authUtils.ts';
 import { useAuth } from './hooks/useAuth.ts';
 import { AuthContext } from './contexts/AuthContext.tsx';
 import { useEffect } from 'react';
+import AdminPage from './pages/admin/page.tsx';
+import { LoadingOverlay } from './components/common/LoadingOverlay.tsx';
+import { FadeContainer } from './components/common/FadeContainer.tsx';
 
 function AppRoutes() {
   const auth = useAuth();
-  const { me, jwt } = auth;
+  const { me, jwt, isLoading } = auth;
 
   // log bruger på hvis token er gemt
   useEffect(() => {
@@ -27,21 +30,34 @@ function AppRoutes() {
 
   return (
     <AuthContext.Provider value={auth}>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<IndexPage />} />
-          <Route path={PageRoutes.Verify} element={<AuthVerify />} />
-          <Route
-            path={PageRoutes.Game}
-            element={<RequireAuth accessLevel={AccessLevel.Anonymous} element={<SpilPage />} />}
-          />
-          <Route
-            path={PageRoutes.Deposit}
-            element={<RequireAuth accessLevel={AccessLevel.Anonymous} element={<DepositPage />} />}
-          />
-          <Route path={PageRoutes.Contact} element={<ContactPage />} />
-        </Route>
-      </Routes>
+      {isLoading && <LoadingOverlay />}
+
+      <FadeContainer>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route
+              index
+              element={<RequireAuth accessLevel={AccessLevel.Anonymous} element={<IndexPage />} />}
+            />
+            <Route path={PageRoutes.Verify} element={<AuthVerify />} />
+            <Route
+              path={PageRoutes.Game}
+              element={<RequireAuth accessLevel={AccessLevel.Protected} element={<SpilPage />} />}
+            />
+            <Route
+              path={PageRoutes.Deposit}
+              element={
+                <RequireAuth accessLevel={AccessLevel.Protected} element={<DepositPage />} />
+              }
+            />
+            <Route
+              path={PageRoutes.Admin}
+              element={<RequireAuth accessLevel={AccessLevel.Admin} element={<AdminPage />} />}
+            />
+            <Route path={PageRoutes.Contact} element={<ContactPage />} />
+          </Route>
+        </Routes>
+      </FadeContainer>
     </AuthContext.Provider>
   );
 }

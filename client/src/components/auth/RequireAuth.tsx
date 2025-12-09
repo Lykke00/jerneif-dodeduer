@@ -33,6 +33,10 @@ export function RequireAuth({ element, accessLevel = AccessLevel.Protected }: Re
     );
   }
 
+  if (user && accessLevel === AccessLevel.Anonymous) {
+    return <Navigate to={PageRoutes.Game} replace />;
+  }
+
   if (!user && accessLevel !== AccessLevel.Anonymous) {
     return <Navigate to={PageRoutes.Login} replace />;
   }

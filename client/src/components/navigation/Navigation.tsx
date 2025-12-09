@@ -82,6 +82,21 @@ export default function Navigation() {
               </Link>
             </NavbarItem>
           ))}
+
+          {user.isAdmin && (
+            <NavbarItem className="font-semibold" key="admin" isActive={pathname === 'admin'}>
+              <Link
+                to="admin"
+                className={`transition-colors duration-200 ${
+                  pathname === 'admin'
+                    ? 'text-primary'
+                    : 'text-foreground-600 hover:text-foreground-800'
+                }`}
+              >
+                Admin
+              </Link>
+            </NavbarItem>
+          )}
         </NavbarContent>
       ) : (
         <NavbarContent className="hidden sm:flex" justify="center">
