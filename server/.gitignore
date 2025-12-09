@@ -6,3 +6,4 @@ riderModule.iml
 .idea
 3rd_sem_template.sln.DotSettings.user
 Api.Rest/wwwroot/uploads/**
+!Api.Rest/wwwroot/uploads/.gitkeep
