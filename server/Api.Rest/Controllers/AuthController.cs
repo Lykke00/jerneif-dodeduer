@@ -62,7 +62,7 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
     }
     
     [HttpPost("refresh")]
-    public async Task<Result<string>> Refresh()
+    public async Task<Result<LoginSafeVerifyResponse>> Refresh()
     {
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
         var userAgent = Request.Headers["User-Agent"].ToString();
@@ -75,18 +75,22 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
 
         var refreshToken = Request.Cookies["token"];
         if (string.IsNullOrWhiteSpace(refreshToken))
-            return Result<string>.Unauthorized("No refresh token cookie.");
+            return Result<LoginSafeVerifyResponse>.Unauthorized("No refresh token cookie.");
 
         var result = await service.RefreshAsync(refreshToken, agent);
         if (!result.Success)
-            return Result<string>.FromResult(result);
+            return Result<LoginSafeVerifyResponse>.FromResult(result);
         
         if (result.Value is null)
-            return Result<string>.InternalError("Unexpected null value from service.");
+            return Result<LoginSafeVerifyResponse>.InternalError("Unexpected null value from service.");
         
         var jwtResult = result.Value;
         cookieService.SetRefreshTokenCookie(HttpContext, jwtResult.Jwt);
-        return Result<string>.Ok(jwtResult.Jwt.AccessToken);
+        return Result<LoginSafeVerifyResponse>.Ok(new LoginSafeVerifyResponse
+        {
+            Token = jwtResult.Jwt.AccessToken,
+            User = jwtResult.User
+        });
     }
     
     [HttpPost("logout")]

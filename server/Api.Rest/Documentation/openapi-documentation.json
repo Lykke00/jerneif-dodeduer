@@ -82,7 +82,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResultOfString"
+                  "$ref": "#/components/schemas/ResultOfLoginSafeVerifyResponse"
                 }
               }
             }
@@ -296,35 +296,6 @@
           }
         }
       },
-      "ResultOfString": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "success",
-          "value",
-          "statusCode",
-          "errors"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "errors": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "ResultOfUserDto": {
         "type": "object",
         "additionalProperties": false,
@@ -345,6 +316,35 @@
                 "$ref": "#/components/schemas/UserDto"
               }
             ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ResultOfString": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
           },
           "statusCode": {
             "type": "integer",

@@ -10,6 +10,7 @@ public static class DataAccessStartupClass
     {
         services.AddScoped<IRepository<User>, UserRepository>();
         services.AddScoped<IRepository<UserLoginToken>, UserLoginTokenRepository>();
+        services.AddScoped<IRepository<Deposit>, DepositRepository>();
 
         return services;
     }

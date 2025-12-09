@@ -7,11 +7,12 @@ import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { useNavigate } from 'react-router-dom';
 import { PageRoutes } from '../PageRoutes';
+import { apiCall } from '../api/apiClient';
 
 type useAuthTypes = {
   requestLogin(email: string): Promise<boolean>;
   verify(token: string): Promise<string>;
-  refresh: string;
+  refresh(): Promise<string>;
   user: UserDto | null;
   logout(): void;
   isLoading: boolean;
@@ -74,9 +75,44 @@ export const useAuth = (): useAuthTypes => {
     }
   };
 
-  const refresh = '';
+  const refresh = async (): Promise<string> => {
+    try {
+      const response = await authClient.refresh();
 
-  const me = null;
+      const accessToken = response.value?.token;
+      const user = response.value?.user;
+
+      if (!accessToken) throw new Error('Ingen token fra refresh');
+      if (!user) throw new Error('Ingen user fra refresh');
+
+      setJwt(accessToken);
+      setUser(user);
+
+      return accessToken;
+    } catch {
+      logout();
+      throw new Error('Kunne ikke refreshe token');
+    }
+  };
+
+  const me = async (): Promise<UserDto | null> => {
+    try {
+      const response = await withLoading(() => apiCall(() => authClient.me()));
+
+      const user = response.value;
+      if (!user) throw new Error('Ingen user fra refresh');
+
+      setUser(user);
+      return user;
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
 
   const logout = async (): Promise<boolean> => {
     try {

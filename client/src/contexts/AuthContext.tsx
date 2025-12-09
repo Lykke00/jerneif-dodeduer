@@ -4,7 +4,7 @@ import type { UserDto } from '../generated-ts-client';
 type AuthContextType = {
   requestLogin(email: string): Promise<boolean>;
   verify(token: string): Promise<string>;
-  refresh: string;
+  refresh(): Promise<string>;
   user: UserDto | null;
   logout(): void;
   isLoading: boolean;
