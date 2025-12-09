@@ -283,7 +283,7 @@ export interface ResultOfBoolean {
     success: boolean;
     value: boolean;
     statusCode: number;
-    errors: string[];
+    errors: { [key: string]: string[]; };
 }
 
 export interface LoginRequest {
@@ -294,7 +294,7 @@ export interface ResultOfLoginSafeVerifyResponse {
     success: boolean;
     value: LoginSafeVerifyResponse | undefined;
     statusCode: number;
-    errors: string[];
+    errors: { [key: string]: string[]; };
 }
 
 export interface LoginSafeVerifyResponse {
@@ -318,21 +318,21 @@ export interface ResultOfUserDto {
     success: boolean;
     value: UserDto | undefined;
     statusCode: number;
-    errors: string[];
+    errors: { [key: string]: string[]; };
 }
 
 export interface ResultOfString {
     success: boolean;
     value: string | undefined;
     statusCode: number;
-    errors: string[];
+    errors: { [key: string]: string[]; };
 }
 
 export interface ResultOfDepositResponse {
     success: boolean;
     value: DepositResponse | undefined;
     statusCode: number;
-    errors: string[];
+    errors: { [key: string]: string[]; };
 }
 
 export interface DepositResponse {

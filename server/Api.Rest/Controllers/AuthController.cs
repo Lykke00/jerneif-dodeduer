@@ -1,5 +1,6 @@
 ﻿using Api.Rest.Extensions;
 using Api.Rest.Http;
+using Api.Rest.Validators.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;

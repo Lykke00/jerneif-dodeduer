@@ -11,9 +11,12 @@ using Serilog;
 using Service;
 using Service.Options;
 using System.Text;
+using Api.Rest.Controllers;
 using Api.Rest.Documentation;
 using Api.Rest.Middleware;
 using Api.Rest.Security;
+using FluentValidation;
+
 using Service.DTO;
 
 namespace Api.Rest;
@@ -62,8 +65,16 @@ public class Program
         });
 
         //---------------- API ---------------------//
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.Filters.Add<ValidationFilter>();
+        });
+
+        builder.Services.AddScoped<ValidationFilter>();
+        
         builder.Services.AddApiDocumentation();
+        
+        builder.Services.AddValidatorsFromAssemblyContaining<AuthController>();
         
         var app = builder.Build();
 

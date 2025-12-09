@@ -29,7 +29,7 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         
         // hvis brugeren er null, så smider vi en fejl
         if (user is null)
-            return Result<bool>.NotFound("Brugeren eksisterer ikke.");
+            return Result<bool>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
 
         // opret en rå token der skal sendes til email
         var raw = TokenService.GenerateRawToken();
@@ -65,12 +65,12 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         var token = await userTokenRepository.Query().SingleOrDefaultAsync(t => t.TokenHash == hash);
             
         if (token == null || token.UsedAt != null || token.ExpiresAt <= DateTime.UtcNow)
-            return Result<LoginVerifyResponse>.ValidationError("Ugyldig eller udløbet token.");
+            return Result<LoginVerifyResponse>.ValidationError(nameof(token), "Ugyldig eller udløbet token.");
         
         var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.UserId);
         
         if (user == null)
-            return Result<LoginVerifyResponse>.NotFound("Brugeren eksisterer ikke.");
+            return Result<LoginVerifyResponse>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
         
         token.UsedAt = DateTime.UtcNow;
         token.ConsumedIp = agentDto.IpAddress;
@@ -90,13 +90,13 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
     
     public async Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto)
     {
-        var tokenUserId = JwtValidator.ValidateRefreshToken(refreshToken);
-        if (tokenUserId == null)
-            return Result<LoginVerifyResponse>.ValidationError("Ugyldig refresh token.");
+        var token = JwtValidator.ValidateRefreshToken(refreshToken);
+        if (token == null)
+            return Result<LoginVerifyResponse>.ValidationError(nameof(token), "Ugyldig refresh token.");
 
-        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == tokenUserId.Value);
+        var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.Value);
         if (user == null)
-            return Result<LoginVerifyResponse>.NotFound("Brugeren eksisterer ikke.");
+            return Result<LoginVerifyResponse>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
 
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
