@@ -2,7 +2,7 @@ import { useAtom } from 'jotai';
 import { type UserDto } from '../generated-ts-client';
 import { jwtAtom, userAtom } from '../atoms/auth';
 import { authClient } from '../api/APIClients';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { useNavigate } from 'react-router-dom';
@@ -18,15 +18,23 @@ type useAuthTypes = {
   jwt: string | null;
   makeApiCall: <T>(fn: () => Promise<T>) => Promise<T>;
   isLoading: boolean;
+  isInitializing: boolean;
 };
 
 export const useAuth = (): useAuthTypes => {
   const [jwt, setJwt] = useAtom(jwtAtom);
   const [user, setUser] = useAtom(userAtom);
 
+  // LATCH – VI VENTER PÅ AT HAVE FORSØGT ME()
+  const [hasAttemptedInit, setHasAttemptedInit] = useState(false);
+
   const navigate = useNavigate();
   const { isLoading, withLoading } = useLoading();
-  const [errors, setErrors] = useState<string[] | null>();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const makeApiCall = async <T>(fn: () => Promise<T>): Promise<T> => {
     try {
@@ -45,21 +53,13 @@ export const useAuth = (): useAuthTypes => {
     }
   };
 
-  // anmod om at modtage token
   const requestLogin = async (email: string): Promise<boolean> => {
-    // prøv at kald backend og se om vi kan logge brugeren ind
     try {
       const response = await withLoading(() => authClient.login({ email }));
       return response.value;
-
-      // hvis en fejl sker, så extract fejlene og kast en error så vores
-      // visningsside kan håndtere den korrekt med try catch.
     } catch (e) {
       const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
+      if (apiError) throw new Error(apiError);
       throw e;
     }
   };
@@ -68,30 +68,21 @@ export const useAuth = (): useAuthTypes => {
     try {
       const response = await withLoading(() => authClient.verify({ token }));
 
-      var accessToken = response.value?.token;
-      var user = response.value?.user;
+      const accessToken = response.value?.token;
+      const u = response.value?.user;
 
-      if (!accessToken) {
-        throw new Error('Ingen token modtaget');
-      }
-
-      if (!user) {
-        throw new Error('Ingen bruger modtaget');
-      }
-
-      console.log('tokeN: ', accessToken);
+      if (!accessToken) throw new Error('Ingen token');
+      if (!u) throw new Error('Ingen user');
 
       setJwt(accessToken);
-      setUser(user);
+      setUser(u);
 
       navigate(PageRoutes.Game);
+
       return accessToken;
     } catch (e) {
       const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
+      if (apiError) throw new Error(apiError);
       throw e;
     }
   };
@@ -99,38 +90,28 @@ export const useAuth = (): useAuthTypes => {
   const refresh = async (): Promise<string> => {
     try {
       const response = await authClient.refresh();
-
       const accessToken = response.value?.token;
-      const user = response.value?.user;
-
-      if (!accessToken) throw new Error('Ingen token fra refresh');
-      if (!user) throw new Error('Ingen user fra refresh');
-
+      const u = response.value?.user;
+      if (!accessToken || !u) throw new Error('Refresh fejl');
       setJwt(accessToken);
-      setUser(user);
-
+      setUser(u);
       return accessToken;
     } catch {
       logout();
-      throw new Error('Kunne ikke refreshe token');
+      throw new Error('Refresh fejl');
     }
   };
 
   const me = async (): Promise<UserDto | null> => {
     try {
       const response = await withLoading(() => makeApiCall(() => authClient.me()));
-
-      const user = response.value;
-      if (!user) throw new Error('Ingen user fra refresh');
-
-      setUser(user);
-      return user;
+      const u = response.value;
+      if (!u) throw new Error('Ingen user fra me()');
+      setUser(u);
+      return u;
     } catch (e) {
       const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
+      if (apiError) throw new Error(apiError);
       throw e;
     }
   };
@@ -138,18 +119,38 @@ export const useAuth = (): useAuthTypes => {
   const logout = async (): Promise<boolean> => {
     try {
       const response = await withLoading(() => authClient.logout());
-
+      setJwt(null);
+      setUser(null);
       navigate(PageRoutes.Home);
       return response.value;
     } catch (e) {
       const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
+      if (apiError) throw new Error(apiError);
       throw e;
     }
   };
+
+  // ----------- INITIALISERING MED LATCH ----------------
+
+  // hydratione r skyld i at den redirected før den burde...
+  // dette burde løse det
+  useEffect(() => {
+    if (!hydrated) return;
+    async function init() {
+      if (!jwt) {
+        setHasAttemptedInit(true);
+        return;
+      }
+      try {
+        await me();
+      } finally {
+        setHasAttemptedInit(true);
+      }
+    }
+    init();
+  }, [hydrated, jwt]);
+
+  // -----------------------------------------------------
 
   return {
     requestLogin,
@@ -161,5 +162,6 @@ export const useAuth = (): useAuthTypes => {
     jwt,
     makeApiCall,
     isLoading,
+    isInitializing: !hasAttemptedInit,
   };
 };

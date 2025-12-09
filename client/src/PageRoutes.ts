@@ -1,5 +1,3 @@
-import type DepositPage from './pages/indbetal/page';
-
 export const PageRoutes = {
   NotFound: '*',
   Forbidden: '/forbidden',

@@ -10,28 +10,21 @@ import { RequireAuth } from './components/auth/RequireAuth.tsx';
 import { AccessLevel } from './helpers/authUtils.ts';
 import { useAuth } from './hooks/useAuth.ts';
 import { AuthContext } from './contexts/AuthContext.tsx';
-import { useEffect } from 'react';
 import AdminPage from './pages/admin/page.tsx';
 import { LoadingOverlay } from './components/common/LoadingOverlay.tsx';
 import { FadeContainer } from './components/common/FadeContainer.tsx';
 
 function AppRoutes() {
   const auth = useAuth();
-  const { me, jwt, isLoading } = auth;
+  const { isInitializing } = auth;
 
-  // log bruger på hvis token er gemt
-  useEffect(() => {
-    if (jwt) {
-      me().catch(() => {
-        auth.logout();
-      });
-    }
-  }, [jwt]);
+  if (isInitializing) {
+    // vis spinner hvis vi er ved at indlæse jwt og user
+    return <LoadingOverlay />;
+  }
 
   return (
     <AuthContext.Provider value={auth}>
-      {isLoading && <LoadingOverlay />}
-
       <FadeContainer>
         <Routes>
           <Route element={<Layout />}>

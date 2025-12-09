@@ -9,6 +9,7 @@ type AuthContextType = {
   logout(): void;
   makeApiCall: <T>(fn: () => Promise<T>) => Promise<T>;
   isLoading: boolean;
+  isInitializing: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);

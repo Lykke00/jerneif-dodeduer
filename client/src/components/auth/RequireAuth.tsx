@@ -17,15 +17,12 @@ type RequireAuthProps = Omit<RouteProps, 'element'> & {
 };
 
 export function RequireAuth({ element, accessLevel = AccessLevel.Protected }: RequireAuthProps) {
-  const { user, isLoading } = useAuthContext();
+  const { user, isInitializing } = useAuthContext();
 
-  useEffect(() => {
-    if (!user && accessLevel !== AccessLevel.Anonymous) {
-      //localStorage.setItem(REDIRECT_PATH_KEY, window.location.pathname);
-    }
-  }, [user, accessLevel]);
+  console.log('[RequireAuth]', { user, isInitializing, accessLevel });
 
-  if (isLoading) {
+  // vi MÅ IKKE redirecte før init er forsøgt
+  if (isInitializing) {
     return (
       <div className="flex justify-center items-center h-full">
         <Spinner />
