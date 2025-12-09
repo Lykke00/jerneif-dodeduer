@@ -3,7 +3,7 @@
 public class DepositRequest
 {
     public decimal Amount { get; set; }
-    public string PaymentId { get; set; } = string.Empty;
+    public string? PaymentId { get; set; }
     public Stream? PaymentPicture { get; set; }
-    public string PaymentPictureFileName { get; set; } = string.Empty;
+    public string? PaymentPictureFileName { get; set; }
 }

@@ -22,7 +22,7 @@ public partial class Deposit
 
     [Column("payment_id")]
     [StringLength(100)]
-    public string PaymentId { get; set; } = null!;
+    public string? PaymentId { get; set; }
 
     [Column("payment_picture")]
     [StringLength(150)]

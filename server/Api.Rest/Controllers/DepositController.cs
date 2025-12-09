@@ -1,5 +1,6 @@
 ﻿using Api.Rest.Extensions;
 using Api.Rest.Requests;
+using DataAccess.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTO;
@@ -17,10 +18,8 @@ public class DepositController(IDepositService depositService) : ControllerBase
     [Authorize]
     public async Task<Result<DepositResponse>> CreateDeposit([FromForm] DepositCreateRequest request)
     {
-        //var userId = User.GetUserId();
-        //if (userId == null) return Result<DepositResponse>.Unauthorized("Not logged in");
-
-        Guid userId = Guid.Parse("0d76d9e0-a6ae-4c82-b4c8-c4f30c4459b5");
+        var userId = User.GetUserId();
+        if (userId == null) return Result<DepositResponse>.Unauthorized("Not logged in");
         
         Stream? stream = null;
         string fileName = "";
@@ -38,6 +37,16 @@ public class DepositController(IDepositService depositService) : ControllerBase
             PaymentPictureFileName = fileName
         };
         
-        return await depositService.DepositAsync(userId, newRequest);
+        return await depositService.DepositAsync(userId.Value, newRequest);
+    }
+    
+    [HttpGet("deposits")]
+    [Authorize]
+    public async Task<Result<PagedResult<GetDepositsResponse>>> GetDeposits([FromQuery] PaginationRequest paginationRequest)
+    {
+        var userId = User.GetUserId();
+        if (userId == null) return Result<PagedResult<GetDepositsResponse>>.Unauthorized("Not logged in");
+        
+        return await depositService.GetDepositsAsync(userId.Value, paginationRequest);
     }
 }

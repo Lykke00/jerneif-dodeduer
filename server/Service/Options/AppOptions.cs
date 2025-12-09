@@ -8,6 +8,9 @@ public sealed class AppOptions
     public string FrontendUrl { get; set; } = null!;
     
     [Required]
+    public string BackendUrl { get; set; } = null!;
+    
+    [Required]
     public string DbConnectionString { get; set; } = null!;
     
     [Required]

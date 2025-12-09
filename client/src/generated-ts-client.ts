@@ -277,6 +277,47 @@ export class DepositClient {
         }
         return Promise.resolve<ResultOfDepositResponse>(null as any);
     }
+
+    getDeposits(page: number | undefined, pageSize: number | undefined): Promise<ResultOfPagedResultOfGetDepositsResponse> {
+        let url_ = this.baseUrl + "/api/Deposit/deposits?";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetDeposits(_response);
+        });
+    }
+
+    protected processGetDeposits(response: Response): Promise<ResultOfPagedResultOfGetDepositsResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfPagedResultOfGetDepositsResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfPagedResultOfGetDepositsResponse>(null as any);
+    }
 }
 
 export interface ResultOfBoolean {
@@ -338,10 +379,28 @@ export interface ResultOfDepositResponse {
 export interface DepositResponse {
     id: string;
     amount: number;
-    paymentId: string;
-    paymentPictureUrl: string;
+    paymentId: string | undefined;
+    paymentPictureUrl: string | undefined;
     status: string;
     createdAt: string;
+}
+
+export interface ResultOfPagedResultOfGetDepositsResponse {
+    success: boolean;
+    value: PagedResultOfGetDepositsResponse | undefined;
+    statusCode: number;
+    errors: { [key: string]: string[]; };
+}
+
+export interface PagedResultOfGetDepositsResponse {
+    items: GetDepositsResponse[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface GetDepositsResponse extends DepositResponse {
+    approvedAt?: string | undefined;
 }
 
 export interface FileParameter {

@@ -101,7 +101,8 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
-            Jwt = jwt
+            Jwt = jwt,
+            User = UserDto.FromDatabase(user)
         };
         
         return Result<LoginVerifyResponse>.Ok(response);
