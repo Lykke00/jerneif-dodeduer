@@ -18,7 +18,7 @@ public interface IAuthService
     Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto);
 }
 
-public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRepository, IRepository<UserLoginToken> userTokenRepository, IEmailService emailservice) : IAuthService
+public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRepository, IRepository<UserLoginToken> userTokenRepository, IEmailService emailService) : IAuthService
 {
     public async Task<Result<bool>> LoginAsync(LoginRequest request, AgentDto agentDto)
     {
@@ -54,7 +54,7 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         await userTokenRepository.Add(userToken);
         
         // til slut sender vi en email til brugeren med linket
-        await emailservice.SendMagicLinkAsync(user.Email, raw);
+        await emailService.SendMagicLinkAsync(user.Email, raw);
         
         return Result<bool>.Ok(true);
     }

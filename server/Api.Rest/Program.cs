@@ -70,7 +70,8 @@ public class Program
         //---------------- MIDDLEWARE --------------//
         app.UseHttpsRedirection();
         
-        
+        // bruges til oprettelse af biler
+        app.UseStaticFiles();
 
         app.UseRouting();
         app.UseCors("Frontend");

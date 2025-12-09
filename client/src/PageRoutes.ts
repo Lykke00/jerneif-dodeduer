@@ -6,7 +6,7 @@ export const PageRoutes = {
   Home: '/',
   Login: '/login',
   Verify: '/auth/verify',
-  Game: '/game',
+  Game: '/spil',
   Deposit: '/indbetal',
   Contact: '/kontakt',
 } as const;

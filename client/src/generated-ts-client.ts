@@ -224,6 +224,61 @@ export class AuthClient {
     }
 }
 
+export class DepositClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    createDeposit(amount: number | undefined, paymentId: string | null | undefined, paymentPicture: FileParameter | null | undefined): Promise<ResultOfDepositResponse> {
+        let url_ = this.baseUrl + "/api/Deposit/create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = new FormData();
+        if (amount === null || amount === undefined)
+            throw new globalThis.Error("The parameter 'amount' cannot be null.");
+        else
+            content_.append("Amount", amount.toString());
+        if (paymentId !== null && paymentId !== undefined)
+            content_.append("PaymentId", paymentId.toString());
+        if (paymentPicture !== null && paymentPicture !== undefined)
+            content_.append("PaymentPicture", paymentPicture.data, paymentPicture.fileName ? paymentPicture.fileName : "PaymentPicture");
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateDeposit(_response);
+        });
+    }
+
+    protected processCreateDeposit(response: Response): Promise<ResultOfDepositResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfDepositResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfDepositResponse>(null as any);
+    }
+}
+
 export interface ResultOfBoolean {
     success: boolean;
     value: boolean;
@@ -271,6 +326,27 @@ export interface ResultOfString {
     value: string | undefined;
     statusCode: number;
     errors: string[];
+}
+
+export interface ResultOfDepositResponse {
+    success: boolean;
+    value: DepositResponse | undefined;
+    statusCode: number;
+    errors: string[];
+}
+
+export interface DepositResponse {
+    id: string;
+    amount: number;
+    paymentId: string;
+    paymentPictureUrl: string;
+    status: string;
+    createdAt: string;
+}
+
+export interface FileParameter {
+    data: any;
+    fileName: string;
 }
 
 export class ApiException extends Error {
