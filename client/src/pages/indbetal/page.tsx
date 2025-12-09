@@ -1,12 +1,13 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Tab, Tabs } from '@heroui/react';
+import { Pagination, Tab, Tabs } from '@heroui/react';
 import type { Deposit } from '../../types/Deposit';
 import DepositForm from '../../components/deposit/DepositForm';
 import DepositHistory from '../../components/deposit/DepositHistory';
 import { useDeposit } from '../../hooks';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
+import type { GetDepositsResponse } from '../../generated-ts-client';
 
 const FAKE_SUBMISSIONS: Deposit[] = [
   {
@@ -36,11 +37,23 @@ const FAKE_SUBMISSIONS: Deposit[] = [
 ];
 
 export default function DepositPage() {
-  const { deposit, isLoading } = useDeposit();
+  const { deposit, getAll, isLoading } = useDeposit();
   const { showModal } = useModal();
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState<Deposit[]>(FAKE_SUBMISSIONS);
+
+  const [data, setData] = useState<GetDepositsResponse[]>([]);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    getAll(page, pageSize).then((res) => {
+      setData(res.items);
+      setTotal(res.totalCount);
+    });
+  }, [page]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>, d: Deposit) => {
     e.preventDefault();
@@ -81,7 +94,19 @@ export default function DepositPage() {
             <DepositForm onSubmit={onSubmit} submitting={submitting} />
           </Tab>
           <Tab key="history" title="Historik">
-            <DepositHistory submissions={submissions} />
+            <div className="space-y-6">
+              <DepositHistory submissions={data} totalCount={total} />
+
+              <Pagination
+                total={Math.ceil(total / pageSize)}
+                size="lg"
+                page={page}
+                onChange={setPage}
+                showControls
+                color="primary"
+                className="self-center"
+              />
+            </div>
           </Tab>
         </Tabs>
       </motion.div>
