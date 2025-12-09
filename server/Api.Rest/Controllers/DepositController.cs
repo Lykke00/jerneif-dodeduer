@@ -49,4 +49,14 @@ public class DepositController(IDepositService depositService) : ControllerBase
         
         return await depositService.GetDepositsAsync(userId.Value, paginationRequest);
     }
+    
+    [Authorize(Roles = "admin")]
+    [HttpGet("all")]
+    public async Task<Result<PagedResult<GetDepositsResponse>>> GetAllDeposits([FromQuery] AllDepositRequest paginationRequest)
+    {
+        var userId = User.GetUserId();
+        if (userId == null) return Result<PagedResult<GetDepositsResponse>>.Unauthorized("Not logged in");
+
+        return await depositService.GetAllDepositsAsync(paginationRequest);
+    }
 }

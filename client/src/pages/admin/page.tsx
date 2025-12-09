@@ -2,30 +2,60 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BiMenu } from 'react-icons/bi';
+
 import GameTab from '../../components/admin/GameTab';
 import UsersTab from '../../components/admin/UsersTab';
 import PaymentsTab from '../../components/admin/PaymentsTab';
 
+const GameHistoryTab = () => <div>Game History</div>;
+const PaymentsPending = () => <PaymentsTab />;
+const PaymentsHistory = () => <PaymentsHistory />;
+
 const menuItems = [
-  { id: 'game', label: 'Spil', icon: '🎮' },
-  { id: 'users', label: 'Brugere', icon: '👥' },
-  { id: 'payments', label: 'Indbetalninger', icon: '💳' },
+  {
+    id: 'users',
+    label: '🙍‍♂️ Brugere',
+    type: 'button',
+  },
+  {
+    label: '🕹 Spil',
+    type: 'label',
+    children: [
+      { id: 'game_current', label: 'Nuværende', type: 'button' },
+      { id: 'game_history', label: 'Historik', type: 'button' },
+    ],
+  },
+  {
+    label: '💵 Indbetalinger',
+    type: 'label',
+    children: [
+      { id: 'payments_pending', label: 'Afventede', type: 'button' },
+      { id: 'payments_history', label: 'Historik', type: 'button' },
+    ],
+  },
 ];
 
 export default function AdminPage() {
-  const [activeSection, setActiveSection] = useState('game');
+  const [activeSection, setActiveSection] = useState<string>('users');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'game':
-        return <GameTab />;
       case 'users':
         return <UsersTab />;
-      case 'payments':
-        return <PaymentsTab />;
-      default:
+      case 'game_current':
         return <GameTab />;
+      case 'game_history':
+        return <GameHistoryTab />;
+
+      case 'payments_pending':
+        return <PaymentsPending />;
+      case 'payments_history':
+        return <PaymentsHistory />;
+
+      default:
+        return <UsersTab />;
     }
   };
 
@@ -36,111 +66,154 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Desktop Layout */}
+      {/* DESKTOP */}
       <div className="hidden md:flex h-screen">
         <motion.aside
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-60 bg-secondary/20 border-r border-secondary/40 p-6 sticky top-0 overflow-y-auto"
+          className="w-54 bg-card border-r border-l border-primary/20 border-border shadow-lg pr-4 pl-2 sticky top-0 overflow-y-auto"
         >
           <div className="mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Admin</h2>
+            <h2 className="text-2xl font-bold text-card-foreground">Admin</h2>
           </div>
 
-          <nav className="space-y-2">
-            {menuItems.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                animate={{
-                  x: activeSection === item.id ? 4 : 0,
-                }}
-                transition={{ duration: 0.1 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
-                  activeSection === item.id
-                    ? 'bg-primary text-white shadow-lg'
-                    : 'text-muted-foreground hover:bg-secondary/30 hover:text-foreground'
-                }`}
-              >
-                <span className="text-xl">{item.icon}</span>
-                <span>{item.label}</span>
-              </motion.button>
-            ))}
+          <nav className="space-y-4">
+            {menuItems.map((item) => {
+              // Label + Children group
+              if (item.type === 'label') {
+                return (
+                  <div key={item.label}>
+                    <div className="px-2 text-sm mb-2 font-bold text-foreground/80">
+                      {item.label}
+                    </div>
+
+                    {/* SKUB DEM TIL HØJRE HER */}
+                    <div className="pl-3 space-y-1">
+                      {item.children?.map((child) => (
+                        <motion.button
+                          key={child.id}
+                          onClick={() => setActiveSection(child.id)}
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.98 }}
+                          animate={{ x: activeSection === child.id ? 4 : 0 }}
+                          transition={{ duration: 0.1 }}
+                          className={`w-full px-4 py-2 rounded-lg text-left transition-all font-medium border border-transparent ${
+                            activeSection === child.id
+                              ? 'bg-primary text-primary-foreground shadow-md'
+                              : 'text-foreground/90 hover:text-accent-foreground hover:bg-primary/2 hover:border-primary/20'
+                          }`}
+                        >
+                          {child.label}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Normal top-level button
+              return (
+                <motion.button
+                  key={item.id}
+                  onClick={() => item.id && setActiveSection(item.id)}
+                  whileHover={{ x: 4 }}
+                  whileTap={{ scale: 0.98 }}
+                  animate={{ x: activeSection === item.id ? 4 : 0 }}
+                  transition={{ duration: 0.1 }}
+                  className={`w-full flex items-start px-4 py-2 rounded-lg transition-all font-medium border border-transparent ${
+                    activeSection === item.id
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'text-foreground/90 hover:bg-accent hover:text-accent-foreground hover:bg-primary/2 hover:border-primary/20'
+                  }`}
+                >
+                  {item.label}
+                </motion.button>
+              );
+            })}
           </nav>
         </motion.aside>
 
-        {/* Main content area */}
         <main className="flex-1 overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="p-8"
+            className="pt-2 pl-4 "
           >
             <div className="max-w-6xl">{renderContent()}</div>
           </motion.div>
         </main>
       </div>
 
-      {/* Mobile Layout */}
+      {/* MOBILE */}
       <div className="md:hidden flex flex-col h-screen">
-        {/* Mobile Header */}
-        <div className="bg-secondary/20 border-b border-secondary/40 p-4 flex items-center justify-between sticky top-0 z-50">
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Admin</h2>
-          </div>
+        <div className="bg-card border-r border-l border-b border-primary/20 shadow-md p-4 flex items-center justify-between sticky top-0 z-50">
+          <h2 className="text-xl font-bold text-card-foreground">Admin</h2>
+
           <motion.button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             whileTap={{ scale: 0.95 }}
-            className="p-2 hover:bg-secondary/30 rounded-lg transition-colors"
+            className="p-2 hover:bg-accent rounded-lg transition-colors text-foreground"
           >
-            <svg
-              className="w-6 h-6 text-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d={isMobileMenuOpen ? 'M6 18L18 6M6 6l12 12M6 12l12-12' : 'M4 6h16M4 12h16M4 18h16'}
-              />
-            </svg>
+            <BiMenu className="w-6 h-6" />
           </motion.button>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-secondary/20 border-b border-secondary/40 p-4 space-y-2"
+              className="bg-card border border-primary/20 shadow-lg p-4 space-y-2"
             >
-              {menuItems.map((item) => (
-                <motion.button
-                  key={item.id}
-                  onClick={() => handleMobileMenuClick(item.id)}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all ${
-                    activeSection === item.id
-                      ? 'bg-primary text-white shadow-lg'
-                      : 'text-muted-foreground hover:bg-secondary/30 hover:text-foreground'
-                  }`}
-                >
-                  <span className="text-xl">{item.icon}</span>
-                  <span>{item.label}</span>
-                </motion.button>
-              ))}
+              {menuItems.map((item) => {
+                if (item.type === 'label') {
+                  return (
+                    <div key={item.label}>
+                      <div className="px-2 py-1 text-xs uppercase font-bold text-foreground/80">
+                        {item.label}
+                      </div>
+
+                      <div className="gap-1 flex flex-col">
+                        {item.children?.map((child) => (
+                          <motion.button
+                            key={child.id}
+                            onClick={() => handleMobileMenuClick(child.id)}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full px-4 py-2 rounded-lg text-left font-medium ${
+                              activeSection === child.id
+                                ? 'bg-primary text-primary-foreground shadow-md'
+                                : 'hover:bg-accent text-foreground/90 hover:text-accent-foreground border border-primary/20'
+                            }`}
+                          >
+                            {child.label}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <motion.button
+                    key={item.id}
+                    onClick={() => item.id && handleMobileMenuClick(item.id)}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-start px-4 py-2 rounded-lg font-semibold ${
+                      activeSection === item.id
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'hover:bg-accent text-foreground/90 hover:text-accent-foreground border border-primary/20'
+                    }`}
+                  >
+                    {item.label}
+                  </motion.button>
+                );
+              })}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Mobile Content */}
         <main className="flex-1 overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -148,20 +221,7 @@ export default function AdminPage() {
             transition={{ duration: 0.3 }}
             className="p-4"
           >
-            <div>
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-foreground">
-                  {menuItems.find((m) => m.id === activeSection)?.label}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {activeSection === 'game' && 'Manage the current game and view winners'}
-                  {activeSection === 'users' && 'View and manage all registered users'}
-                  {activeSection === 'payments' && 'Process and track user payments'}
-                </p>
-              </div>
-
-              {renderContent()}
-            </div>
+            {renderContent()}
           </motion.div>
         </main>
       </div>

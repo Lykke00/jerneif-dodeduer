@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Service.DTO;
 using Service.DTO.Deposit;
+using Service.DTO.User;
 using Service.Options;
 using Service.Services.Files;
 using DbDeposit = DataAccess.Models.Deposit;
@@ -13,6 +14,7 @@ public interface IDepositService
 {
     Task<Result<DepositResponse>> DepositAsync(Guid userId, DepositRequest request); 
     Task<Result<PagedResult<GetDepositsResponse>>> GetDepositsAsync(Guid userId, PaginationRequest paginationRequest);
+    Task<Result<PagedResult<GetDepositsResponse>>> GetAllDepositsAsync(AllDepositRequest request);
 }
 
 public class DepositService(IRepository<DbDeposit> depositRepository, IFileService fileService, IOptions<AppOptions> options) : IDepositService
@@ -74,6 +76,52 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
                 Status = d.Status,
                 CreatedAt = d.CreatedAt,
                 ApprovedAt = d.ApprovedAt
+            });
+
+        return Result<PagedResult<GetDepositsResponse>>.Ok(result);
+    }
+    
+    public async Task<Result<PagedResult<GetDepositsResponse>>> GetAllDepositsAsync(AllDepositRequest request)
+    {
+        IQueryable<DbDeposit> query = depositRepository.Query().Include(d => d.User);
+        
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim();
+
+            query = query.Where(d =>
+                (d.PaymentId != null && d.PaymentId.Contains(search)) ||
+                (d.User!.Email.Contains(search)) ||
+                (d.User!.Id.ToString().Contains(search))
+            );
+        }
+
+
+        if (!string.IsNullOrWhiteSpace(request.Status))
+        {
+            if (Enum.TryParse<DbDeposit.DepositStatus>(request.Status, true, out var status))
+                query = query.Where(d => d.Status.ToLower() == request.Status);
+            else
+            {
+                return Result<PagedResult<GetDepositsResponse>>.BadRequest("status", "Invalid status filter.");
+            }
+        }
+
+        var result = await depositRepository.GetPagedAsync(
+            query,
+            request.Page,
+            request.PageSize,
+            d => d.CreatedAt,
+            d => new GetDepositsResponse
+            {
+                Id = d.Id,
+                Amount = d.Amount,
+                PaymentId = d.PaymentId,
+                PaymentPictureUrl = d.PaymentPicture == null ? null : $"{options.Value.BackendUrl}/uploads/{d.PaymentPicture}",
+                Status = d.Status,
+                CreatedAt = d.CreatedAt,
+                ApprovedAt = d.ApprovedAt,
+                User = UserDto.FromDatabase(d.User)
             });
 
         return Result<PagedResult<GetDepositsResponse>>.Ok(result);

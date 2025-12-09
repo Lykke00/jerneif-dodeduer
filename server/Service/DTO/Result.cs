@@ -120,6 +120,26 @@ public record Result<T>
             Errors = new Dictionary<string, string[]> { { key, errors } }
         };
     
+    // 400
+    public static Result<T> BadRequest(params string[] errors) =>
+        new()
+        {
+            Success = false,
+            StatusCode = 400,
+            Errors = new Dictionary<string, string[]> { { "General", errors } }
+        };
+
+    
+    // 400 - with custom key
+    public static Result<T> BadRequest(string key, params string[] errors) =>
+        new()
+        {
+            Success = false,
+            StatusCode = 400,
+            Errors = new Dictionary<string, string[]> { { key, errors } }
+        };
+
+    
     public static Result<T> FromResult<U>(Result<U> other)
     {
         return new Result<T>

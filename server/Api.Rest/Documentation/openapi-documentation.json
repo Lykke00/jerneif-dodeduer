@@ -255,6 +255,71 @@
           }
         ]
       }
+    },
+    "/api/Deposit/all": {
+      "get": {
+        "tags": [
+          "Deposit"
+        ],
+        "operationId": "Deposit_GetAllDeposits",
+        "parameters": [
+          {
+            "name": "Search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfPagedResultOfGetDepositsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": [
+              "admin"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -616,6 +681,9 @@
                 "type": "string",
                 "format": "date-time",
                 "nullable": true
+              },
+              "user": {
+                "$ref": "#/components/schemas/UserDto"
               }
             }
           }

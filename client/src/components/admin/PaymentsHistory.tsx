@@ -66,13 +66,13 @@ const itemVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.05,
+      duration: 0.3,
       ease: 'easeOut',
     },
   },
 };
 
-export default function PaymentsTab() {
+export default function PaymentsHistoryTab() {
   const [payments, setPayments] = useState<Payment[]>([
     {
       id: 'PAY-001',
@@ -100,15 +100,6 @@ export default function PaymentsTab() {
     },
   ]);
 
-  const handleApprove = (paymentId: string) => {
-    setPayments(payments.map((p) => (p.id === paymentId ? { ...p, status: 'approved' } : p)));
-  };
-
-  const handleDecline = (paymentId: string) => {
-    setPayments(payments.map((p) => (p.id === paymentId ? { ...p, status: 'declined' } : p)));
-  };
-
-  const pendingPayments = payments.filter((p) => p.status === 'pending');
   const processedPayments = payments.filter((p) => p.status !== 'pending');
 
   return (
@@ -117,18 +108,15 @@ export default function PaymentsTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      {pendingPayments.length > 0 && (
-        <Card className="border border-yellow-300/30 shadow-lg bg-card/70 backdrop-blur-sm">
-          <CardHeader className="border-b border-yellow-300/20">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-              <div>
-                <div className="text-lg font-bold text-foreground">Afventende indbetalinger</div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {pendingPayments.length} indbetalning{pendingPayments.length !== 1 ? 'er' : ''}{' '}
-                  afventer
-                </p>
-              </div>
+      {processedPayments.length > 0 && (
+        <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
+          <CardHeader className="border-b border-primary/10">
+            <div>
+              <div className="text-lg font-bold text-foreground">Indbetalningshistorik</div>
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                {processedPayments.length} behandlet indbetaling
+                {processedPayments.length !== 1 ? 's' : ''}
+              </p>
             </div>
           </CardHeader>
           <CardBody className="p-4 md:p-6">
@@ -140,14 +128,22 @@ export default function PaymentsTab() {
                 exit="exit"
                 className="space-y-3"
               >
-                {pendingPayments.map((payment) => (
-                  <motion.div
-                    key={payment.id}
-                    variants={itemVariants}
-                    className="p-4 md:p-5 flex items-center justify-between gap-4 rounded-xl border border-primary/10 bg-primary/5 hover:bg-primary/10 transition-all"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                {processedPayments.map((payment) => {
+                  const cfg = STATUS_CONFIG[payment.status];
+                  return (
+                    <motion.div
+                      key={payment.id}
+                      variants={itemVariants}
+                      className={`
+                        p-4 md:p-5
+                        flex items-center justify-between gap-3
+                        rounded-xl transition-all
+                        border ${cfg.border}
+                        ${cfg.bg}
+                        hover:brightness-95 dark:hover:brightness-125
+                      `}
+                    >
+                      <div className="flex-1 min-w-0">
                         <div className="text-base md:text-lg font-semibold text-foreground">
                           {payment.amount.toLocaleString('en-US', {
                             style: 'currency',
@@ -155,35 +151,23 @@ export default function PaymentsTab() {
                             minimumFractionDigits: 0,
                           })}
                         </div>
-                        <StatusBadge status={payment.status} />
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {payment.userEmail}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {payment.createdAt.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">{payment.userEmail}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {payment.createdAt.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </div>
 
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onPress={() => handleApprove(payment.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold"
-                      >
-                        Godkend
-                      </Button>
-                      <Button
-                        size="sm"
-                        onPress={() => handleDecline(payment.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-semibold"
-                      >
-                        Afvis
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+                      <StatusBadge status={payment.status} />
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             </AnimatePresence>
           </CardBody>
