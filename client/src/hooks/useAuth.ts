@@ -7,7 +7,6 @@ import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { useNavigate } from 'react-router-dom';
 import { PageRoutes } from '../PageRoutes';
-import { apiCall } from '../api/apiClient';
 
 type useAuthTypes = {
   requestLogin(email: string): Promise<boolean>;
@@ -15,16 +14,36 @@ type useAuthTypes = {
   refresh(): Promise<string>;
   user: UserDto | null;
   logout(): void;
+  me(): Promise<UserDto | null>;
+  jwt: string | null;
+  makeApiCall: <T>(fn: () => Promise<T>) => Promise<T>;
   isLoading: boolean;
 };
 
 export const useAuth = (): useAuthTypes => {
-  const [_, setJwt] = useAtom(jwtAtom);
+  const [jwt, setJwt] = useAtom(jwtAtom);
   const [user, setUser] = useAtom(userAtom);
 
   const navigate = useNavigate();
   const { isLoading, withLoading } = useLoading();
   const [errors, setErrors] = useState<string[] | null>();
+
+  const makeApiCall = async <T>(fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn();
+    } catch (err: any) {
+      if (err?.status === 401 || err?.response?.status === 401) {
+        try {
+          await refresh();
+          return await fn();
+        } catch {
+          logout();
+          throw err;
+        }
+      }
+      throw err;
+    }
+  };
 
   // anmod om at modtage token
   const requestLogin = async (email: string): Promise<boolean> => {
@@ -59,6 +78,8 @@ export const useAuth = (): useAuthTypes => {
       if (!user) {
         throw new Error('Ingen bruger modtaget');
       }
+
+      console.log('tokeN: ', accessToken);
 
       setJwt(accessToken);
       setUser(user);
@@ -97,7 +118,7 @@ export const useAuth = (): useAuthTypes => {
 
   const me = async (): Promise<UserDto | null> => {
     try {
-      const response = await withLoading(() => apiCall(() => authClient.me()));
+      const response = await withLoading(() => makeApiCall(() => authClient.me()));
 
       const user = response.value;
       if (!user) throw new Error('Ingen user fra refresh');
@@ -136,6 +157,9 @@ export const useAuth = (): useAuthTypes => {
     refresh,
     user,
     logout,
+    me,
+    jwt,
+    makeApiCall,
     isLoading,
   };
 };

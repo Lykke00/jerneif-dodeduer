@@ -10,9 +10,20 @@ import { RequireAuth } from './components/auth/RequireAuth.tsx';
 import { AccessLevel } from './helpers/authUtils.ts';
 import { useAuth } from './hooks/useAuth.ts';
 import { AuthContext } from './contexts/AuthContext.tsx';
+import { useEffect } from 'react';
 
 function AppRoutes() {
   const auth = useAuth();
+  const { me, jwt } = auth;
+
+  // log bruger på hvis token er gemt
+  useEffect(() => {
+    if (jwt) {
+      me().catch(() => {
+        auth.logout();
+      });
+    }
+  }, [jwt]);
 
   return (
     <AuthContext.Provider value={auth}>

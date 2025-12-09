@@ -7,6 +7,7 @@ type AuthContextType = {
   refresh(): Promise<string>;
   user: UserDto | null;
   logout(): void;
+  makeApiCall: <T>(fn: () => Promise<T>) => Promise<T>;
   isLoading: boolean;
 };
 
