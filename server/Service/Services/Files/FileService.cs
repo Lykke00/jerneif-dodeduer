@@ -19,10 +19,16 @@ public class FileService(IWebHostEnvironment env) : IFileService
         var ext = Path.GetExtension(originalFileName);
         var fileName = $"{Guid.NewGuid()}{ext}";
 
-        var root = Path.Combine(env.WebRootPath, folder);
-        Directory.CreateDirectory(root);
+        var rootPath = env.WebRootPath;
+        if (string.IsNullOrWhiteSpace(rootPath))
+            rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        
+        Directory.CreateDirectory(rootPath);
 
-        var path = Path.Combine(root, fileName);
+        var targetFolder = Path.Combine(rootPath, folder);
+        Directory.CreateDirectory(targetFolder);
+
+        var path = Path.Combine(targetFolder, fileName);
 
         await using (var fileStream = new FileStream(path, FileMode.Create))
             await stream.CopyToAsync(fileStream);

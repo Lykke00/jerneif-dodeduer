@@ -21,16 +21,19 @@ public class DepositController(IDepositService depositService) : ControllerBase
         if (userId == null) return Result<DepositResponse>.Unauthorized("Not logged in");
 
         Stream? stream = null;
+        string fileName = "";
         if (request.PaymentPicture != null)
         {
             stream = request.PaymentPicture.OpenReadStream();
+            fileName = request.PaymentPicture.FileName;
         }
         
         var newRequest = new DepositRequest
         {
             Amount = request.Amount,
             PaymentId = request.PaymentId,
-            PaymentPicture = stream
+            PaymentPicture = stream,
+            PaymentPictureFileName = fileName
         };
         
         return await depositService.DepositAsync(userId.Value, newRequest);
