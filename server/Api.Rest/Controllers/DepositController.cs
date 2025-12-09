@@ -17,9 +17,11 @@ public class DepositController(IDepositService depositService) : ControllerBase
     [Authorize]
     public async Task<Result<DepositResponse>> CreateDeposit([FromForm] DepositCreateRequest request)
     {
-        var userId = User.GetUserId();
-        if (userId == null) return Result<DepositResponse>.Unauthorized("Not logged in");
+        //var userId = User.GetUserId();
+        //if (userId == null) return Result<DepositResponse>.Unauthorized("Not logged in");
 
+        Guid userId = Guid.Parse("0d76d9e0-a6ae-4c82-b4c8-c4f30c4459b5");
+        
         Stream? stream = null;
         string fileName = "";
         if (request.PaymentPicture != null)
@@ -36,6 +38,6 @@ public class DepositController(IDepositService depositService) : ControllerBase
             PaymentPictureFileName = fileName
         };
         
-        return await depositService.DepositAsync(userId.Value, newRequest);
+        return await depositService.DepositAsync(userId, newRequest);
     }
 }

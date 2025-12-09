@@ -30,7 +30,7 @@ CREATE TABLE deposits (
     "id"                     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id"                UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     "amount"                 NUMERIC(12,2) NOT NULL,
-    "payment_id"             VARCHAR(100) NOT NULL,
+    "payment_id"             VARCHAR(100),
     "payment_picture"        VARCHAR(150),
     "status"                 TEXT NOT NULL DEFAULT 'pending',
     "approved_by"            UUID REFERENCES users(id) ON DELETE CASCADE,
