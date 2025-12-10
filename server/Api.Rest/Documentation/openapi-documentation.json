@@ -475,6 +475,57 @@
           }
         ]
       }
+    },
+    "/api/User/{userId}/update": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_GetUserById",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfUserDtoExtended"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": [
+              "admin"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -992,6 +1043,24 @@
           },
           "admin": {
             "type": "boolean"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "active",
+          "admin"
+        ],
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "admin": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       }

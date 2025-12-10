@@ -24,4 +24,9 @@ public class UserController(IUserService userService) : ControllerBase
         return await userService.CreateUserAsync(request);
     }
     
+    [HttpPost("{userId:guid}/update")]
+    public async Task<Result<UserDtoExtended>> GetUserById([FromRoute] Guid userId, UpdateUserRequest request)
+    {
+        return await userService.UpdateUserAsync(userId, request);
+    }
 }

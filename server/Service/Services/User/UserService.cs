@@ -12,6 +12,7 @@ public interface IUserService
     Task<Result<UserDto>> GetByIdAsync(Guid userId);
     Task<PagedResult<UserDtoExtended>> GetUsersAsync(AllUserRequest request);
     Task<Result<UserDtoExtended>> CreateUserAsync(CreateUserRequest request);
+    Task<Result<UserDtoExtended>> UpdateUserAsync(Guid userId, UpdateUserRequest request);
 }
 
 public class UserService(IRepository<DbUser> userRepository) : IUserService
@@ -39,12 +40,7 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
         }
         
         if (request.Active.HasValue)
-        {
-            if (request.Active.HasValue)
-            {
-                query = query.Where(x => x.Active == request.Active.Value);
-            }
-        }
+            query = query.Where(x => x.Active == request.Active.Value);
 
         return await userRepository.GetPagedAsync(
             query,
@@ -71,5 +67,21 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
 
         await userRepository.Add(newUser);
         return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(newUser));
+    }
+    
+    public async Task<Result<UserDtoExtended>> UpdateUserAsync(Guid userId, UpdateUserRequest request)
+    {
+        var user = await userRepository.FindAsync(userId);
+        if (user == null)
+            return Result<UserDtoExtended>.NotFound("User not found.");
+        
+        if (request.Active.HasValue)
+            user.Active = request.Active.Value;
+        
+        if (request.Admin.HasValue)
+            user.Admin = request.Admin.Value;
+        
+        await userRepository.Update(user);
+        return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(user));
     }
 }
