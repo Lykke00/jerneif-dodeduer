@@ -104,7 +104,7 @@ export default function DepositHistory({ submissions, totalCount }: Props) {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
       <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
         <CardHeader className="border-b border-primary/10 flex flex-col gap-1">
-          <div className="text-lg md:text-xl font-bold text-foreground">Deposit History</div>
+          <div className="text-lg md:text-xl font-bold text-foreground">Indbetalning historik</div>
           <p className="text-xs md:text-sm text-muted-foreground">
             {totalCount} Indbetalning{totalCount !== 1 ? 'er' : ''}
           </p>

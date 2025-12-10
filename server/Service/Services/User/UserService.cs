@@ -1,4 +1,6 @@
-﻿using DataAccess.Repository;
+﻿using DataAccess.DTO;
+using DataAccess.Repository;
+using Microsoft.EntityFrameworkCore;
 using Service.DTO;
 using Service.DTO.User;
 using DbUser = DataAccess.Models.User;
@@ -8,6 +10,7 @@ namespace Service.Services.User;
 public interface IUserService
 {
     Task<Result<UserDto>> GetByIdAsync(Guid userId);
+    Task<PagedResult<UserDtoExtended>> GetUsersAsync(AllUserRequest request);
 }
 
 public class UserService(IRepository<DbUser> userRepository) : IUserService
@@ -20,5 +23,34 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
 
         var createdDto = UserDto.FromDatabase(user);
         return Result<UserDto>.Ok(createdDto);
+    }
+    
+    public async Task<PagedResult<UserDtoExtended>> GetUsersAsync(AllUserRequest request)
+    {
+        IQueryable<DbUser> query = userRepository.Query().Include(d => d.DepositUsers);
+        
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim();
+
+            query = query.Where(d =>
+                d.Email.Contains(search));
+        }
+        
+        if (request.Active.HasValue)
+        {
+            if (request.Active.HasValue)
+            {
+                query = query.Where(x => x.Active == request.Active.Value);
+            }
+        }
+
+        return await userRepository.GetPagedAsync(
+            query,
+            request.Page,
+            request.PageSize,
+            orderByDesc: x => x.CreatedAt,
+            selector: u => UserDtoExtended.FromDatabase(u)
+            );
     }
 }

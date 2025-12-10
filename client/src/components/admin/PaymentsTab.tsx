@@ -195,7 +195,7 @@ export default function PaymentsTab() {
 
                       {/* Content */}
                       <div className="pr-24">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2">
                           <div className="text-base font-semibold">
                             {payment.amount.toLocaleString('en-US', {
                               style: 'currency',

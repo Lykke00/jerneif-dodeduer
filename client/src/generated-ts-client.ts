@@ -405,6 +405,62 @@ export class DepositClient {
     }
 }
 
+export class UserClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getUsers(search: string | null | undefined, active: boolean | null | undefined, page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfUserDtoExtended> {
+        let url_ = this.baseUrl + "/api/User?";
+        if (search !== undefined && search !== null)
+            url_ += "Search=" + encodeURIComponent("" + search) + "&";
+        if (active !== undefined && active !== null)
+            url_ += "Active=" + encodeURIComponent("" + active) + "&";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUsers(_response);
+        });
+    }
+
+    protected processGetUsers(response: Response): Promise<PagedResultOfUserDtoExtended> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfUserDtoExtended;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfUserDtoExtended>(null as any);
+    }
+}
+
 export interface ResultOfBoolean {
     success: boolean;
     value: boolean;
@@ -498,6 +554,18 @@ export interface ResultOfGetDepositsResponse {
 
 export interface UpdateDepositStatusRequest {
     status: string;
+}
+
+export interface PagedResultOfUserDtoExtended {
+    items: UserDtoExtended[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface UserDtoExtended extends UserDto {
+    balance?: number;
+    totalDeposits?: number;
 }
 
 export interface FileParameter {
