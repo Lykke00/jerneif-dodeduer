@@ -37,7 +37,7 @@ const itemVariants: Variants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.3,
+      duration: 0.1,
     },
   },
   exit: {
@@ -84,148 +84,142 @@ export default function PaymentsTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      {allDeposits.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Ingen betalinger endnu!</p>
-        </div>
-      ) : (
-        <Card className="border border-yellow-300/30 shadow-lg bg-card/70 backdrop-blur-sm">
-          <CardHeader className="border-b border-yellow-300/20">
-            <div className="flex items-center gap-2">
-              <div>
-                <div className="text-lg font-bold text-foreground">Indbetalinger</div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {allDeposits.length} indbetaling{allDeposits.length !== 1 ? 'er' : ''} ialt
-                </p>
-              </div>
+      <Card className="border border-yellow-300/30 shadow-lg bg-card/70 backdrop-blur-sm">
+        <CardHeader className="border-b border-yellow-300/20">
+          <div className="flex items-center gap-2">
+            <div>
+              <div className="text-lg font-bold text-foreground">Indbetalinger</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {totalCount} indbetaling{totalCount !== 1 ? 'er' : ''} ialt
+              </p>
             </div>
-          </CardHeader>
+          </div>
+        </CardHeader>
 
-          <CardBody className="p-4 md:p-6 space-y-4">
-            {/* FILTERS */}
-            <div className="flex flex-row justify-between gap-4 w-full">
-              <Input
-                className="max-w-2xs"
-                placeholder="Søg..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
+        <CardBody className="p-4 md:p-6 space-y-4 overflow-visible">
+          {/* FILTERS */}
+          <div className="flex flex-row justify-between gap-4 w-full">
+            <Input
+              className="max-w-2xs"
+              placeholder="Søg..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
 
-              <Select
-                className="max-w-2/10"
-                selectedKeys={new Set([status])}
-                onSelectionChange={(keys) => {
-                  const value = Array.from(keys)[0] ?? '';
-                  setStatus(value as DepositStatus);
-                  setPage(1);
-                }}
+            <Select
+              className="max-w-2/10"
+              selectedKeys={new Set([status])}
+              onSelectionChange={(keys) => {
+                const value = Array.from(keys)[0] ?? '';
+                setStatus(value as DepositStatus);
+                setPage(1);
+              }}
+            >
+              <SelectItem key="">Alle</SelectItem>
+              <SelectItem key="pending">Afventer</SelectItem>
+              <SelectItem key="approved">Godkendt</SelectItem>
+              <SelectItem key="declined">Afvist</SelectItem>
+            </Select>
+          </div>
+
+          {/* LIST */}
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${page}-${status}-${search}`}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="space-y-3"
               >
-                <SelectItem key="">Alle</SelectItem>
-                <SelectItem key="pending">Afventer</SelectItem>
-                <SelectItem key="approved">Godkendt</SelectItem>
-                <SelectItem key="declined">Afvist</SelectItem>
-              </Select>
-            </div>
+                {allDeposits.map((payment) => {
+                  const status = payment.status.toLowerCase();
+                  const isPending = status === 'pending';
+                  const isApproved = status === 'approved';
+                  const isDeclined = status === 'declined';
 
-            {/* LIST */}
-            <div className="relative">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={page}
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="space-y-3"
-                >
-                  {allDeposits.map((payment) => {
-                    const status = payment.status.toLowerCase();
-                    const isPending = status === 'pending';
-                    const isApproved = status === 'approved';
-                    const isDeclined = status === 'declined';
+                  const bgClass = isPending
+                    ? 'bg-yellow-100/15 dark:bg-yellow-900/10'
+                    : isApproved
+                    ? 'bg-green-100/30 dark:bg-green-900/10'
+                    : 'bg-red-100/30 dark:bg-red-900/10';
 
-                    const bgClass = isPending
-                      ? 'bg-yellow-100/15 dark:bg-yellow-900/10'
-                      : isApproved
-                      ? 'bg-green-100/30 dark:bg-green-900/10'
-                      : 'bg-red-100/30 dark:bg-red-900/10';
+                  const borderClass = isPending
+                    ? 'border-yellow-300/25 dark:border-yellow-700/50'
+                    : isApproved
+                    ? 'border-green-300/50 dark:border-green-700/50'
+                    : 'border-red-300/50 dark:border-red-700/50';
 
-                    const borderClass = isPending
-                      ? 'border-yellow-300/25 dark:border-yellow-700/50'
-                      : isApproved
-                      ? 'border-green-300/50 dark:border-green-700/50'
-                      : 'border-red-300/50 dark:border-red-700/50';
+                  const statusIcon = isPending ? '⏱' : isApproved ? '✓' : '✕';
+                  const statusLabel = isPending ? 'Afventer' : isApproved ? 'Godkendt' : 'Afvist';
+                  const statusTextClass = isPending
+                    ? 'text-yellow-800 dark:text-yellow-200'
+                    : isApproved
+                    ? 'text-green-800 dark:text-green-200'
+                    : 'text-red-800 dark:text-red-200';
 
-                    const statusIcon = isPending ? '⏱' : isApproved ? '✓' : '✕';
-                    const statusLabel = isPending ? 'Afventer' : isApproved ? 'Godkendt' : 'Afvist';
-                    const statusTextClass = isPending
-                      ? 'text-yellow-800 dark:text-yellow-200'
-                      : isApproved
-                      ? 'text-green-800 dark:text-green-200'
-                      : 'text-red-800 dark:text-red-200';
+                  return (
+                    <motion.div
+                      key={payment.id}
+                      variants={itemVariants}
+                      className={`p-4 md:p-5 relative rounded-xl border ${borderClass} ${bgClass} hover:brightness-95 dark:hover:brightness-125 transition-all`}
+                    >
+                      {/* Status Badge - Top Right */}
+                      <div className="absolute top-3 right-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bgClass} ${statusTextClass}`}
+                        >
+                          <span>{statusIcon}</span>
+                          <span>{statusLabel}</span>
+                        </span>
+                      </div>
 
-                    return (
-                      <motion.div
-                        key={payment.id}
-                        variants={itemVariants}
-                        className={`p-4 md:p-5 relative rounded-xl border ${borderClass} ${bgClass} hover:brightness-95 dark:hover:brightness-125 transition-all`}
-                      >
-                        {/* Status Badge - Top Right */}
-                        <div className="absolute top-3 right-3">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bgClass} ${statusTextClass}`}
-                          >
-                            <span>{statusIcon}</span>
-                            <span>{statusLabel}</span>
-                          </span>
-                        </div>
-
-                        {/* Content */}
-                        <div className="pr-24">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="text-base font-semibold">
-                              {payment.amount.toLocaleString('en-US', {
-                                style: 'currency',
-                                currency: 'DKK',
-                                minimumFractionDigits: 0,
-                              })}
-                            </div>
-                          </div>
-                          <div className="text-sm text-muted-foreground">{payment.user?.email}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {new Date(payment.createdAt).toLocaleTimeString('da-DK', {
-                              hour: '2-digit',
-                              minute: '2-digit',
+                      {/* Content */}
+                      <div className="pr-24">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="text-base font-semibold">
+                            {payment.amount.toLocaleString('en-US', {
+                              style: 'currency',
+                              currency: 'DKK',
+                              minimumFractionDigits: 0,
                             })}
                           </div>
                         </div>
+                        <div className="text-sm text-muted-foreground">{payment.user?.email}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {new Date(payment.createdAt).toLocaleTimeString('da-DK', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
+                      </div>
 
-                        {/* Buttons - Bottom Right */}
-                        {isPending && (
-                          <div className="flex gap-2 justify-end">
-                            <Button size="sm" className="bg-red-600 text-white font-semibold">
-                              Afvis
-                            </Button>
-                            <Button size="sm" className="bg-green-600 text-white font-semibold">
-                              Godkend
-                            </Button>
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                      {/* Buttons - Bottom Right */}
+                      {isPending && (
+                        <div className="flex gap-2 justify-end">
+                          <Button size="sm" className="bg-red-600 text-white font-semibold">
+                            Afvis
+                          </Button>
+                          <Button size="sm" className="bg-green-600 text-white font-semibold">
+                            Godkend
+                          </Button>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-            {/* PAGINATION */}
-            <Pagination showControls page={page} total={totalPages} onChange={setPage} size="sm" />
-          </CardBody>
-        </Card>
-      )}
+          {/* PAGINATION */}
+          <Pagination showControls page={page} total={totalPages} onChange={setPage} size="md" />
+        </CardBody>
+      </Card>
     </motion.div>
   );
 }

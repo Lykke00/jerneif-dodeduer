@@ -320,6 +320,57 @@
           }
         ]
       }
+    },
+    "/api/Deposit/update-status/{depositId}": {
+      "post": {
+        "tags": [
+          "Deposit"
+        ],
+        "operationId": "Deposit_UpdateDepositStatus",
+        "parameters": [
+          {
+            "name": "depositId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDepositStatusRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfGetDepositsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": [
+              "admin"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -688,6 +739,54 @@
             }
           }
         ]
+      },
+      "ResultOfGetDepositsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GetDepositsResponse"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "UpdateDepositStatusRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
       }
     },
     "securitySchemes": {

@@ -15,6 +15,7 @@ public interface IDepositService
     Task<Result<DepositResponse>> DepositAsync(Guid userId, DepositRequest request); 
     Task<Result<PagedResult<GetDepositsResponse>>> GetDepositsAsync(Guid userId, PaginationRequest paginationRequest);
     Task<Result<PagedResult<GetDepositsResponse>>> GetAllDepositsAsync(AllDepositRequest request);
+    Task<Result<GetDepositsResponse>> UpdateDepositStatusAsync(Guid depositId, UpdateDepositStatusRequest request);
 }
 
 public class DepositService(IRepository<DbDeposit> depositRepository, IFileService fileService, IOptions<AppOptions> options) : IDepositService
@@ -95,8 +96,7 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
                 (d.User!.Id.ToString().Contains(search))
             );
         }
-
-
+        
         if (!string.IsNullOrWhiteSpace(request.Status))
         {
             if (Enum.TryParse<DbDeposit.DepositStatus>(request.Status, true, out var status))
@@ -125,5 +125,33 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
             });
 
         return Result<PagedResult<GetDepositsResponse>>.Ok(result);
+    }
+    
+    public async Task<Result<GetDepositsResponse>> UpdateDepositStatusAsync(Guid depositId, UpdateDepositStatusRequest request)
+    {
+        var deposit = await depositRepository.Query()
+            .FirstOrDefaultAsync(d => d.Id == depositId);
+        
+        if (deposit == null)
+            return Result<GetDepositsResponse>.NotFound("deposit", "Deposit not found.");
+
+        if (!Enum.TryParse<DbDeposit.DepositStatus>(request.Status, true, out var status))
+            return Result<GetDepositsResponse>.BadRequest("status", "Invalid status value.");
+
+        deposit.StatusEnum = status;
+        if (status == DbDeposit.DepositStatus.Approved)
+            deposit.ApprovedAt = DateTime.UtcNow;
+        await depositRepository.Update(deposit);
+        
+        return Result<GetDepositsResponse>.Ok(new GetDepositsResponse
+        {
+            Id = deposit.Id,
+            Amount = deposit.Amount,
+            PaymentId = deposit.PaymentId,
+            PaymentPictureUrl = deposit.PaymentPicture == null ? null : $"{options.Value.BackendUrl}/uploads/{deposit.PaymentPicture}",
+            Status = deposit.Status,
+            CreatedAt = deposit.CreatedAt,
+            ApprovedAt = deposit.ApprovedAt
+        });
     }
 }

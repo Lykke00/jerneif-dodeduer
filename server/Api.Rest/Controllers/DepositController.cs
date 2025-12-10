@@ -59,4 +59,11 @@ public class DepositController(IDepositService depositService) : ControllerBase
 
         return await depositService.GetAllDepositsAsync(paginationRequest);
     }
+    
+    [Authorize(Roles = "admin")]
+    [HttpPost("update-status/{depositId}")]
+    public async Task<Result<GetDepositsResponse>> UpdateDepositStatus([FromRoute] Guid depositId, [FromBody] UpdateDepositStatusRequest request)
+    {
+        return await depositService.UpdateDepositStatusAsync(depositId, request);
+    }
 }
