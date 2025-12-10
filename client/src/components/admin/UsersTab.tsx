@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
@@ -20,8 +20,14 @@ import {
   Pagination,
   Divider,
   Input,
+  Select,
+  SelectItem,
+  Spinner,
 } from '@heroui/react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+import { useDebounce, useUsers } from '../../hooks';
+import { useModal } from '../../contexts/ModalContext';
+import type { UserDtoExtended } from '../../generated-ts-client';
 
 interface User {
   id: string;
@@ -34,95 +40,34 @@ interface User {
 }
 
 export default function UsersTab() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      email: 'john@example.com',
-      createdAt: new Date('2024-01-15'),
-      balance: 5000,
-      totalDeposits: 10000,
-      isAdmin: true,
-      isActive: true,
-    },
-    {
-      id: '2',
-      email: 'jane@example.com',
-      createdAt: new Date('2024-02-20'),
-      balance: 3500,
-      totalDeposits: 7500,
-      isAdmin: false,
-      isActive: true,
-    },
-    {
-      id: '3',
-      email: 'mike@example.com',
-      createdAt: new Date('2024-03-10'),
-      balance: 8000,
-      totalDeposits: 15000,
-      isAdmin: false,
-      isActive: true,
-    },
-    {
-      id: '4',
-      email: 'sarah@example.com',
-      createdAt: new Date('2024-01-05'),
-      balance: 0,
-      totalDeposits: 2000,
-      isAdmin: false,
-      isActive: false,
-    },
-    {
-      id: '5',
-      email: 'sarsdfsdfah@example.com',
-      createdAt: new Date('2024-01-05'),
-      balance: 0,
-      totalDeposits: 2000,
-      isAdmin: false,
-      isActive: false,
-    },
-    {
-      id: '6',
-      email: 'sasdfsdfrah@example.com',
-      createdAt: new Date('2024-01-05'),
-      balance: 0,
-      totalDeposits: 2000,
-      isAdmin: false,
-      isActive: false,
-    },
-    {
-      id: '7',
-      email: 'sarsdfsdfah@example.com',
-      createdAt: new Date('2024-01-05'),
-      balance: 0,
-      totalDeposits: 2000,
-      isAdmin: false,
-      isActive: false,
-    },
-    {
-      id: '8',
-      email: 'sarah@example.com',
-      createdAt: new Date('2024-01-05'),
-      balance: 0,
-      totalDeposits: 2000,
-      isAdmin: false,
-      isActive: false,
-    },
-  ]);
+  const [search, setSearch] = useState('');
+  const [sortActive, setSortActive] = useState<boolean | undefined>(undefined);
+  const debouncedSearch = useDebounce(search, 400);
 
   const [page, setPage] = useState(1);
-  const rowsPerPage = 5;
+  const [totalCount, setTotalCount] = useState(0);
+  const [allUsers, setAllUsers] = useState<UserDtoExtended[]>([]);
+  const { showModal } = useModal();
 
-  const pages = Math.ceil(users.length / rowsPerPage);
+  const pageSize = 10;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
-  const paginatedUsers = users.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const { getAll, isLoading } = useUsers();
 
-  const handleMakeAdmin = (userId: string) => {
-    setUsers(users.map((u) => (u.id === userId ? { ...u, isAdmin: true } : u)));
-  };
+  useEffect(() => {
+    let isActive = true;
 
-  const handleDeactivate = (userId: string) => {
-    setUsers(users.map((u) => (u.id === userId ? { ...u, isActive: false } : u)));
-  };
+    (async () => {
+      const res = await getAll(search, page, pageSize, sortActive);
+      if (!isActive) return;
+      setAllUsers(res.items);
+      setTotalCount(res.totalCount);
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [page, debouncedSearch, sortActive]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
@@ -130,8 +75,37 @@ export default function UsersTab() {
         <CardBody className="p-2 gap-2 overflow-x-auto">
           {/* Actions */}
           <div className="flex items-center justify-between gap-4">
+            <Select
+              className="max-w-1/6"
+              selectedKeys={
+                new Set([sortActive === undefined ? 'all' : sortActive ? 'active' : 'deactivated'])
+              }
+              onSelectionChange={(keys) => {
+                const key = Array.from(keys)[0];
+
+                if (key === 'all') {
+                  setSortActive(undefined);
+                } else if (key === 'active') {
+                  setSortActive(true);
+                } else if (key === 'deactivated') {
+                  setSortActive(false);
+                }
+
+                setPage(1);
+              }}
+            >
+              <SelectItem key="all">Alle</SelectItem>
+              <SelectItem key="active">Aktive</SelectItem>
+              <SelectItem key="deactivated">Deaktiveret</SelectItem>
+            </Select>
+
             {/* Search */}
-            <Input type="text" placeholder="Søg efter email..." />
+            <Input
+              type="text"
+              placeholder="Søg efter email..."
+              value={search}
+              onValueChange={setSearch}
+            />
 
             {/* Create button */}
             <Button
@@ -155,7 +129,7 @@ export default function UsersTab() {
                     <Pagination
                       showControls
                       page={page}
-                      total={pages}
+                      total={totalPages}
                       onChange={setPage}
                       size="sm"
                     />
@@ -170,8 +144,8 @@ export default function UsersTab() {
                   <TableColumn align="end">STATUS</TableColumn>
                   <TableColumn align="end">{''}</TableColumn>
                 </TableHeader>
-                <TableBody>
-                  {paginatedUsers.map((user) => (
+                <TableBody isLoading={isLoading} loadingContent={<Spinner label="Indlæser..." />}>
+                  {allUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell className="text-right font-semibold">{user.balance}</TableCell>
@@ -179,7 +153,7 @@ export default function UsersTab() {
                         {user.totalDeposits}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {user.createdAt.toLocaleDateString('en-US', {
+                        {new Date(user.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
@@ -215,18 +189,12 @@ export default function UsersTab() {
                             <DropdownMenu>
                               {[
                                 !user.isAdmin ? (
-                                  <DropdownItem
-                                    key="make_admin"
-                                    onClick={() => handleMakeAdmin(user.id)}
-                                  >
-                                    Make Admin
-                                  </DropdownItem>
+                                  <DropdownItem key="make_admin">Make Admin</DropdownItem>
                                 ) : null,
 
                                 user.isActive ? (
                                   <DropdownItem
                                     key="deactivate"
-                                    onClick={() => handleDeactivate(user.id)}
                                     className="text-danger"
                                     color="danger"
                                   >

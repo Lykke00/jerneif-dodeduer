@@ -1,4 +1,4 @@
-import { AuthClient, DepositClient } from '../generated-ts-client';
+import { AuthClient, DepositClient, UserClient } from '../generated-ts-client';
 import { TOKEN_KEY } from '../atoms/auth';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -6,7 +6,9 @@ const prod = import.meta.env.PROD;
 
 const apiUrl = prod ? 'https://' + baseUrl : 'http://' + baseUrl;
 
-function createClient<T extends AuthClient | DepositClient>(Ctor: new (...args: any[]) => T): T {
+function createClient<T extends AuthClient | DepositClient | UserClient>(
+  Ctor: new (...args: any[]) => T
+): T {
   return new Ctor(apiUrl, {
     fetch: (url: RequestInfo, init?: RequestInit) => {
       const token = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null');
@@ -28,3 +30,4 @@ function createClient<T extends AuthClient | DepositClient>(Ctor: new (...args: 
 
 export const authClient = createClient(AuthClient);
 export const depositClient = createClient(DepositClient);
+export const userClient = createClient(UserClient);
