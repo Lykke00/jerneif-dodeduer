@@ -22,6 +22,7 @@ export default function Navigation() {
   const { user, logout } = useAuth();
   const { showModal } = useModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isAdminPage = pathname.startsWith('/admin');
 
   const links = [
     { label: 'Spil', href: PageRoutes.Game },
@@ -84,13 +85,11 @@ export default function Navigation() {
           ))}
 
           {user.isAdmin && (
-            <NavbarItem className="font-semibold" key="admin" isActive={pathname === '/admin'}>
+            <NavbarItem className="font-semibold" key="admin" isActive={isAdminPage}>
               <Link
                 to="/admin"
                 className={`transition-colors duration-200 ${
-                  pathname === '/admin'
-                    ? 'text-primary'
-                    : 'text-foreground-600 hover:text-foreground-800'
+                  isAdminPage ? 'text-primary' : 'text-foreground-600 hover:text-foreground-800'
                 }`}
               >
                 Admin

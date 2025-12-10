@@ -230,12 +230,12 @@ export default function UsersTab() {
                           )}
                           {!user.isActive && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100/30 dark:bg-red-900/10 text-red-800 dark:text-red-200">
-                              Inactive
+                              Inaktiv
                             </span>
                           )}
                           {user.isActive && !user.isAdmin && (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100/30 dark:bg-green-900/10 text-green-800 dark:text-green-200">
-                              Active
+                              Aktiv
                             </span>
                           )}
                         </div>
