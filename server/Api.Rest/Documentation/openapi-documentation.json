@@ -372,7 +372,7 @@
         ]
       }
     },
-    "/api/User": {
+    "/api/User/all": {
       "get": {
         "tags": [
           "User"

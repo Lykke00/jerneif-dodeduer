@@ -12,6 +12,7 @@ namespace Api.Rest.Controllers;
 [Authorize(Roles="admin")]
 public class UserController(IUserService userService) : ControllerBase
 {
+    [HttpGet("all")]
     public async Task<PagedResult<UserDtoExtended>> GetUsers([FromQuery] AllUserRequest request)
     {
         return await userService.GetUsersAsync(request);

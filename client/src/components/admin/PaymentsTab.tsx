@@ -11,7 +11,7 @@ import {
   Pagination,
 } from '@heroui/react';
 import type { Variants } from 'framer-motion';
-import { useDeposit, type DepositStatus } from '../../hooks';
+import { useDebounce, useDeposit, type DepositStatus } from '../../hooks';
 import type { GetDepositsResponse } from '../../generated-ts-client';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
@@ -53,6 +53,8 @@ const itemVariants: Variants = {
 
 export default function PaymentsTab() {
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 400);
+
   const [status, setStatus] = useState<DepositStatus>('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -77,7 +79,7 @@ export default function PaymentsTab() {
     return () => {
       isActive = false;
     };
-  }, [page, search, status]);
+  }, [page, debouncedSearch, status]);
 
   const updateStatus = async (id: string, status: DepositStatus) => {
     try {
@@ -144,7 +146,7 @@ export default function PaymentsTab() {
           <div className="relative">
             <AnimatePresence initial={false} mode="wait">
               <motion.div
-                key={`${page}-${status}-${search}`}
+                key={`${page}-${status}-${debouncedSearch}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"

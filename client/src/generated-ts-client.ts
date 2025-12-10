@@ -416,7 +416,7 @@ export class UserClient {
     }
 
     getUsers(search: string | null | undefined, active: boolean | null | undefined, page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfUserDtoExtended> {
-        let url_ = this.baseUrl + "/api/User?";
+        let url_ = this.baseUrl + "/api/User/all?";
         if (search !== undefined && search !== null)
             url_ += "Search=" + encodeURIComponent("" + search) + "&";
         if (active !== undefined && active !== null)
