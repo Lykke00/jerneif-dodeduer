@@ -23,11 +23,14 @@ import {
   Select,
   SelectItem,
   Spinner,
+  useDisclosure,
 } from '@heroui/react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { useDebounce, useUsers } from '../../hooks';
 import { useModal } from '../../contexts/ModalContext';
 import type { UserDtoExtended } from '../../generated-ts-client';
+import { UserCreateModal } from '../modal/UserCreateModal';
+import { errorToMessage } from '../../helpers/errorToMessage';
 
 interface User {
   id: string;
@@ -40,6 +43,8 @@ interface User {
 }
 
 export default function UsersTab() {
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+
   const [search, setSearch] = useState('');
   const [sortActive, setSortActive] = useState<boolean | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 400);
@@ -52,7 +57,7 @@ export default function UsersTab() {
   const pageSize = 10;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const { getAll, isLoading } = useUsers();
+  const { getAll, create, isLoading } = useUsers();
 
   useEffect(() => {
     let isActive = true;
@@ -68,6 +73,27 @@ export default function UsersTab() {
       isActive = false;
     };
   }, [page, debouncedSearch, sortActive]);
+
+  const createUser = async (email: string, isAdmin: boolean) => {
+    try {
+      const createdUser = await create(email, isAdmin);
+
+      setAllUsers((prev) => [createdUser, ...prev]);
+      setTotalCount((prev) => prev + 1);
+
+      showModal({
+        variant: 'success',
+        title: 'Bruger oprettet',
+        description: `Brugeren ${email} er oprettet.`,
+      });
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
@@ -108,11 +134,7 @@ export default function UsersTab() {
             />
 
             {/* Create button */}
-            <Button
-              color="primary"
-              onPress={() => console.log('Create user clicked')}
-              className="whitespace-nowrap"
-            >
+            <Button color="primary" onPress={() => onOpenChange()} className="whitespace-nowrap">
               Opret ny
             </Button>
           </div>
@@ -214,6 +236,8 @@ export default function UsersTab() {
           </AnimatePresence>
         </CardBody>
       </Card>
+
+      <UserCreateModal createUser={createUser} isOpen={isOpen} onOpenChange={onOpenChange} />
     </motion.div>
   );
 }

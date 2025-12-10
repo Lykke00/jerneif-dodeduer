@@ -17,4 +17,11 @@ public class UserController(IUserService userService) : ControllerBase
     {
         return await userService.GetUsersAsync(request);
     }
+    
+    [HttpPost("create")]
+    public async Task<Result<UserDtoExtended>> CreateUser([FromBody] CreateUserRequest request)
+    {
+        return await userService.CreateUserAsync(request);
+    }
+    
 }

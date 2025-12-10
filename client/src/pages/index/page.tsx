@@ -1,13 +1,4 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Form,
-  Input,
-  useDisclosure,
-} from '@heroui/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Form, Input } from '@heroui/react';
 import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { isValidEmail } from '../../helpers/isValidEmail';

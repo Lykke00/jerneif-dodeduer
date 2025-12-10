@@ -11,6 +11,7 @@ public interface IUserService
 {
     Task<Result<UserDto>> GetByIdAsync(Guid userId);
     Task<PagedResult<UserDtoExtended>> GetUsersAsync(AllUserRequest request);
+    Task<Result<UserDtoExtended>> CreateUserAsync(CreateUserRequest request);
 }
 
 public class UserService(IRepository<DbUser> userRepository) : IUserService
@@ -52,5 +53,23 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
             orderByDesc: x => x.CreatedAt,
             selector: u => UserDtoExtended.FromDatabase(u)
             );
+    }
+    
+    public async Task<Result<UserDtoExtended>> CreateUserAsync(CreateUserRequest request)
+    {
+        var email = request.Email;
+        var exists = await userRepository.Query().AnyAsync(u => u.Email.ToLower() == email.ToLower());
+        if (exists)
+            return Result<UserDtoExtended>.BadRequest("email", "A user with this email already exists.");
+        
+        var newUser = new DbUser
+        {
+            Email = request.Email,
+            Admin = request.Admin,
+            Active = true
+        };
+
+        await userRepository.Add(newUser);
+        return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(newUser));
     }
 }

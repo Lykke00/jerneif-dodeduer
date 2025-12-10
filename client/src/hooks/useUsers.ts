@@ -11,6 +11,7 @@ type useUsersTypes = {
     pageSize: number,
     active?: boolean
   ): Promise<PagedResultOfUserDtoExtended>;
+  create(email: string, admin: boolean): Promise<UserDtoExtended>;
   isLoading: boolean;
 };
 
@@ -48,8 +49,31 @@ export const useUsers = (): useUsersTypes => {
     }
   };
 
+  const create = async (email: string, admin: boolean): Promise<UserDtoExtended> => {
+    try {
+      const response = await withLoading(() =>
+        makeApiCall(() => userClient.createUser({ email, admin }))
+      );
+
+      var createdUser = response.value;
+      if (createdUser == null) {
+        throw new Error('Brugeren blev ikke oprettet');
+      }
+
+      return createdUser;
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
+
   return {
     getAll,
+    create,
     isLoading,
   };
 };
