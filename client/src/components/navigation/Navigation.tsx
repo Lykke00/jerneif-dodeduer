@@ -84,11 +84,11 @@ export default function Navigation() {
           ))}
 
           {user.isAdmin && (
-            <NavbarItem className="font-semibold" key="admin" isActive={pathname === 'admin'}>
+            <NavbarItem className="font-semibold" key="admin" isActive={pathname === '/admin'}>
               <Link
-                to="admin"
+                to="/admin"
                 className={`transition-colors duration-200 ${
-                  pathname === 'admin'
+                  pathname === '/admin'
                     ? 'text-primary'
                     : 'text-foreground-600 hover:text-foreground-800'
                 }`}

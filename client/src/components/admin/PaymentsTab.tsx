@@ -1,53 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardBody, CardHeader, Button } from '@heroui/react';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Pagination,
+} from '@heroui/react';
 import type { Variants } from 'framer-motion';
-
-interface Payment {
-  id: string;
-  amount: number;
-  userEmail: string;
-  createdAt: Date;
-  status: 'pending' | 'approved' | 'declined';
-  imageUrl?: string;
-}
-
-const STATUS_CONFIG = {
-  pending: {
-    bg: 'bg-yellow-100/15 dark:bg-yellow-900/10',
-    border: 'border-yellow-300/25 dark:border-yellow-700/50',
-    text: 'text-yellow-800 dark:text-yellow-200',
-    label: 'Afventer',
-    icon: '⏱',
-  },
-  approved: {
-    bg: 'bg-green-100/30 dark:bg-green-900/10',
-    border: 'border-green-300/50 dark:border-green-700/50',
-    text: 'text-green-800 dark:text-green-200',
-    label: 'Godkendt',
-    icon: '✓',
-  },
-  declined: {
-    bg: 'bg-red-100/30 dark:bg-red-900/10',
-    border: 'border-red-300/50 dark:border-red-700/50',
-    text: 'text-red-800 dark:text-red-200',
-    label: 'Afvist',
-    icon: '✕',
-  },
-};
-
-const StatusBadge = ({ status }: { status: 'pending' | 'approved' | 'declined' }) => {
-  const cfg = STATUS_CONFIG[status];
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cfg.bg} ${cfg.text}`}
-    >
-      <span>{cfg.icon}</span>
-      <span>{cfg.label}</span>
-    </span>
-  );
-};
+import { useDeposit, type DepositStatus } from '../../hooks';
+import type { GetDepositsResponse } from '../../generated-ts-client';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -55,61 +20,63 @@ const containerVariants: Variants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.05,
-      delayChildren: 0,
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      staggerChildren: 0.03,
+      staggerDirection: -1,
     },
   },
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, x: -20 },
   visible: {
     opacity: 1,
-    y: 0,
+    x: 0,
     transition: {
-      duration: 0.05,
-      ease: 'easeOut',
+      duration: 0.3,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: 20,
+    transition: {
+      duration: 0.2,
     },
   },
 };
 
 export default function PaymentsTab() {
-  const [payments, setPayments] = useState<Payment[]>([
-    {
-      id: 'PAY-001',
-      amount: 500,
-      userEmail: 'john@example.com',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      status: 'pending',
-      imageUrl: 'https://via.placeholder.com/200x200.png?text=Receipt+1',
-    },
-    {
-      id: 'PAY-002',
-      amount: 1000,
-      userEmail: 'jane@example.com',
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-      status: 'pending',
-      imageUrl: 'https://via.placeholder.com/200x200.png?text=Receipt+2',
-    },
-    {
-      id: 'PAY-003',
-      amount: 750,
-      userEmail: 'mike@example.com',
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      status: 'approved',
-      imageUrl: 'https://via.placeholder.com/200x200.png?text=Receipt+3',
-    },
-  ]);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState<DepositStatus>('');
+  const [page, setPage] = useState(1);
 
-  const handleApprove = (paymentId: string) => {
-    setPayments(payments.map((p) => (p.id === paymentId ? { ...p, status: 'approved' } : p)));
-  };
+  const [totalCount, setTotalCount] = useState(0);
 
-  const handleDecline = (paymentId: string) => {
-    setPayments(payments.map((p) => (p.id === paymentId ? { ...p, status: 'declined' } : p)));
-  };
+  const pageSize = 5;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
-  const pendingPayments = payments.filter((p) => p.status === 'pending');
-  const processedPayments = payments.filter((p) => p.status !== 'pending');
+  const [allDeposits, setAllDeposits] = useState<GetDepositsResponse[]>([]);
+
+  const { adminGetAll } = useDeposit();
+
+  useEffect(() => {
+    let isActive = true;
+
+    (async () => {
+      const res = await adminGetAll(search, status, page, pageSize);
+      if (!isActive) return;
+      setAllDeposits(res.items);
+      setTotalCount(res.totalCount);
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [page, search, status]);
 
   return (
     <motion.div
@@ -117,83 +84,147 @@ export default function PaymentsTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      {pendingPayments.length > 0 && (
+      {allDeposits.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Ingen betalinger endnu!</p>
+        </div>
+      ) : (
         <Card className="border border-yellow-300/30 shadow-lg bg-card/70 backdrop-blur-sm">
           <CardHeader className="border-b border-yellow-300/20">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full" />
               <div>
-                <div className="text-lg font-bold text-foreground">Afventende indbetalinger</div>
+                <div className="text-lg font-bold text-foreground">Indbetalinger</div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {pendingPayments.length} indbetalning{pendingPayments.length !== 1 ? 'er' : ''}{' '}
-                  afventer
+                  {allDeposits.length} indbetaling{allDeposits.length !== 1 ? 'er' : ''} ialt
                 </p>
               </div>
             </div>
           </CardHeader>
-          <CardBody className="p-4 md:p-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="space-y-3"
-              >
-                {pendingPayments.map((payment) => (
-                  <motion.div
-                    key={payment.id}
-                    variants={itemVariants}
-                    className="p-4 md:p-5 flex items-center justify-between gap-4 rounded-xl border border-primary/10 bg-primary/5 hover:bg-primary/10 transition-all"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="text-base md:text-lg font-semibold text-foreground">
-                          {payment.amount.toLocaleString('en-US', {
-                            style: 'currency',
-                            currency: 'DKK',
-                            minimumFractionDigits: 0,
-                          })}
-                        </div>
-                        <StatusBadge status={payment.status} />
-                      </div>
-                      <div className="text-sm text-muted-foreground">{payment.userEmail}</div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {payment.createdAt.toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </div>
 
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onPress={() => handleApprove(payment.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+          <CardBody className="p-4 md:p-6 space-y-4">
+            {/* FILTERS */}
+            <div className="flex flex-row justify-between gap-4 w-full">
+              <Input
+                className="max-w-2xs"
+                placeholder="Søg..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+              />
+
+              <Select
+                className="max-w-2/10"
+                selectedKeys={new Set([status])}
+                onSelectionChange={(keys) => {
+                  const value = Array.from(keys)[0] ?? '';
+                  setStatus(value as DepositStatus);
+                  setPage(1);
+                }}
+              >
+                <SelectItem key="">Alle</SelectItem>
+                <SelectItem key="pending">Afventer</SelectItem>
+                <SelectItem key="approved">Godkendt</SelectItem>
+                <SelectItem key="declined">Afvist</SelectItem>
+              </Select>
+            </div>
+
+            {/* LIST */}
+            <div className="relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={page}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="space-y-3"
+                >
+                  {allDeposits.map((payment) => {
+                    const status = payment.status.toLowerCase();
+                    const isPending = status === 'pending';
+                    const isApproved = status === 'approved';
+                    const isDeclined = status === 'declined';
+
+                    const bgClass = isPending
+                      ? 'bg-yellow-100/15 dark:bg-yellow-900/10'
+                      : isApproved
+                      ? 'bg-green-100/30 dark:bg-green-900/10'
+                      : 'bg-red-100/30 dark:bg-red-900/10';
+
+                    const borderClass = isPending
+                      ? 'border-yellow-300/25 dark:border-yellow-700/50'
+                      : isApproved
+                      ? 'border-green-300/50 dark:border-green-700/50'
+                      : 'border-red-300/50 dark:border-red-700/50';
+
+                    const statusIcon = isPending ? '⏱' : isApproved ? '✓' : '✕';
+                    const statusLabel = isPending ? 'Afventer' : isApproved ? 'Godkendt' : 'Afvist';
+                    const statusTextClass = isPending
+                      ? 'text-yellow-800 dark:text-yellow-200'
+                      : isApproved
+                      ? 'text-green-800 dark:text-green-200'
+                      : 'text-red-800 dark:text-red-200';
+
+                    return (
+                      <motion.div
+                        key={payment.id}
+                        variants={itemVariants}
+                        className={`p-4 md:p-5 relative rounded-xl border ${borderClass} ${bgClass} hover:brightness-95 dark:hover:brightness-125 transition-all`}
                       >
-                        Godkend
-                      </Button>
-                      <Button
-                        size="sm"
-                        onPress={() => handleDecline(payment.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-semibold"
-                      >
-                        Afvis
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                        {/* Status Badge - Top Right */}
+                        <div className="absolute top-3 right-3">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bgClass} ${statusTextClass}`}
+                          >
+                            <span>{statusIcon}</span>
+                            <span>{statusLabel}</span>
+                          </span>
+                        </div>
+
+                        {/* Content */}
+                        <div className="pr-24">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="text-base font-semibold">
+                              {payment.amount.toLocaleString('en-US', {
+                                style: 'currency',
+                                currency: 'DKK',
+                                minimumFractionDigits: 0,
+                              })}
+                            </div>
+                          </div>
+                          <div className="text-sm text-muted-foreground">{payment.user?.email}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {new Date(payment.createdAt).toLocaleTimeString('da-DK', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Buttons - Bottom Right */}
+                        {isPending && (
+                          <div className="flex gap-2 justify-end">
+                            <Button size="sm" className="bg-red-600 text-white font-semibold">
+                              Afvis
+                            </Button>
+                            <Button size="sm" className="bg-green-600 text-white font-semibold">
+                              Godkend
+                            </Button>
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* PAGINATION */}
+            <Pagination showControls page={page} total={totalPages} onChange={setPage} size="sm" />
           </CardBody>
         </Card>
-      )}
-
-      {payments.length === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-          <p className="text-muted-foreground">Ingen betalinger endnu!</p>
-        </motion.div>
       )}
     </motion.div>
   );

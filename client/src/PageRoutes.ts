@@ -8,4 +8,8 @@ export const PageRoutes = {
   Deposit: '/indbetal',
   Contact: '/kontakt',
   Admin: '/admin',
+  AdminUsers: '/admin/users',
+  AdminGame: '/admin/game/',
+  AdminGameHistory: '/admin/game/history',
+  AdminDeposits: '/admin/deposits',
 } as const;

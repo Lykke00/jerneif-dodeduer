@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BiMenu } from 'react-icons/bi';
@@ -7,31 +5,59 @@ import { BiMenu } from 'react-icons/bi';
 import GameTab from '../../components/admin/GameTab';
 import UsersTab from '../../components/admin/UsersTab';
 import PaymentsTab from '../../components/admin/PaymentsTab';
+import PaymentsHistoryTab from '../../components/admin/PaymentsHistory';
+import { useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { PageRoutes } from '../../PageRoutes';
 
 const GameHistoryTab = () => <div>Game History</div>;
 const PaymentsPending = () => <PaymentsTab />;
-const PaymentsHistory = () => <PaymentsHistory />;
+const PaymentsHistory = () => <PaymentsHistoryTab />;
 
-const menuItems = [
+type MenuButton = {
+  id: string;
+  label: string;
+  type: 'button';
+  route: string;
+};
+
+type MenuLabel = {
+  label: string;
+  type: 'label';
+  children: MenuButton[];
+};
+
+type MenuItem = MenuButton | MenuLabel;
+
+const menuItems: MenuItem[] = [
   {
     id: 'users',
     label: '🙍‍♂️ Brugere',
     type: 'button',
+    route: PageRoutes.AdminUsers,
+  },
+  {
+    id: 'deposits',
+    label: '💵 Indbetalinger',
+    type: 'button',
+    route: PageRoutes.AdminDeposits,
   },
   {
     label: '🕹 Spil',
     type: 'label',
     children: [
-      { id: 'game_current', label: 'Nuværende', type: 'button' },
-      { id: 'game_history', label: 'Historik', type: 'button' },
-    ],
-  },
-  {
-    label: '💵 Indbetalinger',
-    type: 'label',
-    children: [
-      { id: 'payments_pending', label: 'Afventede', type: 'button' },
-      { id: 'payments_history', label: 'Historik', type: 'button' },
+      {
+        id: 'game_current',
+        label: 'Nuværende',
+        type: 'button',
+        route: PageRoutes.AdminGame,
+      },
+      {
+        id: 'game_history',
+        label: 'Historik',
+        type: 'button',
+        route: PageRoutes.AdminGameHistory,
+      },
     ],
   },
 ];
@@ -39,6 +65,14 @@ const menuItems = [
 export default function AdminPage() {
   const [activeSection, setActiveSection] = useState<string>('users');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleTabChange = (item: MenuItem) => {
+    if (item.type !== 'button') return; // ignore labels
+
+    setActiveSection(item.id);
+    navigate(item.route);
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -77,7 +111,7 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold text-card-foreground">Admin</h2>
           </div>
 
-          <nav className="space-y-4">
+          <nav className="space-y-2">
             {menuItems.map((item) => {
               // Label + Children group
               if (item.type === 'label') {
@@ -92,7 +126,7 @@ export default function AdminPage() {
                       {item.children?.map((child) => (
                         <motion.button
                           key={child.id}
-                          onClick={() => setActiveSection(child.id)}
+                          onClick={() => handleTabChange(child)}
                           whileHover={{ x: 4 }}
                           whileTap={{ scale: 0.98 }}
                           animate={{ x: activeSection === child.id ? 4 : 0 }}
@@ -115,7 +149,7 @@ export default function AdminPage() {
               return (
                 <motion.button
                   key={item.id}
-                  onClick={() => item.id && setActiveSection(item.id)}
+                  onClick={() => handleTabChange(item)}
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   animate={{ x: activeSection === item.id ? 4 : 0 }}
@@ -140,7 +174,9 @@ export default function AdminPage() {
             transition={{ duration: 0.3 }}
             className="pt-2 pl-4 "
           >
-            <div className="max-w-6xl">{renderContent()}</div>
+            <div className="max-w-6xl">
+              <Outlet />
+            </div>
           </motion.div>
         </main>
       </div>
@@ -221,7 +257,7 @@ export default function AdminPage() {
             transition={{ duration: 0.3 }}
             className="p-4"
           >
-            {renderContent()}
+            <Outlet />
           </motion.div>
         </main>
       </div>

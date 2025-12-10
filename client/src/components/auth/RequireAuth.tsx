@@ -11,17 +11,19 @@ import {
 } from '../../helpers/authUtils';
 import { PageRoutes } from '../../PageRoutes';
 
-type RequireAuthProps = Omit<RouteProps, 'element'> & {
-  element: React.ReactElement;
+type RequireAuthProps = {
+  element?: React.ReactElement;
+  children?: React.ReactNode;
   accessLevel?: AccessLevelType;
 };
 
-export function RequireAuth({ element, accessLevel = AccessLevel.Protected }: RequireAuthProps) {
+export function RequireAuth({
+  element,
+  children,
+  accessLevel = AccessLevel.Protected,
+}: RequireAuthProps) {
   const { user, isInitializing } = useAuthContext();
 
-  console.log('[RequireAuth]', { user, isInitializing, accessLevel });
-
-  // vi MÅ IKKE redirecte før init er forsøgt
   if (isInitializing) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -42,5 +44,5 @@ export function RequireAuth({ element, accessLevel = AccessLevel.Protected }: Re
     return <Navigate to={PageRoutes.Forbidden} replace />;
   }
 
-  return element;
+  return <>{children ?? element}</>;
 }
