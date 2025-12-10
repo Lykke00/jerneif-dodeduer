@@ -497,7 +497,7 @@ export class UserClient {
         return Promise.resolve<ResultOfUserDtoExtended>(null as any);
     }
 
-    getUserById(userId: string, request: UpdateUserRequest): Promise<ResultOfUserDtoExtended> {
+    update(userId: string, request: UpdateUserRequest): Promise<ResultOfUserDtoExtended> {
         let url_ = this.baseUrl + "/api/User/{userId}/update";
         if (userId === undefined || userId === null)
             throw new globalThis.Error("The parameter 'userId' must be defined.");
@@ -516,11 +516,11 @@ export class UserClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processGetUserById(_response);
+            return this.processUpdate(_response);
         });
     }
 
-    protected processGetUserById(response: Response): Promise<ResultOfUserDtoExtended> {
+    protected processUpdate(response: Response): Promise<ResultOfUserDtoExtended> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {

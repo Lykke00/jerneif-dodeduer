@@ -481,7 +481,7 @@
         "tags": [
           "User"
         ],
-        "operationId": "User_GetUserById",
+        "operationId": "User_Update",
         "parameters": [
           {
             "name": "userId",

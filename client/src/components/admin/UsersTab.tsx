@@ -57,7 +57,7 @@ export default function UsersTab() {
   const pageSize = 10;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const { getAll, create, isLoading } = useUsers();
+  const { getAll, update, create, isLoading } = useUsers();
 
   useEffect(() => {
     let isActive = true;
@@ -85,6 +85,46 @@ export default function UsersTab() {
         variant: 'success',
         title: 'Bruger oprettet',
         description: `Brugeren ${email} er oprettet.`,
+      });
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
+
+  const updateUserRole = async (id: string, admin: boolean) => {
+    try {
+      const updatedUser = await update(id, undefined, admin);
+
+      setAllUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+
+      showModal({
+        variant: 'success',
+        title: 'Bruger oprettet',
+        description: `Brugeren blev gjort ${admin ? 'administrator' : 'bruger'}.`,
+      });
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
+
+  const updateActive = async (id: string, active: boolean) => {
+    try {
+      const updatedUser = await update(id, active, undefined);
+
+      setAllUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+
+      showModal({
+        variant: 'success',
+        title: 'Bruger oprettet',
+        description: `Brugeren blev ${active ? 'aktiveret' : 'deaktiveret'}.`,
       });
     } catch (e) {
       showModal({
@@ -211,18 +251,40 @@ export default function UsersTab() {
                             <DropdownMenu>
                               {[
                                 !user.isAdmin ? (
-                                  <DropdownItem key="make_admin">Make Admin</DropdownItem>
-                                ) : null,
+                                  <DropdownItem
+                                    onPress={() => updateUserRole(user.id, true)}
+                                    key="make_admin"
+                                  >
+                                    Gør administrator
+                                  </DropdownItem>
+                                ) : (
+                                  <DropdownItem
+                                    onPress={() => updateUserRole(user.id, false)}
+                                    key="make_user"
+                                  >
+                                    Degrader til bruger
+                                  </DropdownItem>
+                                ),
 
                                 user.isActive ? (
                                   <DropdownItem
+                                    onPress={() => updateActive(user.id, false)}
                                     key="deactivate"
                                     className="text-danger"
                                     color="danger"
                                   >
-                                    Deactivate
+                                    Deaktiver
                                   </DropdownItem>
-                                ) : null,
+                                ) : (
+                                  <DropdownItem
+                                    onPress={() => updateActive(user.id, true)}
+                                    key="deactivate"
+                                    className="text-green-900"
+                                    color="success"
+                                  >
+                                    Aktiver
+                                  </DropdownItem>
+                                ),
                               ]}
                             </DropdownMenu>
                           </Dropdown>

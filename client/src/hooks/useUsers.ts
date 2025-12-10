@@ -3,6 +3,7 @@ import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { userClient } from '../api/APIClients';
 import { useAuthContext } from '../contexts/AuthContext';
+import { act } from 'react';
 
 type useUsersTypes = {
   getAll(
@@ -12,6 +13,7 @@ type useUsersTypes = {
     active?: boolean
   ): Promise<PagedResultOfUserDtoExtended>;
   create(email: string, admin: boolean): Promise<UserDtoExtended>;
+  update(id: string, active?: boolean, admin?: boolean): Promise<UserDtoExtended>;
   isLoading: boolean;
 };
 
@@ -71,9 +73,36 @@ export const useUsers = (): useUsersTypes => {
     }
   };
 
+  const update = async (
+    id: string,
+    active?: boolean,
+    admin?: boolean
+  ): Promise<UserDtoExtended> => {
+    try {
+      const response = await withLoading(() =>
+        makeApiCall(() => userClient.update(id, { active: active, admin: admin }))
+      );
+
+      var updatedUser = response.value;
+      if (updatedUser == null) {
+        throw new Error('Brugeren blev ikke opdateret');
+      }
+
+      return updatedUser;
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
+
   return {
     getAll,
     create,
+    update,
     isLoading,
   };
 };
