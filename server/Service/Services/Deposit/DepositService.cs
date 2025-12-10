@@ -130,6 +130,7 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
     public async Task<Result<GetDepositsResponse>> UpdateDepositStatusAsync(Guid depositId, UpdateDepositStatusRequest request)
     {
         var deposit = await depositRepository.Query()
+            .Include(d => d.User)
             .FirstOrDefaultAsync(d => d.Id == depositId);
         
         if (deposit == null)
@@ -151,7 +152,8 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
             PaymentPictureUrl = deposit.PaymentPicture == null ? null : $"{options.Value.BackendUrl}/uploads/{deposit.PaymentPicture}",
             Status = deposit.Status,
             CreatedAt = deposit.CreatedAt,
-            ApprovedAt = deposit.ApprovedAt
+            ApprovedAt = deposit.ApprovedAt,
+            User = UserDto.FromDatabase(deposit.User)
         });
     }
 }

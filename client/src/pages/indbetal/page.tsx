@@ -47,13 +47,16 @@ export default function DepositPage() {
 
   const [data, setData] = useState<GetDepositsResponse[]>([]);
   const [total, setTotal] = useState(0);
+  const [tab, setTab] = useState<'form' | 'history'>('form');
 
   useEffect(() => {
+    if (tab !== 'history') return;
+
     getAll(page, pageSize).then((res) => {
       setData(res.items);
       setTotal(res.totalCount);
     });
-  }, [page]);
+  }, [page, tab]);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>, d: Deposit) => {
     e.preventDefault();
@@ -83,6 +86,9 @@ export default function DepositPage() {
       >
         <Tabs
           aria-label="Deposit options"
+          onSelectionChange={(key) => {
+            setTab(key as 'form' | 'history');
+          }}
           classNames={{
             tabList: 'w-full bg-secondary/30 rounded-lg p-1',
             tab: 'w-full text-base font-semibold py-4 px-4 min-w-[200px] sm:min-w-[275px] md:min-w-[325px]',

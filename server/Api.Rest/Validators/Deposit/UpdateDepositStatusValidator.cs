@@ -10,7 +10,7 @@ public class UpdateDepositStatusRequestValidator : AbstractValidator<UpdateDepos
         RuleFor(x => x.Status)
             .NotEmpty()
             .WithMessage("Status must be provided.")
-            .Must(status => status == "pending" || status == "approved" || status == "rejected")
-            .WithMessage("Status must be one of the following values: Pending, Approved, Rejected.");
+            .Must(status => status == "pending" || status == "approved" || status == "declined")
+            .WithMessage("Status must be one of the following values: Pending, Approved, Declined.");
     }
 }

@@ -13,6 +13,8 @@ import {
 import type { Variants } from 'framer-motion';
 import { useDeposit, type DepositStatus } from '../../hooks';
 import type { GetDepositsResponse } from '../../generated-ts-client';
+import { useModal } from '../../contexts/ModalContext';
+import { errorToMessage } from '../../helpers/errorToMessage';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -53,15 +55,14 @@ export default function PaymentsTab() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<DepositStatus>('');
   const [page, setPage] = useState(1);
-
   const [totalCount, setTotalCount] = useState(0);
+  const [allDeposits, setAllDeposits] = useState<GetDepositsResponse[]>([]);
+  const { showModal } = useModal();
 
   const pageSize = 5;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const [allDeposits, setAllDeposits] = useState<GetDepositsResponse[]>([]);
-
-  const { adminGetAll } = useDeposit();
+  const { adminGetAll, adminUpdateStatus } = useDeposit();
 
   useEffect(() => {
     let isActive = true;
@@ -77,6 +78,20 @@ export default function PaymentsTab() {
       isActive = false;
     };
   }, [page, search, status]);
+
+  const updateStatus = async (id: string, status: DepositStatus) => {
+    try {
+      var updated = await adminUpdateStatus(id, status);
+
+      setAllDeposits((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
 
   return (
     <motion.div
@@ -127,7 +142,7 @@ export default function PaymentsTab() {
 
           {/* LIST */}
           <div className="relative">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false} mode="wait">
               <motion.div
                 key={`${page}-${status}-${search}`}
                 variants={containerVariants}
@@ -201,10 +216,30 @@ export default function PaymentsTab() {
                       {/* Buttons - Bottom Right */}
                       {isPending && (
                         <div className="flex gap-2 justify-end">
-                          <Button size="sm" className="bg-red-600 text-white font-semibold">
+                          <Button
+                            onPress={() => updateStatus(payment.id, 'declined')}
+                            size="sm"
+                            className="bg-red-600 text-white font-semibold"
+                          >
                             Afvis
                           </Button>
-                          <Button size="sm" className="bg-green-600 text-white font-semibold">
+                          <Button
+                            onPress={() => updateStatus(payment.id, 'approved')}
+                            size="sm"
+                            className="bg-green-600 text-white font-semibold"
+                          >
+                            Godkend
+                          </Button>
+                        </div>
+                      )}
+
+                      {payment.status == 'declined' && (
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            onPress={() => updateStatus(payment.id, 'approved')}
+                            size="sm"
+                            className="bg-green-600 text-white font-semibold"
+                          >
                             Godkend
                           </Button>
                         </div>

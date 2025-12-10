@@ -1,5 +1,6 @@
 import {
   type DepositResponse,
+  type GetDepositsResponse,
   type PagedResultOfGetDepositsResponse,
 } from '../generated-ts-client';
 import { extractApiErrors } from '../api/extractApiErrors';
@@ -20,7 +21,7 @@ type useDepositTypes = {
     page: number,
     pageSize: number
   ): Promise<PagedResultOfGetDepositsResponse>;
-
+  adminUpdateStatus(depositId: string, status: DepositStatus): Promise<GetDepositsResponse>;
   isLoading: boolean;
 };
 
@@ -108,9 +109,34 @@ export const useDeposit = (): useDepositTypes => {
         throw new Error('Ingen indbetalninger fundet');
       }
 
-      setAllDeposits(allDeposits);
-
       return allDeposits;
+      // hvis en fejl sker, så extract fejlene og kast en error så vores
+      // visningsside kan håndtere den korrekt med try catch.
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
+
+  const adminUpdateStatus = async (
+    depositId: string,
+    status: DepositStatus
+  ): Promise<GetDepositsResponse> => {
+    try {
+      const response = await withLoading(() =>
+        makeApiCall(() => depositClient.updateDepositStatus(depositId, { status }))
+      );
+
+      var updatedDeposit = response.value;
+      if (updatedDeposit == null) {
+        throw new Error('Indbetalning blev ikke opdateret');
+      }
+
+      return updatedDeposit;
       // hvis en fejl sker, så extract fejlene og kast en error så vores
       // visningsside kan håndtere den korrekt med try catch.
     } catch (e) {
@@ -127,6 +153,7 @@ export const useDeposit = (): useDepositTypes => {
     deposit,
     getAll,
     adminGetAll,
+    adminUpdateStatus,
     isLoading,
   };
 };
