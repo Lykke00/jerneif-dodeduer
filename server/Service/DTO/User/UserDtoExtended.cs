@@ -1,4 +1,6 @@
-﻿namespace Service.DTO.User;
+﻿using DataAccess.Models;
+
+namespace Service.DTO.User;
 
 public class UserDtoExtended : UserDto
 {
@@ -10,6 +12,11 @@ public class UserDtoExtended : UserDto
     
     public static UserDtoExtended FromDatabase(DataAccess.Models.User u)
     {
+        var approvedDepositCount = u.UsersBalances
+            .Count(b => b.BalanceEnum == UsersBalance.BalanceType.Deposit);
+
+        var balance = u.UsersBalances.Sum(b => b.Amount);
+
         return new UserDtoExtended
         {
             Id = u.Id,
@@ -21,12 +28,8 @@ public class UserDtoExtended : UserDto
             IsActive = u.Active,
             CreatedAt = u.CreatedAt,
 
-            Balance = u.DepositUsers
-                .Where(d => d.StatusEnum == DataAccess.Models.Deposit.DepositStatus.Approved)
-                .Sum(d => d.Amount),
-
-            TotalDeposits = u.DepositUsers
-                .Count(d => d.StatusEnum == DataAccess.Models.Deposit.DepositStatus.Approved)
+            Balance = balance,
+            TotalDeposits = approvedDepositCount
         };
     }
 

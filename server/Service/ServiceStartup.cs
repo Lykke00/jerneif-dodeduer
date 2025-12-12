@@ -36,6 +36,7 @@ public static class ServiceStartupClass
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IDepositService, DepositService>();
         services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IUserBalanceService, UserBalanceService>();
         
         return services;
     }

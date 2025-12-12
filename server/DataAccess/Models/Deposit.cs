@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("deposits")]
+[Index("ApprovedBy", Name = "idx_deposits_approved_by")]
+[Index("Status", Name = "idx_deposits_status")]
+[Index("Status", "CreatedAt", Name = "idx_deposits_status_created_at")]
+[Index("UserId", Name = "idx_deposits_user_id")]
 public partial class Deposit
 {
     [Key]
@@ -47,4 +51,7 @@ public partial class Deposit
     [ForeignKey("UserId")]
     [InverseProperty("DepositUsers")]
     public virtual User User { get; set; } = null!;
+
+    [InverseProperty("Deposit")]
+    public virtual UsersBalance? UsersBalance { get; set; }
 }

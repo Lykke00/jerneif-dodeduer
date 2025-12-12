@@ -1,4 +1,6 @@
-﻿using DataAccess.DTO;
+﻿using DataAccess;
+using DataAccess.DTO;
+using DataAccess.Querying;
 using DataAccess.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -7,6 +9,7 @@ using Service.DTO.Deposit;
 using Service.DTO.User;
 using Service.Options;
 using Service.Services.Files;
+using Service.Services.User;
 using DbDeposit = DataAccess.Models.Deposit;
 namespace Service.Services.Deposit;
 
@@ -18,7 +21,7 @@ public interface IDepositService
     Task<Result<GetDepositsResponse>> UpdateDepositStatusAsync(Guid depositId, UpdateDepositStatusRequest request);
 }
 
-public class DepositService(IRepository<DbDeposit> depositRepository, IFileService fileService, IOptions<AppOptions> options) : IDepositService
+public class DepositService(AppDbContext context, IUserBalanceService userBalanceService, IFileService fileService, IOptions<AppOptions> options) : IDepositService
 {
     public async Task<Result<DepositResponse>> DepositAsync(Guid userId, DepositRequest request)
     {
@@ -43,7 +46,8 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
             CreatedAt = DateTime.UtcNow
         };
 
-        await depositRepository.Add(deposit);
+        await context.Deposits.AddAsync(deposit);
+        await context.SaveChangesAsync();
         
         return Result<DepositResponse>.Ok(new DepositResponse
         {
@@ -60,55 +64,59 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
         Guid userId,
         PaginationRequest paginationRequest)
     {
-        var query = depositRepository.Query()
-            .Where(d => d.UserId == userId);
-
-        var result = await depositRepository.GetPagedAsync(
-            query,
-            paginationRequest.Page,
-            paginationRequest.PageSize,
-            d => d.CreatedAt,
-            d => new GetDepositsResponse
-            {
-                Id = d.Id,
-                Amount = d.Amount,
-                PaymentId = d.PaymentId,
-                PaymentPictureUrl = d.PaymentPicture == null ? null : $"{options.Value.BackendUrl}/uploads/{d.PaymentPicture}",
-                Status = d.Status,
-                CreatedAt = d.CreatedAt,
-                ApprovedAt = d.ApprovedAt
-            });
+        var result = await context.Deposits
+            .Where(d => d.UserId == userId)
+            .ToPagedAsync(
+                paginationRequest.Page,
+                paginationRequest.PageSize,
+                d => d.CreatedAt,
+                d => new GetDepositsResponse
+                {
+                    Id = d.Id,
+                    Amount = d.Amount,
+                    PaymentId = d.PaymentId,
+                    PaymentPictureUrl = d.PaymentPicture == null
+                        ? null
+                        : $"{options.Value.BackendUrl}/uploads/{d.PaymentPicture}",
+                    Status = d.Status,
+                    CreatedAt = d.CreatedAt,
+                    ApprovedAt = d.ApprovedAt
+                });
 
         return Result<PagedResult<GetDepositsResponse>>.Ok(result);
     }
     
-    public async Task<Result<PagedResult<GetDepositsResponse>>> GetAllDepositsAsync(AllDepositRequest request)
+    public async Task<Result<PagedResult<GetDepositsResponse>>> GetAllDepositsAsync(
+        AllDepositRequest request)
     {
-        IQueryable<DbDeposit> query = depositRepository.Query().Include(d => d.User);
-        
+        IQueryable<DbDeposit> query = context.Deposits
+            .AsNoTracking()
+            .Include(d => d.User);
+
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim();
 
             query = query.Where(d =>
                 (d.PaymentId != null && d.PaymentId.Contains(search)) ||
-                (d.User!.Email.Contains(search)) ||
-                (d.User!.Id.ToString().Contains(search))
+                d.User!.Email.Contains(search) ||
+                d.User!.Id.ToString().Contains(search)
             );
         }
-        
+
         if (!string.IsNullOrWhiteSpace(request.Status))
         {
-            if (Enum.TryParse<DbDeposit.DepositStatus>(request.Status, true, out var status))
-                query = query.Where(d => d.Status.ToLower() == request.Status);
-            else
+            if (!Enum.TryParse<DbDeposit.DepositStatus>(
+                    request.Status, true, out var status))
             {
-                return Result<PagedResult<GetDepositsResponse>>.BadRequest("status", "Invalid status filter.");
+                return Result<PagedResult<GetDepositsResponse>>
+                    .BadRequest("status", "Invalid status filter.");
             }
+
+            query = query.Where(d => d.StatusEnum == status);
         }
 
-        var result = await depositRepository.GetPagedAsync(
-            query,
+        var result = await query.ToPagedAsync(
             request.Page,
             request.PageSize,
             d => d.CreatedAt,
@@ -117,11 +125,13 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
                 Id = d.Id,
                 Amount = d.Amount,
                 PaymentId = d.PaymentId,
-                PaymentPictureUrl = d.PaymentPicture == null ? null : $"{options.Value.BackendUrl}/uploads/{d.PaymentPicture}",
+                PaymentPictureUrl = d.PaymentPicture == null
+                    ? null
+                    : $"{options.Value.BackendUrl}/uploads/{d.PaymentPicture}",
                 Status = d.Status,
                 CreatedAt = d.CreatedAt,
                 ApprovedAt = d.ApprovedAt,
-                User = UserDto.FromDatabase(d.User)
+                User = UserDto.FromDatabase(d.User!)
             });
 
         return Result<PagedResult<GetDepositsResponse>>.Ok(result);
@@ -129,7 +139,7 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
     
     public async Task<Result<GetDepositsResponse>> UpdateDepositStatusAsync(Guid depositId, UpdateDepositStatusRequest request)
     {
-        var deposit = await depositRepository.Query()
+        var deposit = await context.Deposits
             .Include(d => d.User)
             .FirstOrDefaultAsync(d => d.Id == depositId);
         
@@ -141,8 +151,17 @@ public class DepositService(IRepository<DbDeposit> depositRepository, IFileServi
 
         deposit.StatusEnum = status;
         if (status == DbDeposit.DepositStatus.Approved)
+        {
             deposit.ApprovedAt = DateTime.UtcNow;
-        await depositRepository.Update(deposit);
+
+            await userBalanceService.AddDepositAsync(
+                deposit.UserId,
+                deposit.Id,
+                deposit.Amount);
+        }
+
+        context.Deposits.Update(deposit);
+        await context.SaveChangesAsync();
         
         return Result<GetDepositsResponse>.Ok(new GetDepositsResponse
         {

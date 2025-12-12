@@ -68,4 +68,20 @@ public abstract class BaseRepository<T>(AppDbContext context) : IRepository<T>
         };
     }
 
+    public async Task ExecuteInTransactionAsync(Func<Task> action)
+    {
+        await using var transaction = await Context.Database.BeginTransactionAsync();
+
+        try
+        {
+            await action();
+            await Context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 }

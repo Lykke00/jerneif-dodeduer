@@ -15,12 +15,13 @@ public interface IUserService
     Task<Result<UserDtoExtended>> UpdateUserAsync(Guid userId, UpdateUserRequest request);
 }
 
-public class UserService(IRepository<DbUser> userRepository) : IUserService
+public class UserService(IRepository<DbUser> userRepository, IUserBalanceService userBalanceService) : IUserService
 {
     public async Task<Result<UserDto>> GetByIdAsync(Guid userId)
     {
         var user = await userRepository.Query()
-            .Include(u => u.DepositUsers)
+            .Include(d => d.DepositUsers)
+            .Include(d => d.UsersBalances)
             .FirstOrDefaultAsync(u => u.Id == userId);
         
         if (user == null)
@@ -32,7 +33,9 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
     
     public async Task<PagedResult<UserDtoExtended>> GetUsersAsync(AllUserRequest request)
     {
-        IQueryable<DbUser> query = userRepository.Query().Include(d => d.DepositUsers);
+        IQueryable<DbUser> query = userRepository.Query()
+            .Include(d => d.DepositUsers)
+            .Include(d => d.UsersBalances);
         
         if (!string.IsNullOrWhiteSpace(request.Search))
         {

@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("users")]
+[Index("Active", Name = "idx_users_active")]
+[Index("Email", Name = "idx_users_email", IsUnique = true)]
 public partial class User
 {
     [Key]
@@ -46,4 +48,7 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<UserLoginToken> UserLoginTokens { get; set; } = new List<UserLoginToken>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<UsersBalance> UsersBalances { get; set; } = new List<UsersBalance>();
 }

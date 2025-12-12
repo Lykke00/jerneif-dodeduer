@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("user_login_tokens")]
+[Index("ExpiresAt", Name = "idx_user_login_tokens_expires_at")]
+[Index("TokenHash", Name = "idx_user_login_tokens_token_hash", IsUnique = true)]
+[Index("UserId", Name = "idx_user_login_tokens_user_id")]
 public partial class UserLoginToken
 {
     [Key]

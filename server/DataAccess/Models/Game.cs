@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("games")]
+[Index("Active", Name = "idx_games_active")]
+[Index("Week", "Year", Name = "idx_games_week_year", IsUnique = true)]
 public partial class Game
 {
     [Key]
@@ -24,4 +26,7 @@ public partial class Game
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [InverseProperty("Game")]
+    public virtual ICollection<UsersBalance> UsersBalances { get; set; } = new List<UsersBalance>();
 }
