@@ -372,6 +372,57 @@
         ]
       }
     },
+    "/api/Game/current": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetCurrentGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfGameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Game/by-id": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetGameById",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfGameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/User/all": {
       "get": {
         "tags": [
@@ -945,6 +996,74 @@
         "properties": {
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "ResultOfGameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GameDto"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "GameDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "week",
+          "year",
+          "isActive",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "week": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

@@ -9,6 +9,7 @@ using Service.Services.Auth;
 using Service.Services.Deposit;
 using Service.Services.Email;
 using Service.Services.Files;
+using Service.Services.Game;
 using Service.Services.User;
 
 namespace Service;
@@ -37,6 +38,7 @@ public static class ServiceStartupClass
         services.AddScoped<IDepositService, DepositService>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IUserBalanceService, UserBalanceService>();
+        services.AddScoped<IGameService, GameService>();
         
         return services;
     }

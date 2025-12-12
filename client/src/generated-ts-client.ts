@@ -405,6 +405,87 @@ export class DepositClient {
     }
 }
 
+export class GameClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getCurrentGame(): Promise<ResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Game/current";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetCurrentGame(_response);
+        });
+    }
+
+    protected processGetCurrentGame(response: Response): Promise<ResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfGameDto>(null as any);
+    }
+
+    getGameById(gameId: string | undefined): Promise<ResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Game/by-id?";
+        if (gameId === null)
+            throw new globalThis.Error("The parameter 'gameId' cannot be null.");
+        else if (gameId !== undefined)
+            url_ += "gameId=" + encodeURIComponent("" + gameId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetGameById(_response);
+        });
+    }
+
+    protected processGetGameById(response: Response): Promise<ResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfGameDto>(null as any);
+    }
+}
+
 export class UserClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -632,6 +713,21 @@ export interface ResultOfGetDepositsResponse {
 
 export interface UpdateDepositStatusRequest {
     status: string;
+}
+
+export interface ResultOfGameDto {
+    success: boolean;
+    value: GameDto | undefined;
+    statusCode: number;
+    errors: { [key: string]: string[]; };
+}
+
+export interface GameDto {
+    id: string;
+    week: number;
+    year: number;
+    isActive: boolean;
+    createdAt: string;
 }
 
 export interface PagedResultOfUserDtoExtended {
