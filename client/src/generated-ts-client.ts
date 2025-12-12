@@ -567,6 +567,7 @@ export interface UserDto {
     isAdmin: boolean;
     isActive: boolean;
     createdAt: string;
+    balance: number;
 }
 
 export interface LoginVerifyRequest {
@@ -641,7 +642,6 @@ export interface PagedResultOfUserDtoExtended {
 }
 
 export interface UserDtoExtended extends UserDto {
-    balance?: number;
     totalDeposits?: number;
 }
 

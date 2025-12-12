@@ -2,7 +2,6 @@
 
 public class UserDtoExtended : UserDto
 {
-    public decimal Balance { get; set; }
     public int TotalDeposits { get; set; }
     
     public static UserDtoExtended FromDatabase(DataAccess.Models.User u)

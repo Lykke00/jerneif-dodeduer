@@ -633,7 +633,8 @@
           "email",
           "isAdmin",
           "isActive",
-          "createdAt"
+          "createdAt",
+          "balance"
         ],
         "properties": {
           "id": {
@@ -652,6 +653,10 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "balance": {
+            "type": "number",
+            "format": "decimal"
           }
         }
       },
@@ -982,10 +987,6 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "balance": {
-                "type": "number",
-                "format": "decimal"
-              },
               "totalDeposits": {
                 "type": "integer",
                 "format": "int32"

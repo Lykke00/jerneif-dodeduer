@@ -9,6 +9,7 @@ import {
   NavbarMenuItem,
   Divider,
   useNavbar,
+  Chip,
 } from '@heroui/react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks';
@@ -63,6 +64,11 @@ export default function Navigation() {
 
       {/* Burger toggle only on mobile */}
       <NavbarContent className="sm:hidden" justify="end">
+        {user && (
+          <NavbarMenuItem>
+            <Chip className="border text-white bg-primary border-primary/50">{user.balance},-</Chip>
+          </NavbarMenuItem>
+        )}
         <NavbarMenuToggle aria-label={isMenuOpen ? 'Close menu' : 'Open menu'} />
       </NavbarContent>
 
@@ -108,9 +114,17 @@ export default function Navigation() {
       {/* Right: Login/Logout */}
       <NavbarContent justify="end" className="hidden sm:flex">
         {user ? (
-          <Button onPress={logUserOut} variant="light">
-            Log ud
-          </Button>
+          <>
+            <NavbarMenuItem>
+              <Chip className="border text-white bg-primary border-primary/50">
+                {user.balance},-
+              </Chip>
+            </NavbarMenuItem>
+
+            <Button onPress={logUserOut} variant="light">
+              Log ud
+            </Button>
+          </>
         ) : (
           <Link to="/">Login</Link>
         )}

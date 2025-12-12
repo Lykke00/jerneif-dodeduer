@@ -2,7 +2,7 @@ export const PageRoutes = {
   NotFound: '*',
   Forbidden: '/forbidden',
   Home: '/',
-  Login: '/login',
+  Login: '/',
   Verify: '/auth/verify',
   Game: '/spil',
   Deposit: '/indbetal',

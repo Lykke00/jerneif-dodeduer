@@ -107,7 +107,11 @@ export const useAuth = (): useAuthTypes => {
       const response = await withLoading(() => makeApiCall(() => authClient.me()));
       const u = response.value;
       if (!u) throw new Error('Ingen user fra me()');
+
+      if (u.isAdmin != user?.isAdmin) refresh();
+
       setUser(u);
+
       return u;
     } catch (e) {
       const apiError = extractApiErrors(e);

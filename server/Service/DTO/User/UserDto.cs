@@ -6,7 +6,9 @@ public class UserDto
     public string Email { get; set; } = null!;
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; }
+    
     public DateTime CreatedAt { get; set; }
+    public decimal Balance { get; set; }
     
     public static UserDto FromDatabase(DataAccess.Models.User user)
     {
@@ -16,7 +18,10 @@ public class UserDto
             Email = user.Email,
             IsAdmin = user.Admin,
             IsActive = user.Active,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            Balance = user.DepositUsers
+                .Where(d => d.StatusEnum == DataAccess.Models.Deposit.DepositStatus.Approved)
+                .Sum(d => d.Amount),
         };
     }
 }

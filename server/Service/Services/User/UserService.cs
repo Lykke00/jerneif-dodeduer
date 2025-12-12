@@ -19,7 +19,10 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
 {
     public async Task<Result<UserDto>> GetByIdAsync(Guid userId)
     {
-        var user = await userRepository.FindAsync(userId);
+        var user = await userRepository.Query()
+            .Include(u => u.DepositUsers)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        
         if (user == null)
             return Result<UserDto>.NotFound("User not found.");
 
