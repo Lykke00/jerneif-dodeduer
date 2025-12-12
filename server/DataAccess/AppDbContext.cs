@@ -101,6 +101,10 @@ public partial class AppDbContext : DbContext
                 .IsUnique()
                 .HasFilter("(deposit_id IS NOT NULL)");
 
+            entity.HasIndex(e => e.PlayId, "idx_users_balance_play_id")
+                .IsUnique()
+                .HasFilter("(play_id IS NOT NULL)");
+
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.Type).HasDefaultValueSql("'deposit'::text");
@@ -109,9 +113,9 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("users_balance_deposit_id_fkey");
 
-            entity.HasOne(d => d.Game).WithMany(p => p.UsersBalances)
+            entity.HasOne(d => d.Play).WithOne(p => p.UsersBalance)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("users_balance_game_id_fkey");
+                .HasConstraintName("users_balance_play_id_fkey");
 
             entity.HasOne(d => d.User).WithMany(p => p.UsersBalances).HasConstraintName("users_balance_user_id_fkey");
         });

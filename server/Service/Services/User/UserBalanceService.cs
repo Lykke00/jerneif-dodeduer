@@ -15,7 +15,7 @@ public interface IUserBalanceService
     
     Task AddPlayAsync(
         Guid userId,
-        Guid gameId,
+        Guid playId,
         decimal amount);
 
 }
@@ -49,14 +49,14 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
     
     public async Task AddPlayAsync(
         Guid userId,
-        Guid gameId,
+        Guid playId,
         decimal amount)
     {
         var userBalance = new UsersBalance
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            GameId = gameId,
+            PlayId = playId,
             BalanceEnum = UsersBalance.BalanceType.Play,
             Amount = -amount,
             CreatedAt = DateTime.UtcNow

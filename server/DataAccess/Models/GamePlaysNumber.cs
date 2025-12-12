@@ -16,7 +16,7 @@ public partial class GamePlaysNumber
 
     [Key]
     [Column("number")]
-    public short Number { get; set; }
+    public int Number { get; set; }
 
     [ForeignKey("PlayId")]
     [InverseProperty("GamePlaysNumbers")]

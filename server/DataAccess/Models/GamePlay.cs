@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("game_plays")]
+[Index("GameId", "UserId", Name = "idx_game_plays_game_user")]
 public partial class GamePlay
 {
     [Key]
@@ -32,4 +33,7 @@ public partial class GamePlay
     [ForeignKey("UserId")]
     [InverseProperty("GamePlays")]
     public virtual User User { get; set; } = null!;
+
+    [InverseProperty("Play")]
+    public virtual UsersBalance? UsersBalance { get; set; }
 }

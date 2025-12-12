@@ -38,7 +38,7 @@ CREATE TABLE users_balance
     "amount"     NUMERIC(12, 2) NOT NULL,
     "type"       TEXT           NOT NULL DEFAULT 'deposit',
     "deposit_id" UUID           REFERENCES deposits (id) ON DELETE CASCADE,
-    "game_id"    UUID           REFERENCES games (id) ON DELETE CASCADE,
+    "play_id"    UUID           REFERENCES game_plays (id) ON DELETE CASCADE,
     "created_at" TIMESTAMPTZ    DEFAULT CURRENT_TIMESTAMP NOT NULL,
     
     CONSTRAINT type_check CHECK ("type" IN ('deposit', 'play'))
@@ -78,7 +78,7 @@ CREATE TABLE "game_plays"
 CREATE TABLE "game_plays_numbers"
 (
     "play_id"      UUID NOT NULL REFERENCES game_plays(id) ON DELETE CASCADE,
-    "number"       SMALLINT NOT NULL,
+    "number"       INT NOT NULL,
         
     PRIMARY KEY (play_id, number),
     CONSTRAINT number_range_check CHECK (number BETWEEN 1 AND 16)
@@ -122,8 +122,9 @@ CREATE UNIQUE INDEX idx_users_balance_deposit_id
 CREATE INDEX idx_users_balance_user_created_at
     ON users_balance (user_id, created_at DESC);
 
-CREATE INDEX idx_users_balance_game_id
-    ON users_balance (game_id);
+CREATE UNIQUE INDEX idx_users_balance_play_id
+    ON users_balance (play_id)
+    WHERE play_id IS NOT NULL;
 
 CREATE INDEX idx_games_active
     ON games (active);

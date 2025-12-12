@@ -1,4 +1,6 @@
-﻿namespace Service.DTO.User;
+﻿using DataAccess.Models;
+
+namespace Service.DTO.User;
 
 public class UserDto
 {
@@ -12,6 +14,8 @@ public class UserDto
     
     public static UserDto FromDatabase(DataAccess.Models.User user)
     {
+        var balance = user.UsersBalances.Sum(b => b.Amount);
+
         return new UserDto
         {
             Id = user.Id,
@@ -19,9 +23,7 @@ public class UserDto
             IsAdmin = user.Admin,
             IsActive = user.Active,
             CreatedAt = user.CreatedAt,
-            Balance = user.DepositUsers
-                .Where(d => d.StatusEnum == DataAccess.Models.Deposit.DepositStatus.Approved)
-                .Sum(d => d.Amount),
+            Balance = balance,
         };
     }
 }

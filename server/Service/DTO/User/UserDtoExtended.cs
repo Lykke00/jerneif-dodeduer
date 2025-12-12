@@ -14,9 +14,7 @@ public class UserDtoExtended : UserDto
     {
         var approvedDepositCount = u.UsersBalances
             .Count(b => b.BalanceEnum == UsersBalance.BalanceType.Deposit);
-
-        var balance = u.UsersBalances.Sum(b => b.Amount);
-
+        
         return new UserDtoExtended
         {
             Id = u.Id,
@@ -28,7 +26,6 @@ public class UserDtoExtended : UserDto
             IsActive = u.Active,
             CreatedAt = u.CreatedAt,
 
-            Balance = balance,
             TotalDeposits = approvedDepositCount
         };
     }

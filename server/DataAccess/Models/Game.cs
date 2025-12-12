@@ -29,7 +29,4 @@ public partial class Game
 
     [InverseProperty("Game")]
     public virtual ICollection<GamePlay> GamePlays { get; set; } = new List<GamePlay>();
-
-    [InverseProperty("Game")]
-    public virtual ICollection<UsersBalance> UsersBalances { get; set; } = new List<UsersBalance>();
 }

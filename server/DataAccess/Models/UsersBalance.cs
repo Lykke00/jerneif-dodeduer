@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("users_balance")]
-[Index("GameId", Name = "idx_users_balance_game_id")]
 [Index("UserId", "CreatedAt", Name = "idx_users_balance_user_created_at", IsDescending = new[] { false, true })]
 [Index("UserId", Name = "idx_users_balance_user_id")]
 public partial class UsersBalance
@@ -29,8 +28,8 @@ public partial class UsersBalance
     [Column("deposit_id")]
     public Guid? DepositId { get; set; }
 
-    [Column("game_id")]
-    public Guid? GameId { get; set; }
+    [Column("play_id")]
+    public Guid? PlayId { get; set; }
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
@@ -39,9 +38,9 @@ public partial class UsersBalance
     [InverseProperty("UsersBalance")]
     public virtual Deposit? Deposit { get; set; }
 
-    [ForeignKey("GameId")]
-    [InverseProperty("UsersBalances")]
-    public virtual Game? Game { get; set; }
+    [ForeignKey("PlayId")]
+    [InverseProperty("UsersBalance")]
+    public virtual GamePlay? Play { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("UsersBalances")]

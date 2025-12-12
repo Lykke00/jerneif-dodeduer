@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Api.Rest.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.DTO;
 using Service.DTO.Game;
+using Service.DTO.User;
 using Service.Services.Game;
 
 namespace Api.Rest.Controllers;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class GameController(IGameService gameService) : ControllerBase
@@ -21,5 +23,14 @@ public class GameController(IGameService gameService) : ControllerBase
     public async Task<Result<GameDto>> GetGameByIdAsync([FromQuery] Guid gameId)
     {
         return await gameService.GetGameByIdAsync(gameId);
+    }
+    
+    [HttpPost("play")]
+    public async Task<Result<bool>> PlayGame([FromBody] GameUserPlayRequest request)
+    {
+        var id = User.GetUserId();
+        if (id == null) return Result<bool>.Unauthorized("Not logged in");
+
+        return await gameService.PlayGameAsync(id.Value, request.GameId, request);
     }
 }
