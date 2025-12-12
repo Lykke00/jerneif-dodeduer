@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
@@ -8,10 +8,13 @@ import {
   Button,
   NumberInput,
   Checkbox,
+  Spinner,
 } from '@heroui/react';
 import GamePickCard from '../../components/GamePickCard';
 import { BiMinus, BiPlus } from 'react-icons/bi';
 import { FaXmark } from 'react-icons/fa6';
+import { useGame } from '../../hooks';
+import ErrorState from '../../components/common/ErrorState';
 
 const PRICING = {
   5: 20,
@@ -21,6 +24,7 @@ const PRICING = {
 };
 
 export default function DeadPigeonsGame() {
+  const { game, isLoading, getCurrent } = useGame();
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -29,6 +33,10 @@ export default function DeadPigeonsGame() {
   const [quantity, setQuantity] = useState(1);
   const MIN = 1;
   const MAX = 20;
+
+  useEffect(() => {
+    getCurrent();
+  }, []);
 
   const increment = () => {
     setQuantity((q) => Math.min(q + 1, MAX));
@@ -77,6 +85,23 @@ export default function DeadPigeonsGame() {
     selectedNumbers.length >= minSelections && selectedNumbers.length <= maxSelections;
   const progress = (selectedNumbers.length / maxSelections) * 100;
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex justify-center items-start pt-32">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!game && !isLoading) {
+    return (
+      <ErrorState
+        title="Intet aktiv spil fundet"
+        message="Vent venligst.. det næste spil starter snart!"
+      />
+    );
+  }
+
   return (
     <div className="h-full bg-linear-to-b pt-2 from-background via-background to-secondary/20 dark:from-background dark:via-background dark:to-secondary/30 flex flex-col items-center justify-start transition-colors duration-300">
       <div className="w-full max-w-3xl">
@@ -100,7 +125,7 @@ export default function DeadPigeonsGame() {
             <CardHeader className="border-b border-primary/10 pb-4">
               <div className="flex w-full text-center flex-col items-center justify-center">
                 <div>
-                  <p className="text-3xl font-bold text-foreground-800 mb-1">Uge 48</p>
+                  <p className="text-3xl font-bold text-foreground-800 mb-1">Uge {game?.week}</p>
                   <p className="text-sm text-foreground-700">
                     Vælg {minSelections}-{maxSelections} numre fra 1-16
                   </p>
