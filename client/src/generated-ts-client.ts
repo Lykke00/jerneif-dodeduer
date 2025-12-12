@@ -485,7 +485,7 @@ export class GameClient {
         return Promise.resolve<ResultOfGameDto>(null as any);
     }
 
-    playGame(request: GameUserPlayRequest): Promise<ResultOfBoolean> {
+    playGame(request: GameUserPlayRequest): Promise<ResultOfGameUserPlayResponse> {
         let url_ = this.baseUrl + "/api/Game/play";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -505,13 +505,13 @@ export class GameClient {
         });
     }
 
-    protected processPlayGame(response: Response): Promise<ResultOfBoolean> {
+    protected processPlayGame(response: Response): Promise<ResultOfGameUserPlayResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfBoolean;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfGameUserPlayResponse;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -519,7 +519,7 @@ export class GameClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<ResultOfBoolean>(null as any);
+        return Promise.resolve<ResultOfGameUserPlayResponse>(null as any);
     }
 }
 
@@ -765,6 +765,18 @@ export interface GameDto {
     year: number;
     isActive: boolean;
     createdAt: string;
+}
+
+export interface ResultOfGameUserPlayResponse {
+    success: boolean;
+    value: GameUserPlayResponse | undefined;
+    statusCode: number;
+    errors: { [key: string]: string[]; };
+}
+
+export interface GameUserPlayResponse {
+    totalPrice: number;
+    newBalance: number;
 }
 
 export interface GameUserPlayRequest {

@@ -26,10 +26,10 @@ public class GameController(IGameService gameService) : ControllerBase
     }
     
     [HttpPost("play")]
-    public async Task<Result<bool>> PlayGame([FromBody] GameUserPlayRequest request)
+    public async Task<Result<GameUserPlayResponse>> PlayGame([FromBody] GameUserPlayRequest request)
     {
         var id = User.GetUserId();
-        if (id == null) return Result<bool>.Unauthorized("Not logged in");
+        if (id == null) return Result<GameUserPlayResponse>.Unauthorized("Not logged in");
 
         return await gameService.PlayGameAsync(id.Value, request.GameId, request);
     }

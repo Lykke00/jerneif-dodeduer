@@ -457,7 +457,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ResultOfBoolean"
+                  "$ref": "#/components/schemas/ResultOfGameUserPlayResponse"
                 }
               }
             }
@@ -1111,6 +1111,60 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ResultOfGameUserPlayResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GameUserPlayResponse"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "GameUserPlayResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "totalPrice",
+          "newBalance"
+        ],
+        "properties": {
+          "totalPrice": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "newBalance": {
+            "type": "number",
+            "format": "decimal"
           }
         }
       },
