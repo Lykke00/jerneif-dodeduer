@@ -16,6 +16,6 @@ public interface IRepository<T>
         int pageSize,
         Expression<Func<T, object>>? orderByDesc,
         Expression<Func<T, TResult>> selector);
-    
+
     Task ExecuteInTransactionAsync(Func<Task> action);
 }

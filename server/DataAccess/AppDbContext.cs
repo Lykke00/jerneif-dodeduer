@@ -16,6 +16,10 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Game> Games { get; set; }
 
+    public virtual DbSet<GamePlay> GamePlays { get; set; }
+
+    public virtual DbSet<GamePlaysNumber> GamePlaysNumbers { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserLoginToken> UserLoginTokens { get; set; }
@@ -48,6 +52,25 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<GamePlay>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("game_plays_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.GamePlays).HasConstraintName("game_plays_game_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.GamePlays).HasConstraintName("game_plays_user_id_fkey");
+        });
+
+        modelBuilder.Entity<GamePlaysNumber>(entity =>
+        {
+            entity.HasKey(e => new { e.PlayId, e.Number }).HasName("game_plays_numbers_pkey");
+
+            entity.HasOne(d => d.Play).WithMany(p => p.GamePlaysNumbers).HasConstraintName("game_plays_numbers_play_id_fkey");
         });
 
         modelBuilder.Entity<User>(entity =>

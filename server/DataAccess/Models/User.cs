@@ -47,6 +47,9 @@ public partial class User
     public virtual ICollection<Deposit> DepositUsers { get; set; } = new List<Deposit>();
 
     [InverseProperty("User")]
+    public virtual ICollection<GamePlay> GamePlays { get; set; } = new List<GamePlay>();
+
+    [InverseProperty("User")]
     public virtual ICollection<UserLoginToken> UserLoginTokens { get; set; } = new List<UserLoginToken>();
 
     [InverseProperty("User")]

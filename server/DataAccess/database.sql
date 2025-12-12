@@ -67,6 +67,24 @@ CREATE TABLE "games"
     "created_at"    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE "game_plays"
+(
+    "id"            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "game_id"       UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    "user_id"       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    "created_at"    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE "game_plays_numbers"
+(
+    "play_id"      UUID NOT NULL REFERENCES game_plays(id) ON DELETE CASCADE,
+    "number"       SMALLINT NOT NULL,
+        
+    PRIMARY KEY (play_id, number),
+    CONSTRAINT number_range_check CHECK (number BETWEEN 1 AND 16)
+);
+
+
 CREATE UNIQUE INDEX idx_users_email
     ON users (email);
 
@@ -112,3 +130,6 @@ CREATE INDEX idx_games_active
 
 CREATE UNIQUE INDEX idx_games_week_year
     ON games (week, year);
+
+CREATE INDEX idx_game_plays_game_user
+    ON game_plays (game_id, user_id);
