@@ -25,12 +25,22 @@ import {
   Spinner,
   useDisclosure,
 } from '@heroui/react';
-import { BsThreeDotsVertical } from 'react-icons/bs';
+import { BsCheckCircle, BsEye, BsThreeDotsVertical, BsXCircle } from 'react-icons/bs';
 import { useDebounce, useUsers } from '../../hooks';
 import { useModal } from '../../contexts/ModalContext';
 import type { UserDtoExtended } from '../../generated-ts-client';
 import { UserCreateModal } from '../modal/UserCreateModal';
 import { errorToMessage } from '../../helpers/errorToMessage';
+import UserInfoDrawer from '../drawer/UserInfoDrawe';
+import { RiAdminFill } from 'react-icons/ri';
+import { GiUpgrade } from 'react-icons/gi';
+import {
+  MdAdminPanelSettings,
+  MdOutlineAdminPanelSettings,
+  MdPersonOutline,
+  MdUpgrade,
+} from 'react-icons/md';
+import { FaTrashCan } from 'react-icons/fa6';
 
 interface User {
   id: string;
@@ -44,11 +54,13 @@ interface User {
 
 export default function UsersTab() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen: isOpenUserInfo, onOpenChange: onOpenChangeUserInfo } = useDisclosure();
 
   const [search, setSearch] = useState('');
   const [sortActive, setSortActive] = useState<boolean | undefined>(undefined);
   const debouncedSearch = useDebounce(search, 400);
 
+  const [currentUser, setCurrentUser] = useState<UserDtoExtended>();
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [allUsers, setAllUsers] = useState<UserDtoExtended[]>([]);
@@ -74,9 +86,15 @@ export default function UsersTab() {
     };
   }, [page, debouncedSearch, sortActive]);
 
-  const createUser = async (email: string, isAdmin: boolean) => {
+  const createUser = async (
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    isAdmin: boolean
+  ) => {
     try {
-      const createdUser = await create(email, isAdmin);
+      const createdUser = await create(firstName, lastName, phone, email, isAdmin);
 
       setAllUsers((prev) => [createdUser, ...prev]);
       setTotalCount((prev) => prev + 1);
@@ -133,6 +151,11 @@ export default function UsersTab() {
         description: errorToMessage(e),
       });
     }
+  };
+
+  const showUserInfo = async (user: UserDtoExtended) => {
+    setCurrentUser(user);
+    onOpenChangeUserInfo();
   };
 
   return (
@@ -199,7 +222,7 @@ export default function UsersTab() {
                 }
               >
                 <TableHeader>
-                  <TableColumn>EMAIL</TableColumn>
+                  <TableColumn>NAVN</TableColumn>
                   <TableColumn align="end">BALANCE</TableColumn>
                   <TableColumn align="end">INDBETALNINGER</TableColumn>
                   <TableColumn align="end">OPRETTET</TableColumn>
@@ -209,7 +232,12 @@ export default function UsersTab() {
                 <TableBody isLoading={isLoading} loadingContent={<Spinner label="Indlæser..." />}>
                   {allUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
+                      <TableCell
+                        className="font-medium cursor-pointer hover:underline"
+                        onClick={() => showUserInfo(user)}
+                      >
+                        {user.fullName}
+                      </TableCell>
                       <TableCell className="text-right font-semibold">{user.balance}</TableCell>
                       <TableCell className="text-right font-semibold">
                         {user.totalDeposits}
@@ -249,43 +277,56 @@ export default function UsersTab() {
                               </Button>
                             </DropdownTrigger>
                             <DropdownMenu>
-                              {[
-                                !user.isAdmin ? (
-                                  <DropdownItem
-                                    onPress={() => updateUserRole(user.id, true)}
-                                    key="make_admin"
-                                  >
-                                    Gør administrator
-                                  </DropdownItem>
-                                ) : (
-                                  <DropdownItem
-                                    onPress={() => updateUserRole(user.id, false)}
-                                    key="make_user"
-                                  >
-                                    Degrader til bruger
-                                  </DropdownItem>
-                                ),
+                              <>
+                                <DropdownItem
+                                  onPress={() => showUserInfo(user)}
+                                  startContent={<BsEye />}
+                                  key="info"
+                                >
+                                  Vis info
+                                </DropdownItem>
+                                {[
+                                  !user.isAdmin ? (
+                                    <DropdownItem
+                                      onPress={() => updateUserRole(user.id, true)}
+                                      startContent={<MdOutlineAdminPanelSettings />}
+                                      key="make_admin"
+                                    >
+                                      Gør administrator
+                                    </DropdownItem>
+                                  ) : (
+                                    <DropdownItem
+                                      onPress={() => updateUserRole(user.id, false)}
+                                      startContent={<MdPersonOutline />}
+                                      key="make_user"
+                                    >
+                                      Degrader til bruger
+                                    </DropdownItem>
+                                  ),
 
-                                user.isActive ? (
-                                  <DropdownItem
-                                    onPress={() => updateActive(user.id, false)}
-                                    key="deactivate"
-                                    className="text-danger"
-                                    color="danger"
-                                  >
-                                    Deaktiver
-                                  </DropdownItem>
-                                ) : (
-                                  <DropdownItem
-                                    onPress={() => updateActive(user.id, true)}
-                                    key="deactivate"
-                                    className="text-green-900"
-                                    color="success"
-                                  >
-                                    Aktiver
-                                  </DropdownItem>
-                                ),
-                              ]}
+                                  user.isActive ? (
+                                    <DropdownItem
+                                      onPress={() => updateActive(user.id, false)}
+                                      key="deactivate"
+                                      className="text-danger"
+                                      startContent={<BsXCircle />}
+                                      color="danger"
+                                    >
+                                      Deaktiver
+                                    </DropdownItem>
+                                  ) : (
+                                    <DropdownItem
+                                      onPress={() => updateActive(user.id, true)}
+                                      key="deactivate"
+                                      className="text-green-900"
+                                      startContent={<BsCheckCircle />}
+                                      color="success"
+                                    >
+                                      Aktiver
+                                    </DropdownItem>
+                                  ),
+                                ]}
+                              </>
                             </DropdownMenu>
                           </Dropdown>
                         </div>
@@ -300,6 +341,11 @@ export default function UsersTab() {
       </Card>
 
       <UserCreateModal createUser={createUser} isOpen={isOpen} onOpenChange={onOpenChange} />
+      <UserInfoDrawer
+        user={currentUser}
+        isOpen={isOpenUserInfo}
+        onOpenChange={onOpenChangeUserInfo}
+      />
     </motion.div>
   );
 }

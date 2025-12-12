@@ -65,6 +65,9 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
         {
             Email = request.Email,
             Admin = request.Admin,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Phone = request.Phone,
             Active = true
         };
 

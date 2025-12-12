@@ -14,6 +14,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Deposit> Deposits { get; set; }
 
+    public virtual DbSet<Game> Games { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserLoginToken> UserLoginTokens { get; set; }
@@ -35,6 +37,15 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("deposits_approved_by_fkey");
 
             entity.HasOne(d => d.User).WithMany(p => p.DepositUsers).HasConstraintName("deposits_user_id_fkey");
+        });
+
+        modelBuilder.Entity<Game>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("games_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         modelBuilder.Entity<User>(entity =>

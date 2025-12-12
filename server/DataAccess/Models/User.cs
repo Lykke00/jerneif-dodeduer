@@ -17,6 +17,18 @@ public partial class User
     [StringLength(100)]
     public string Email { get; set; } = null!;
 
+    [Column("first_name")]
+    [StringLength(50)]
+    public string FirstName { get; set; } = null!;
+
+    [Column("last_name")]
+    [StringLength(50)]
+    public string LastName { get; set; } = null!;
+
+    [Column("phone")]
+    [StringLength(20)]
+    public string Phone { get; set; } = null!;
+
     [Column("admin")]
     public bool Admin { get; set; }
 

@@ -987,6 +987,18 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string"
+              },
+              "fullName": {
+                "type": "string"
+              },
               "totalDeposits": {
                 "type": "integer",
                 "format": "int32"
@@ -1036,10 +1048,22 @@
         "additionalProperties": false,
         "required": [
           "email",
+          "firstName",
+          "lastName",
+          "phone",
           "admin"
         ],
         "properties": {
           "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "phone": {
             "type": "string"
           },
           "admin": {

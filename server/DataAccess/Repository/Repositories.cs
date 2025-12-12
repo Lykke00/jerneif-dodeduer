@@ -37,7 +37,7 @@ public abstract class BaseRepository<T>(AppDbContext context) : IRepository<T>
         Set.Update(entity);
         await context.SaveChangesAsync();
     }
-    
+
     public async Task<PagedResult<TResult>> GetPagedAsync<TResult>(
         IQueryable<T> query,
         int page,

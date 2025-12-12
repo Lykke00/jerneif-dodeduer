@@ -15,60 +15,130 @@ import {
   Form,
 } from '@heroui/react';
 
+type FormState = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+};
+
 type Props = {
   isOpen: boolean;
   onOpenChange: () => void;
-  createUser: (email: string, isAdmin: boolean) => Promise<void>;
+  createUser: (
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    isAdmin: boolean
+  ) => Promise<void>;
+};
+
+const initialForm: FormState = {
+  email: '',
+  firstName: '',
+  lastName: '',
+  phone: '',
 };
 
 export const UserCreateModal: React.FC<Props> = ({ isOpen, onOpenChange, createUser }) => {
-  const [email, setEmail] = useState('');
+  const [form, setForm] = useState<FormState>(initialForm);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const updateField =
+    <K extends keyof FormState>(field: K) =>
+    (value: string) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+  const resetForm = () => {
+    setForm(initialForm);
+    setIsAdmin(false);
+  };
+
   const onSubmit = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-
-      await createUser(email, isAdmin);
-
-      setEmail('');
-      setIsAdmin(false);
+      await createUser(form.firstName, form.lastName, form.phone, form.email, isAdmin);
+      resetForm();
       onOpenChange();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  const isSubmitDisabled =
+    loading || !form.email || !form.firstName || !form.lastName || !/^\d{8}$/.test(form.phone);
+
   return (
-    <Modal onOpenChange={onOpenChange} isOpen={isOpen} backdrop="opaque">
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="opaque">
       <ModalContent>
         {() => (
           <>
             <ModalHeader>Opret bruger</ModalHeader>
-
             <Divider />
 
             <Form
               className="w-full"
-              onSubmit={async (e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
-                await onSubmit();
+                onSubmit();
               }}
             >
               <ModalBody className="w-full">
+                <div className="flex flex-row gap-2">
+                  <Input
+                    label="Fornavn"
+                    placeholder="Jørgen"
+                    value={form.firstName}
+                    onValueChange={updateField('firstName')}
+                    isDisabled={loading}
+                    isRequired
+                    name="firstName"
+                  />
+
+                  <Input
+                    label="Efternavn"
+                    placeholder="Hansen"
+                    value={form.lastName}
+                    onValueChange={updateField('lastName')}
+                    isDisabled={loading}
+                    isRequired
+                    name="lastName"
+                  />
+                </div>
+
                 <Input
                   label="Email"
-                  placeholder="indtast email..."
-                  value={email}
-                  onValueChange={setEmail}
+                  placeholder="jorgen@hansen.dk"
+                  value={form.email}
+                  onValueChange={updateField('email')}
                   isDisabled={loading}
                   type="email"
                   isRequired
                   name="email"
                 />
+
+                <Input
+                  label="Telefonnummer"
+                  placeholder="12345678"
+                  value={form.phone}
+                  onValueChange={(value) =>
+                    updateField('phone')(value.replace(/\D/g, '').slice(0, 8))
+                  }
+                  isDisabled={loading}
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]{8}"
+                  maxLength={8}
+                  isRequired
+                  name="phone"
+                />
+
+                <Divider />
 
                 <Checkbox
                   isSelected={isAdmin}
@@ -88,7 +158,7 @@ export const UserCreateModal: React.FC<Props> = ({ isOpen, onOpenChange, createU
                 <Button
                   type="submit"
                   color="primary"
-                  isDisabled={!email || loading}
+                  isDisabled={isSubmitDisabled}
                   endContent={loading ? <Spinner size="sm" /> : null}
                 >
                   Opret

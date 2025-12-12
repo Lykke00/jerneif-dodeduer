@@ -642,6 +642,10 @@ export interface PagedResultOfUserDtoExtended {
 }
 
 export interface UserDtoExtended extends UserDto {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    fullName?: string;
     totalDeposits?: number;
 }
 
@@ -654,6 +658,9 @@ export interface ResultOfUserDtoExtended {
 
 export interface CreateUserRequest {
     email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
     admin: boolean;
 }
 

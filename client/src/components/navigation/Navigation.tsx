@@ -8,7 +8,6 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   Divider,
-  useNavbar,
   Chip,
 } from '@heroui/react';
 import { Link, useLocation } from 'react-router-dom';
@@ -66,7 +65,10 @@ export default function Navigation() {
       <NavbarContent className="sm:hidden" justify="end">
         {user && (
           <NavbarMenuItem>
-            <Chip className="border text-white bg-primary border-primary/50">{user.balance},-</Chip>
+            <Chip className="border text-white bg-primary border-primary/50">
+              {' '}
+              Din saldo: {user.balance},-
+            </Chip>
           </NavbarMenuItem>
         )}
         <NavbarMenuToggle aria-label={isMenuOpen ? 'Close menu' : 'Open menu'} />
@@ -93,7 +95,7 @@ export default function Navigation() {
           {user.isAdmin && (
             <NavbarItem className="font-semibold" key="admin" isActive={isAdminPage}>
               <Link
-                to="/admin"
+                to={PageRoutes.AdminUsers}
                 className={`transition-colors duration-200 ${
                   isAdminPage ? 'text-primary' : 'text-foreground-600 hover:text-foreground-800'
                 }`}
@@ -117,7 +119,7 @@ export default function Navigation() {
           <>
             <NavbarMenuItem>
               <Chip className="border text-white bg-primary border-primary/50">
-                {user.balance},-
+                Din saldo: {user.balance},-
               </Chip>
             </NavbarMenuItem>
 

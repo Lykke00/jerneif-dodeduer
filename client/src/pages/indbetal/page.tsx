@@ -103,15 +103,17 @@ export default function DepositPage() {
             <div className="space-y-6">
               <DepositHistory submissions={data} totalCount={total} />
 
-              <Pagination
-                total={Math.ceil(total / pageSize)}
-                size="lg"
-                page={page}
-                onChange={setPage}
-                showControls
-                color="primary"
-                className="self-center"
-              />
+              {total > 0 && (
+                <Pagination
+                  total={Math.ceil(total / pageSize)}
+                  size="lg"
+                  page={page}
+                  onChange={setPage}
+                  showControls
+                  color="primary"
+                  className="self-center"
+                />
+              )}
             </div>
           </Tab>
         </Tabs>

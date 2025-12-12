@@ -12,7 +12,13 @@ type useUsersTypes = {
     pageSize: number,
     active?: boolean
   ): Promise<PagedResultOfUserDtoExtended>;
-  create(email: string, admin: boolean): Promise<UserDtoExtended>;
+  create(
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    admin: boolean
+  ): Promise<UserDtoExtended>;
   update(id: string, active?: boolean, admin?: boolean): Promise<UserDtoExtended>;
   isLoading: boolean;
 };
@@ -51,10 +57,16 @@ export const useUsers = (): useUsersTypes => {
     }
   };
 
-  const create = async (email: string, admin: boolean): Promise<UserDtoExtended> => {
+  const create = async (
+    firstName: string,
+    lastName: string,
+    phone: string,
+    email: string,
+    admin: boolean
+  ): Promise<UserDtoExtended> => {
     try {
       const response = await withLoading(() =>
-        makeApiCall(() => userClient.createUser({ email, admin }))
+        makeApiCall(() => userClient.createUser({ firstName, lastName, phone, email, admin }))
       );
 
       var createdUser = response.value;
