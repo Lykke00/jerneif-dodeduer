@@ -16,13 +16,16 @@ import { PageRoutes } from '../../PageRoutes';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
 import { Fragment, useState } from 'react';
+import { isActiveRoute } from '../../helpers/isActiveRoute';
+import { BiChevronDown, BiChevronRight } from 'react-icons/bi';
 
 export default function Navigation() {
   const { pathname } = useLocation();
   const { user, logout } = useAuth();
   const { showModal } = useModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAdminPage = pathname.startsWith('/admin');
+  const isAdminPage = isActiveRoute(pathname, PageRoutes.Admin);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   const links = [
     { label: 'Spil', href: PageRoutes.Game },
@@ -78,11 +81,11 @@ export default function Navigation() {
       {user ? (
         <NavbarContent className="hidden sm:flex gap-4" justify="center">
           {links.map(({ label, href }) => (
-            <NavbarItem className="font-semibold" key={href} isActive={pathname === href}>
+            <NavbarItem key={href} isActive={isActiveRoute(pathname, href)}>
               <Link
                 to={href}
                 className={`transition-colors duration-200 ${
-                  pathname === href
+                  isActiveRoute(pathname, href)
                     ? 'text-primary'
                     : 'text-foreground-600 hover:text-foreground-800'
                 }`}
@@ -93,7 +96,7 @@ export default function Navigation() {
           ))}
 
           {user.isAdmin && (
-            <NavbarItem className="font-semibold" key="admin" isActive={isAdminPage}>
+            <NavbarItem key="admin" isActive={isAdminPage}>
               <Link
                 to={PageRoutes.AdminUsers}
                 className={`transition-colors duration-200 ${
@@ -142,7 +145,11 @@ export default function Navigation() {
                   <Link
                     to={href}
                     onClick={() => setIsMenuOpen(false)}
-                    className="w-full block py-2 text-lg text-neutral-800"
+                    className={`w-full block py-2 text-lg ${
+                      isActiveRoute(pathname, href)
+                        ? 'text-primary font-semibold'
+                        : 'text-neutral-800'
+                    }`}
                   >
                     {label}
                   </Link>
@@ -151,6 +158,70 @@ export default function Navigation() {
                 {index < links.length - 1 && <Divider />}
               </Fragment>
             ))}
+
+            {user.isAdmin && (
+              <>
+                <Divider />
+
+                {/* ADMIN TOGGLE */}
+                <NavbarMenuItem>
+                  <button
+                    onClick={() => setIsAdminOpen((v) => !v)}
+                    className="w-full flex items-center justify-between py-2 text-lg text-neutral-800"
+                  >
+                    <span>Admin</span>
+                    {isAdminOpen ? <BiChevronDown /> : <BiChevronRight />}
+                  </button>
+                </NavbarMenuItem>
+
+                {/* ADMIN LINKS */}
+                {isAdminOpen && (
+                  <div className="pl-4 space-y-1">
+                    <NavbarMenuItem>
+                      <Link
+                        to={PageRoutes.AdminUsers}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block py-2 text-base ${
+                          isActiveRoute(pathname, PageRoutes.AdminUsers)
+                            ? 'text-primary font-semibold'
+                            : 'text-neutral-700'
+                        }`}
+                      >
+                        Brugere
+                      </Link>
+                    </NavbarMenuItem>
+
+                    <NavbarMenuItem>
+                      <Link
+                        to={PageRoutes.AdminDeposits}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block py-2 text-base ${
+                          isActiveRoute(pathname, PageRoutes.AdminDeposits)
+                            ? 'text-primary font-semibold'
+                            : 'text-neutral-700'
+                        }`}
+                      >
+                        Indbetalinger
+                      </Link>
+                    </NavbarMenuItem>
+
+                    <NavbarMenuItem>
+                      <Link
+                        to={PageRoutes.AdminGame}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block py-2 text-base ${
+                          isActiveRoute(pathname, PageRoutes.AdminGame)
+                            ? 'text-primary font-semibold'
+                            : 'text-neutral-700'
+                        }`}
+                      >
+                        Spil
+                      </Link>
+                    </NavbarMenuItem>
+                  </div>
+                )}
+              </>
+            )}
 
             <NavbarMenuItem className="border rounded-md border-primary/50">
               <Button

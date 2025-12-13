@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
     <HeroUIProvider>
       <BrowserRouter>
         <ModalProvider>
-          <ToastProvider placement={'top-right'} toastOffset={80} />
+          <ToastProvider placement={'top-right'} toastOffset={75} />
           <AppRoutes />
         </ModalProvider>
       </BrowserRouter>

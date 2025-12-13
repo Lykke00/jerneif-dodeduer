@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import IndexPage from './pages/index/page.tsx';
 import { Layout } from './pages/layout.tsx';
 import SpilPage from './pages/spil/page.tsx';
-import DepositPage from './pages/indbetal/page.tsx';
 import ContactPage from './pages/kontakt/page.tsx';
 import { AuthVerify } from './pages/auth/page.tsx';
 import { PageRoutes } from './PageRoutes.ts';
@@ -16,6 +15,9 @@ import { FadeContainer } from './components/common/FadeContainer.tsx';
 import UsersTab from './components/admin/UsersTab.tsx';
 import GameTab from './components/admin/GameTab.tsx';
 import PaymentsTab from './components/admin/PaymentsTab.tsx';
+import DepositLayout from './pages/indbetal/page.tsx';
+import DepositHistoryPage from './pages/indbetal/DepositHistory.tsx';
+import DepositPage from './pages/indbetal/depositpage.tsx';
 
 function AppRoutes() {
   const auth = useAuth();
@@ -43,9 +45,14 @@ function AppRoutes() {
             <Route
               path={PageRoutes.Deposit}
               element={
-                <RequireAuth accessLevel={AccessLevel.Protected} element={<DepositPage />} />
+                <RequireAuth accessLevel={AccessLevel.Protected}>
+                  <DepositLayout />
+                </RequireAuth>
               }
-            />
+            >
+              <Route index element={<DepositPage />} />
+              <Route path="historik" element={<DepositHistoryPage />} />
+            </Route>
             <Route
               path={PageRoutes.Admin}
               element={

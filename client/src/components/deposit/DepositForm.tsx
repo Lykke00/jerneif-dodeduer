@@ -2,9 +2,9 @@ import type React from 'react';
 
 import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import DepositImagePreview from './DepositImagePreview';
 import { Button, Card, CardBody, CardFooter, CardHeader, Form, Input } from '@heroui/react';
 import type { Deposit } from '../../types/Deposit';
+import DepositImagePreview from './DepositImagePreview';
 
 interface Props {
   onSubmit: (e: FormEvent<HTMLFormElement>, deposit: Deposit) => void;

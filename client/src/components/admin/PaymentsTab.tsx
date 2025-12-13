@@ -99,7 +99,7 @@ export default function PaymentsTab() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full space-y-6"
+      className="w-full h-full"
     >
       <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
         <CardHeader className="border-b border-primary/10">
@@ -183,64 +183,59 @@ export default function PaymentsTab() {
                     <motion.div
                       key={payment.id}
                       variants={itemVariants}
-                      className={`p-4 md:p-5 relative rounded-xl border ${borderClass} ${bgClass} hover:brightness-95 dark:hover:brightness-125 transition-all`}
+                      className={`px-4 py-3 rounded-lg border flex items-start justify-between gap-4 ${borderClass} ${bgClass} transition-all`}
                     >
-                      {/* Status Badge - Top Right */}
-                      <div className="absolute top-3 right-3">
+                      {/* LEFT: AMOUNT + USER */}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-foreground">
+                          {payment.amount.toLocaleString('da-DK', {
+                            style: 'currency',
+                            currency: 'DKK',
+                            minimumFractionDigits: 0,
+                          })}
+                        </div>
+
+                        <div className="text-sm font-medium text-foreground/80 truncate">
+                          {payment.user?.email}
+                        </div>
+                      </div>
+
+                      {/* RIGHT: STATUS + DATE */}
+                      <div className="flex flex-col items-end shrink-0 gap-1">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bgClass} ${statusTextClass}`}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${bgClass} ${statusTextClass}`}
                         >
                           <span>{statusIcon}</span>
                           <span>{statusLabel}</span>
                         </span>
-                      </div>
 
-                      {/* Content */}
-                      <div className="pr-24">
-                        <div className="flex items-center gap-2">
-                          <div className="text-base font-semibold">
-                            {payment.amount.toLocaleString('en-US', {
-                              style: 'currency',
-                              currency: 'DKK',
-                              minimumFractionDigits: 0,
-                            })}
-                          </div>
-                        </div>
-                        <div className="text-sm text-muted-foreground">{payment.user?.email}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {new Date(payment.createdAt).toLocaleTimeString('da-DK', {
+                        <span className="text-xs text-foreground/60">
+                          {new Date(payment.createdAt).toLocaleString('da-DK', {
+                            day: '2-digit',
+                            month: 'short',
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
-                        </div>
+                        </span>
                       </div>
 
-                      {/* Buttons - Bottom Right */}
-                      {isPending && (
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            onPress={() => updateStatus(payment.id, 'declined')}
-                            size="sm"
-                            className="bg-red-600 text-white font-semibold"
-                          >
-                            Afvis
-                          </Button>
-                          <Button
-                            onPress={() => updateStatus(payment.id, 'approved')}
-                            size="sm"
-                            className="bg-green-600 text-white font-semibold"
-                          >
-                            Godkend
-                          </Button>
-                        </div>
-                      )}
+                      {/* ACTIONS */}
+                      {(isPending || isDeclined) && (
+                        <div className="flex gap-1 ml-2">
+                          {isPending && (
+                            <Button
+                              size="sm"
+                              onPress={() => updateStatus(payment.id, 'declined')}
+                              className="h-8 px-3 bg-red-600 text-white font-semibold"
+                            >
+                              Afvis
+                            </Button>
+                          )}
 
-                      {payment.status == 'declined' && (
-                        <div className="flex gap-2 justify-end">
                           <Button
-                            onPress={() => updateStatus(payment.id, 'approved')}
                             size="sm"
-                            className="bg-green-600 text-white font-semibold"
+                            onPress={() => updateStatus(payment.id, 'approved')}
+                            className="h-8 px-3 bg-green-600 text-white font-semibold"
                           >
                             Godkend
                           </Button>

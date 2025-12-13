@@ -6,6 +6,7 @@ export const PageRoutes = {
   Verify: '/auth/verify',
   Game: '/spil',
   Deposit: '/indbetal',
+  DepositHistory: '/indbetal/historik',
   Contact: '/kontakt',
   Admin: '/admin',
   AdminUsers: '/admin/users',

@@ -20,10 +20,10 @@ export default function DeadPigeonsGame() {
     try {
       await play(amount, numbers);
 
-      addToast({
+      showModal({
+        variant: 'success',
         title: 'Bræt blev købt',
         description: `Du har købt ${amount} bræt med numrene ${formatNumbers(numbers)}`,
-        color: 'success',
       });
 
       return true;

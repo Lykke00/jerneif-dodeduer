@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
   CardBody,
-  CardHeader,
   Table,
   TableHeader,
   TableColumn,
@@ -32,15 +31,8 @@ import type { UserDtoExtended } from '../../generated-ts-client';
 import { UserCreateModal } from '../modal/UserCreateModal';
 import { errorToMessage } from '../../helpers/errorToMessage';
 import UserInfoDrawer from '../drawer/UserInfoDrawe';
-import { RiAdminFill } from 'react-icons/ri';
-import { GiUpgrade } from 'react-icons/gi';
-import {
-  MdAdminPanelSettings,
-  MdOutlineAdminPanelSettings,
-  MdPersonOutline,
-  MdUpgrade,
-} from 'react-icons/md';
-import { FaTrashCan } from 'react-icons/fa6';
+import { MdOutlineAdminPanelSettings, MdPersonOutline } from 'react-icons/md';
+import UserCard from './UserCard';
 
 interface User {
   id: string;
@@ -161,7 +153,7 @@ export default function UsersTab() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full">
       <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
-        <CardBody className="p-2 gap-2 overflow-x-auto">
+        <CardBody className="p-2 gap-2 overflow-visible">
           {/* Actions */}
           <div className="flex items-center justify-between gap-4">
             <Select
@@ -204,139 +196,164 @@ export default function UsersTab() {
 
           <Divider />
 
-          <AnimatePresence>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <Table
-                aria-label="Users table"
-                removeWrapper
-                bottomContent={
-                  <div className="flex mb-2 w-full justify-center">
-                    <Pagination
-                      showControls
-                      page={page}
-                      total={totalPages}
-                      onChange={setPage}
-                      size="sm"
-                    />
-                  </div>
-                }
-              >
-                <TableHeader>
-                  <TableColumn>NAVN</TableColumn>
-                  <TableColumn align="end">BALANCE</TableColumn>
-                  <TableColumn align="end">INDBETALNINGER</TableColumn>
-                  <TableColumn align="end">OPRETTET</TableColumn>
-                  <TableColumn align="end">STATUS</TableColumn>
-                  <TableColumn align="end">{''}</TableColumn>
-                </TableHeader>
-                <TableBody isLoading={isLoading} loadingContent={<Spinner label="Indlæser..." />}>
-                  {allUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell
-                        className="font-medium cursor-pointer hover:underline"
-                        onClick={() => showUserInfo(user)}
-                      >
-                        {user.fullName}
-                      </TableCell>
-                      <TableCell className="text-right font-semibold">{user.balance}</TableCell>
-                      <TableCell className="text-right font-semibold">
-                        {user.totalDeposits}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(user.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 justify-end">
-                          {user.isAdmin && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100/30 dark:bg-blue-900/10 text-blue-800 dark:text-blue-200">
-                              Admin
-                            </span>
-                          )}
-                          {!user.isActive && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100/30 dark:bg-red-900/10 text-red-800 dark:text-red-200">
-                              Inaktiv
-                            </span>
-                          )}
-                          {user.isActive && !user.isAdmin && (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100/30 dark:bg-green-900/10 text-green-800 dark:text-green-200">
-                              Aktiv
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
-                          <Dropdown>
-                            <DropdownTrigger>
-                              <Button isIconOnly size="sm" variant="light">
-                                <BsThreeDotsVertical className="w-4 h-4" />
-                              </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu>
-                              <>
-                                <DropdownItem
-                                  onPress={() => showUserInfo(user)}
-                                  startContent={<BsEye />}
-                                  key="info"
-                                >
-                                  Vis info
-                                </DropdownItem>
-                                {[
-                                  !user.isAdmin ? (
-                                    <DropdownItem
-                                      onPress={() => updateUserRole(user.id, true)}
-                                      startContent={<MdOutlineAdminPanelSettings />}
-                                      key="make_admin"
-                                    >
-                                      Gør administrator
-                                    </DropdownItem>
-                                  ) : (
-                                    <DropdownItem
-                                      onPress={() => updateUserRole(user.id, false)}
-                                      startContent={<MdPersonOutline />}
-                                      key="make_user"
-                                    >
-                                      Degrader til bruger
-                                    </DropdownItem>
-                                  ),
+          {/* DESKTOP TABLE */}
+          <div className="hidden md:block">
+            <AnimatePresence>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Table
+                  aria-label="Users table"
+                  removeWrapper
+                  bottomContent={
+                    <div className="flex mb-2 w-full justify-center">
+                      <Pagination
+                        showControls
+                        page={page}
+                        total={totalPages}
+                        onChange={setPage}
+                        size="sm"
+                      />
+                    </div>
+                  }
+                >
+                  <TableHeader>
+                    <TableColumn>NAVN</TableColumn>
+                    <TableColumn align="end">BALANCE</TableColumn>
+                    <TableColumn align="end">INDBETALNINGER</TableColumn>
+                    <TableColumn align="end">OPRETTET</TableColumn>
+                    <TableColumn align="end">STATUS</TableColumn>
+                    <TableColumn align="end">{''}</TableColumn>
+                  </TableHeader>
+                  <TableBody isLoading={isLoading} loadingContent={<Spinner label="Indlæser..." />}>
+                    {allUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell
+                          className="font-medium cursor-pointer hover:underline"
+                          onClick={() => showUserInfo(user)}
+                        >
+                          {user.fullName}
+                        </TableCell>
+                        <TableCell className="text-right font-semibold">{user.balance}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {user.totalDeposits}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(user.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 justify-end">
+                            {user.isAdmin && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100/30 dark:bg-blue-900/10 text-blue-800 dark:text-blue-200">
+                                Admin
+                              </span>
+                            )}
+                            {!user.isActive && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100/30 dark:bg-red-900/10 text-red-800 dark:text-red-200">
+                                Inaktiv
+                              </span>
+                            )}
+                            {user.isActive && !user.isAdmin && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100/30 dark:bg-green-900/10 text-green-800 dark:text-green-200">
+                                Aktiv
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end">
+                            <Dropdown>
+                              <DropdownTrigger>
+                                <Button isIconOnly size="sm" variant="light">
+                                  <BsThreeDotsVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownTrigger>
+                              <DropdownMenu>
+                                <>
+                                  <DropdownItem
+                                    onPress={() => showUserInfo(user)}
+                                    startContent={<BsEye />}
+                                    key="info"
+                                  >
+                                    Vis info
+                                  </DropdownItem>
+                                  {[
+                                    !user.isAdmin ? (
+                                      <DropdownItem
+                                        onPress={() => updateUserRole(user.id, true)}
+                                        startContent={<MdOutlineAdminPanelSettings />}
+                                        key="make_admin"
+                                      >
+                                        Gør administrator
+                                      </DropdownItem>
+                                    ) : (
+                                      <DropdownItem
+                                        onPress={() => updateUserRole(user.id, false)}
+                                        startContent={<MdPersonOutline />}
+                                        key="make_user"
+                                      >
+                                        Degrader til bruger
+                                      </DropdownItem>
+                                    ),
 
-                                  user.isActive ? (
-                                    <DropdownItem
-                                      onPress={() => updateActive(user.id, false)}
-                                      key="deactivate"
-                                      className="text-danger"
-                                      startContent={<BsXCircle />}
-                                      color="danger"
-                                    >
-                                      Deaktiver
-                                    </DropdownItem>
-                                  ) : (
-                                    <DropdownItem
-                                      onPress={() => updateActive(user.id, true)}
-                                      key="deactivate"
-                                      className="text-green-900"
-                                      startContent={<BsCheckCircle />}
-                                      color="success"
-                                    >
-                                      Aktiver
-                                    </DropdownItem>
-                                  ),
-                                ]}
-                              </>
-                            </DropdownMenu>
-                          </Dropdown>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </motion.div>
-          </AnimatePresence>
+                                    user.isActive ? (
+                                      <DropdownItem
+                                        onPress={() => updateActive(user.id, false)}
+                                        key="deactivate"
+                                        className="text-danger"
+                                        startContent={<BsXCircle />}
+                                        color="danger"
+                                      >
+                                        Deaktiver
+                                      </DropdownItem>
+                                    ) : (
+                                      <DropdownItem
+                                        onPress={() => updateActive(user.id, true)}
+                                        key="deactivate"
+                                        className="text-green-900"
+                                        startContent={<BsCheckCircle />}
+                                        color="success"
+                                      >
+                                        Aktiver
+                                      </DropdownItem>
+                                    ),
+                                  ]}
+                                </>
+                              </DropdownMenu>
+                            </Dropdown>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* MOBILE LIST */}
+          <div className="block md:hidden space-y-3">
+            <AnimatePresence>
+              <div className="space-y-3">
+                {allUsers.map((user) => (
+                  <UserCard key={user.id} user={user} onOpenInfo={() => showUserInfo(user)} />
+                ))}
+              </div>
+            </AnimatePresence>
+
+            {/* PAGINATION */}
+            <div className="flex justify-center pt-2">
+              <Pagination
+                showControls
+                page={page}
+                total={totalPages}
+                onChange={setPage}
+                size="sm"
+              />
+            </div>
+          </div>
         </CardBody>
       </Card>
 
