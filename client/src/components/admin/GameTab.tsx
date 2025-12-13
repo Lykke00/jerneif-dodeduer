@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
@@ -12,7 +12,10 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  NumberInput,
 } from '@heroui/react';
+import NumberListInput from '../common/NumberListInput';
+import { useGame } from '../../hooks';
 
 interface Winner {
   id: string;
@@ -27,6 +30,12 @@ interface GameState {
 }
 
 export default function GameTab() {
+  const { game, getCurrent } = useGame();
+
+  useEffect(() => {
+    getCurrent();
+  }, []);
+
   const [gameState, setGameState] = useState<GameState>({
     status: 'stopped',
     currentWeek: 0,
@@ -63,7 +72,7 @@ export default function GameTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      {gameState.status === 'running' ? (
+      {game !== null ? (
         <>
           <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-primary/10">
@@ -71,7 +80,7 @@ export default function GameTab() {
                 <div>
                   <div className="text-xl font-bold text-foreground">Spil kørende</div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Uge {gameState.currentWeek} er i øjeblikket aktiv
+                    Uge {game.week} er i øjeblikket aktiv
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -80,12 +89,13 @@ export default function GameTab() {
                 </div>
               </div>
             </CardHeader>
-            <CardBody className="pt-6">
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4">
+            <CardBody className="pt-6 flex flex-col gap-2">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground">
-                  Startet den {gameState.startDate?.toLocaleDateString()}
+                  Startet den {new Date(game.createdAt).toLocaleString()}
                 </p>
               </div>
+              <NumberListInput />
               <Button
                 onPress={handleStopGame}
                 className="w-full h-11 font-semibold text-base bg-red-600 hover:bg-red-700 text-white transition-all"
