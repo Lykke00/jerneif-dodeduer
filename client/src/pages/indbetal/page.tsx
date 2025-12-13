@@ -78,7 +78,7 @@ export default function DepositPage() {
   };
 
   return (
-    <div className="min-h-screen w-full py-4 px-4 bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="w-full px-4 bg-gradient-to-br from-background via-background to-primary/5">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

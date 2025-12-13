@@ -99,19 +99,15 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="w-full bg-gradient-to-br from-background via-background to-primary/5">
       {/* DESKTOP */}
       <div className="hidden md:flex h-screen">
         <motion.aside
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-54 bg-card border-r border-l border-primary/20 border-border shadow-lg pr-4 pl-2 sticky top-0 overflow-y-auto"
+          className="w-54 bg-card border rounded-lg border-primary/20 border-border shadow-lg pr-4 pl-2 sticky top-0 overflow-y-auto"
         >
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-card-foreground">Admin</h2>
-          </div>
-
-          <nav className="space-y-2">
+          <nav className="space-y-2 mt-4">
             {menuItems.map((item) => {
               // Label + Children group
               if (item.type === 'label') {
@@ -172,7 +168,7 @@ export default function AdminPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="pt-2 pl-4 "
+            className="pl-4 "
           >
             <div className="max-w-6xl">
               <Outlet />

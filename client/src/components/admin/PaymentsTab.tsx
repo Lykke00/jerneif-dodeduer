@@ -101,8 +101,8 @@ export default function PaymentsTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      <Card className="border border-yellow-300/30 shadow-lg bg-card/70 backdrop-blur-sm">
-        <CardHeader className="border-b border-yellow-300/20">
+      <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
+        <CardHeader className="border-b border-primary/10">
           <div className="flex items-center gap-2">
             <div>
               <div className="text-lg font-bold text-foreground">Indbetalinger</div>
