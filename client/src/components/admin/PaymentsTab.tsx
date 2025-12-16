@@ -127,6 +127,7 @@ export default function PaymentsTab() {
             />
 
             <Select
+              aria-label="Vælg status"
               className="max-w-2/10"
               selectedKeys={new Set([status])}
               onSelectionChange={(keys) => {

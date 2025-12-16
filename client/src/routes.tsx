@@ -16,8 +16,10 @@ import UsersTab from './components/admin/UsersTab.tsx';
 import GameTab from './components/admin/GameTab.tsx';
 import PaymentsTab from './components/admin/PaymentsTab.tsx';
 import DepositLayout from './pages/indbetal/page.tsx';
-import DepositHistoryPage from './pages/indbetal/DepositHistory.tsx';
 import DepositPage from './pages/indbetal/depositpage.tsx';
+import GameSpecificTab from './components/admin/GameSpecificTab.tsx';
+import DepositHistoryPage from './pages/indbetal/deposithistory.tsx';
+import GameHistoryTab from './components/admin/GameHistoryTab.tsx';
 
 function AppRoutes() {
   const auth = useAuth();
@@ -63,7 +65,8 @@ function AppRoutes() {
             >
               <Route path="users" element={<UsersTab />} />
               <Route path="game" element={<GameTab />} />
-              <Route path="game/history" element={<GameTab />} />
+              <Route path="game/:gameId" element={<GameSpecificTab />} />
+              <Route path="game/history" element={<GameHistoryTab />} />
               <Route path="deposits" element={<PaymentsTab />} />
             </Route>
             <Route path={PageRoutes.Contact} element={<ContactPage />} />

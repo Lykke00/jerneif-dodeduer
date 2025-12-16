@@ -521,6 +521,164 @@ export class GameClient {
         }
         return Promise.resolve<ResultOfGameUserPlayResponse>(null as any);
     }
+
+    updateGame(gameId: string, request: GameUpdateRequest): Promise<ResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Game/{gameId}/update";
+        if (gameId === undefined || gameId === null)
+            throw new globalThis.Error("The parameter 'gameId' must be defined.");
+        url_ = url_.replace("{gameId}", encodeURIComponent("" + gameId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateGame(_response);
+        });
+    }
+
+    protected processUpdateGame(response: Response): Promise<ResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfGameDto>(null as any);
+    }
+
+    getWinners(gameId: string, request: PaginationRequest): Promise<PagedResultOfUserWinnerDto> {
+        let url_ = this.baseUrl + "/api/Game/{gameId}/winners";
+        if (gameId === undefined || gameId === null)
+            throw new globalThis.Error("The parameter 'gameId' must be defined.");
+        url_ = url_.replace("{gameId}", encodeURIComponent("" + gameId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetWinners(_response);
+        });
+    }
+
+    protected processGetWinners(response: Response): Promise<PagedResultOfUserWinnerDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfUserWinnerDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfUserWinnerDto>(null as any);
+    }
+
+    createGame(request: GameCreateRequest): Promise<ResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Game/create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateGame(_response);
+        });
+    }
+
+    protected processCreateGame(response: Response): Promise<ResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfGameDto>(null as any);
+    }
+
+    getAllGames(page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfGameExtendedDto> {
+        let url_ = this.baseUrl + "/api/Game/all?";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllGames(_response);
+        });
+    }
+
+    protected processGetAllGames(response: Response): Promise<PagedResultOfGameExtendedDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfGameExtendedDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfGameExtendedDto>(null as any);
+    }
 }
 
 export class UserClient {
@@ -763,7 +921,7 @@ export interface GameDto {
     id: string;
     week: number;
     year: number;
-    isActive: boolean;
+    winningNumbers: number[] | undefined;
     createdAt: string;
 }
 
@@ -783,6 +941,47 @@ export interface GameUserPlayRequest {
     gameId: string;
     amount: number;
     numbers: number[];
+}
+
+export interface GameUpdateRequest {
+    winningNumbers: number[];
+}
+
+export interface PagedResultOfUserWinnerDto {
+    items: UserWinnerDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface UserWinnerDto extends UserDto {
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
+    playedNumbers?: number[];
+    winningPlays?: number;
+}
+
+export interface PaginationRequest {
+    page: number;
+    pageSize: number;
+}
+
+export interface GameCreateRequest {
+    weekNumber: number;
+}
+
+export interface PagedResultOfGameExtendedDto {
+    items: GameExtendedDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface GameExtendedDto extends GameDto {
+    totalPlays?: number;
+    totalPrizePool?: number;
+    winners?: number;
 }
 
 export interface PagedResultOfUserDtoExtended {

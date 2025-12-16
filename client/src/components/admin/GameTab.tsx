@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Card,
@@ -13,9 +13,12 @@ import {
   TableRow,
   TableCell,
   NumberInput,
+  Form,
 } from '@heroui/react';
 import NumberListInput from '../common/NumberListInput';
 import { useGame } from '../../hooks';
+import { errorToMessage } from '../../helpers/errorToMessage';
+import { useModal } from '../../contexts/ModalContext';
 
 interface Winner {
   id: string;
@@ -23,48 +26,63 @@ interface Winner {
   winnings: number;
 }
 
-interface GameState {
-  status: 'running' | 'stopped';
-  currentWeek: number;
-  startDate: Date | null;
-}
-
 export default function GameTab() {
-  const { game, getCurrent } = useGame();
+  const { game, getCurrent, isUpdateLoading, isCreateLoading, updateGame, createGame } = useGame();
+  const { showModal } = useModal();
+
+  const [winningNumbers, setWinningNumbers] = useState<number[]>([]);
+  const [weekNumber, setWeekNumber] = useState<number>();
 
   useEffect(() => {
     getCurrent();
   }, []);
 
-  const [gameState, setGameState] = useState<GameState>({
-    status: 'stopped',
-    currentWeek: 0,
-    startDate: null,
-  });
+  const update = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(winningNumbers);
+    try {
+      if (winningNumbers.length === 0) {
+        throw new Error('Der skal være et vindertal');
+      }
 
-  const [weekNumber, setWeekNumber] = useState('');
+      await updateGame(winningNumbers);
+      setWinningNumbers([]);
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
+
+  const create = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      if (weekNumber == undefined || weekNumber == 0) {
+        throw new Error('Uge nummer skal være højere end nul');
+      }
+
+      await createGame(weekNumber);
+      setWeekNumber(undefined);
+      // opdater state her hvis relevant
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
+
   const [winners, setWinners] = useState<Winner[]>([
     { id: '1', username: 'user_001', winnings: 5000 },
     { id: '2', username: 'user_002', winnings: 3500 },
     { id: '3', username: 'user_003', winnings: 2000 },
   ]);
 
-  const handleStartGame = () => {
-    if (!weekNumber) return;
-    setGameState({
-      status: 'running',
-      currentWeek: Number.parseInt(weekNumber),
-      startDate: new Date(),
-    });
-    setWeekNumber('');
-  };
-
-  const handleStopGame = () => {
-    setGameState({
-      ...gameState,
-      status: 'stopped',
-    });
-  };
+  const hasGame = game !== null;
+  const hasWinningNumbers = (game?.winningNumbers?.length ?? 0) > 0;
 
   return (
     <motion.div
@@ -72,7 +90,8 @@ export default function GameTab() {
       animate={{ opacity: 1, y: 0 }}
       className="w-full space-y-6"
     >
-      {game !== null ? (
+      {hasGame && !hasWinningNumbers ? (
+        // Game is running - show form to enter winning numbers
         <>
           <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-primary/10">
@@ -89,23 +108,28 @@ export default function GameTab() {
                 </div>
               </div>
             </CardHeader>
-            <CardBody className="pt-6 flex flex-col gap-2">
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">
-                  Startet den {new Date(game.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <NumberListInput />
-              <Button
-                onPress={handleStopGame}
-                className="w-full h-11 font-semibold text-base bg-red-600 hover:bg-red-700 text-white transition-all"
-              >
-                Stop spil
-              </Button>
-            </CardBody>
+            <Form onSubmit={update}>
+              <CardBody className="pt-6 flex flex-col gap-2">
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Startet den {new Date(game.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <NumberListInput value={winningNumbers} onChange={setWinningNumbers} />
+                <Button
+                  name="submit"
+                  type="submit"
+                  isLoading={isUpdateLoading}
+                  className="w-full h-11 font-semibold text-base bg-red-600 hover:bg-red-700 text-white transition-all"
+                >
+                  Stop spil
+                </Button>
+              </CardBody>
+            </Form>
           </Card>
         </>
-      ) : (
+      ) : hasWinningNumbers ? (
+        // Game has winning numbers - show start new game + winners
         <>
           <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-primary/10">
@@ -115,23 +139,27 @@ export default function GameTab() {
               </div>
             </CardHeader>
             <CardBody className="space-y-4 pt-4">
-              <div>
-                <Input
+              <Form onSubmit={create} className="w-full">
+                <NumberInput
+                  isDisabled={isCreateLoading}
+                  name="weekNumber"
                   type="number"
                   label="Uge nummer"
                   value={weekNumber}
-                  onChange={(e) => setWeekNumber(e.target.value)}
+                  onValueChange={setWeekNumber}
                   placeholder="43"
                   min="1"
                 />
-              </div>
-              <Button
-                onPress={handleStartGame}
-                disabled={!weekNumber}
-                className="w-full h-11 font-semibold text-base bg-gradient-to-r from-primary to-primary/80 transition-all text-white"
-              >
-                Start spil
-              </Button>
+                <Button
+                  isLoading={isCreateLoading}
+                  type="submit"
+                  name="submit"
+                  disabled={!weekNumber}
+                  className="w-full h-11 font-semibold text-base bg-gradient-to-r from-primary to-primary/80 transition-all text-white"
+                >
+                  Start spil
+                </Button>
+              </Form>
             </CardBody>
           </Card>
 
@@ -169,6 +197,41 @@ export default function GameTab() {
                   </Table>
                 </motion.div>
               </AnimatePresence>
+            </CardBody>
+          </Card>
+        </>
+      ) : (
+        // No game - show start new game only
+        <>
+          <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
+            <CardHeader className="border-b border-primary/10">
+              <div>
+                <div className="text-xl font-bold text-foreground">Start et nyt spil</div>
+                <p className="text-sm text-muted-foreground mt-1">Opret en ny spil uge</p>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-4 pt-4">
+              <Form onSubmit={create} className="w-full">
+                <NumberInput
+                  isDisabled={isCreateLoading}
+                  name="weekNumber"
+                  type="number"
+                  label="Uge nummer"
+                  value={weekNumber}
+                  onValueChange={setWeekNumber}
+                  placeholder="43"
+                  min="1"
+                />
+                <Button
+                  name="weekNumber"
+                  type="submit"
+                  isLoading={isCreateLoading}
+                  disabled={!weekNumber}
+                  className="w-full h-11 font-semibold text-base bg-gradient-to-r from-primary to-primary/80 transition-all text-white"
+                >
+                  Start spil
+                </Button>
+              </Form>
             </CardBody>
           </Card>
         </>

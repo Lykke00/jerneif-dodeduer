@@ -157,6 +157,7 @@ export default function UsersTab() {
           {/* Actions */}
           <div className="flex items-center justify-between gap-4">
             <Select
+              aria-label="Vælg status"
               className="max-w-1/6"
               selectedKeys={
                 new Set([sortActive === undefined ? 'all' : sortActive ? 'active' : 'deactivated'])
