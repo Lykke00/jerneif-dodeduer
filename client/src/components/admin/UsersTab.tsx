@@ -30,7 +30,7 @@ import { useModal } from '../../contexts/ModalContext';
 import type { UserDtoExtended } from '../../generated-ts-client';
 import { UserCreateModal } from '../modal/UserCreateModal';
 import { errorToMessage } from '../../helpers/errorToMessage';
-import UserInfoDrawer from '../drawer/UserInfoDrawe';
+import UserInfoDrawer from '../drawer/UserInfoDrawer';
 import { MdOutlineAdminPanelSettings, MdPersonOutline } from 'react-icons/md';
 import UserCard from './UserCard';
 

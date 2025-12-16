@@ -7,6 +7,10 @@ import {
   CardBody,
   CardHeader,
   Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Pagination,
   Spinner,
   Table,
@@ -21,6 +25,12 @@ import { useEffect, useState } from 'react';
 import { type GameExtendedDto, type UserWinnerDto } from '../../generated-ts-client';
 import { AnimatePresence, motion } from 'framer-motion';
 import WinningNumbersDrawer from '../drawer/WinningNumbersDrawer';
+import { BsArrowDown, BsDownload } from 'react-icons/bs';
+import { exportCsv } from '../../helpers/export/exportCsv';
+import { exportXlsx } from '../../helpers/export/exportXlsx';
+import { exportPdf } from '../../helpers/export/exportPdf';
+import { exportDocx } from '../../helpers/export/exportDocx';
+import { mapToExportModel } from '../../types/WinnersExportModel';
 
 export default function GameSpecificTab() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -115,6 +125,8 @@ export default function GameSpecificTab() {
     );
   }
 
+  const exportModel = game && gameWinners.length ? mapToExportModel(game, gameWinners) : null;
+
   return (
     <div className="flex justify-center flex flex-col gap-2">
       <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm w-full">
@@ -163,6 +175,45 @@ export default function GameSpecificTab() {
               <div className="text-lg font-bold text-foreground">Vindere</div>
               <p className="text-xs text-muted-foreground">{totalGameWinners} vindere i alt</p>
             </div>
+
+            <Dropdown>
+              <DropdownTrigger>
+                <Button variant="bordered" className="border-primary/15 hover:bg-primary/15">
+                  Eksporter
+                  <BsArrowDown />
+                </Button>
+              </DropdownTrigger>
+
+              <DropdownMenu aria-label="Eksportér vindere">
+                <DropdownItem key="csv" onPress={() => exportModel && exportCsv(exportModel)}>
+                  <div className="flex w-full justify-between items-center">
+                    <span>CSV</span>
+                    <span className="text-xs text-muted-foreground">(.csv)</span>
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem key="xlsx" onPress={() => exportModel && exportXlsx(exportModel)}>
+                  <div className="flex w-full justify-between items-center">
+                    <span>Excel</span>
+                    <span className="text-xs text-muted-foreground">(.xlsx)</span>
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem key="pdf" onPress={() => exportModel && exportPdf(exportModel)}>
+                  <div className="flex w-full justify-between items-center">
+                    <span>PDF</span>
+                    <span className="text-xs text-muted-foreground">(.pdf)</span>
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem key="docx" onPress={() => exportModel && exportDocx(exportModel)}>
+                  <div className="flex w-full justify-between items-center">
+                    <span>Word</span>
+                    <span className="text-xs text-muted-foreground">(.docx)</span>
+                  </div>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </div>
 
           <Divider />
