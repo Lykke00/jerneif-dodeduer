@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { PageRoutes } from '../../PageRoutes';
 
@@ -54,13 +53,19 @@ const menuItems: MenuItem[] = [
 ];
 
 export default function AdminPage() {
-  const [activeSection, setActiveSection] = useState<string>('users');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeSection = (() => {
+    const match = menuItems
+      .flatMap((item) => (item.type === 'label' ? item.children : [item]))
+      .find((item) => matchPath(item.route, location.pathname));
+
+    return match?.id;
+  })();
 
   const handleTabChange = (item: MenuItem) => {
-    if (item.type !== 'button') return; // ignore labels
-
-    setActiveSection(item.id);
+    if (item.type !== 'button') return;
     navigate(item.route);
   };
 

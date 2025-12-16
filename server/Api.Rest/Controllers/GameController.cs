@@ -63,4 +63,10 @@ public class GameController(IGameService gameService) : ControllerBase
         return await gameService.GetAllGamesAsync(request);
     }
     
+    [Authorize(Roles = "admin")]
+    [HttpGet("details")]
+    public async Task<Result<GameExtendedDto>> GetGameDetails([FromQuery] Guid gameId)
+    {
+        return await gameService.GetGameDetailsAsync(gameId);
+    }
 }

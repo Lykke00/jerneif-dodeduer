@@ -95,7 +95,7 @@ export default function GameHistoryTab() {
                   <TableHeader>
                     <TableColumn>UGE</TableColumn>
                     <TableColumn>ÅR</TableColumn>
-                    <TableColumn align="end">TOTAL SPIL</TableColumn>
+                    <TableColumn align="end">BRÆT KØBT</TableColumn>
                     <TableColumn align="end">VINDERE</TableColumn>
                     <TableColumn align="end">OMSÆTNING</TableColumn>
                     <TableColumn align="end">{''}</TableColumn>
@@ -115,7 +115,7 @@ export default function GameHistoryTab() {
                         </TableCell>
                         <TableCell className="text-right font-semibold">{game.winners}</TableCell>
                         <TableCell className="text-right font-semibold">
-                          {game.totalPrizePool?.toLocaleString('da-DK')} kr
+                          {game.totalPrizePool},-
                         </TableCell>
                         <TableCell>
                           <div className="flex justify-end">
@@ -151,7 +151,7 @@ export default function GameHistoryTab() {
                       </div>
                       <div className="text-sm text-muted-foreground">Bræt: {game.totalPlays}</div>
                       <div className="text-sm font-medium">
-                        Omsætning: {game.totalPrizePool?.toLocaleString('da-DK')} kr
+                        Omsætning: {game.totalPrizePool?.toLocaleString('da-DK')},-
                       </div>
 
                       <Button

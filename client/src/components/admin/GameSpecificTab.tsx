@@ -15,22 +15,63 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from '@heroui/react';
-import ErrorState from '../common/ErrorState';
 import { useEffect, useState } from 'react';
-import type { PagedResultOfGameExtendedDto, UserWinnerDto } from '../../generated-ts-client';
+import { type GameExtendedDto, type UserWinnerDto } from '../../generated-ts-client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BsEye } from 'react-icons/bs';
+import WinningNumbersDrawer from '../drawer/WinningNumbersDrawer';
 
 export default function GameSpecificTab() {
   const { gameId } = useParams<{ gameId: string }>();
 
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const [selectedUser, setSelectedUser] = useState<UserWinnerDto | undefined>();
+  const [selectedNumbers, setSelectedNumbers] = useState<number[][]>([]);
+
   const [page, setPage] = useState(1);
-  const { getGameWinners, isLoading, isSubmitLoading, play } = useGame();
+  const { getGameWinners, getGameInfo, isLoading } = useGame();
   const { showModal } = useModal();
 
+  const [game, setCurrentGame] = useState<GameExtendedDto>();
   const [gameWinners, setGameWinners] = useState<UserWinnerDto[]>([]);
   const [totalGameWinners, setTotalGameWinners] = useState<number>(0);
+  const pageSize = 10;
+  const totalPages = Math.ceil(totalGameWinners / pageSize);
+
+  useEffect(() => {
+    let isActive = true;
+
+    (async () => {
+      try {
+        if (gameId == null) {
+          showModal({
+            variant: 'error',
+            title: 'En fejl opstod',
+            description: 'Kunne ikke hente spil-info',
+          });
+          return;
+        }
+
+        const gameInfo = await getGameInfo(gameId);
+        if (!isActive) return;
+
+        setCurrentGame(gameInfo);
+      } catch {
+        showModal({
+          variant: 'error',
+          title: 'En fejl opstod',
+          description: 'Kunne ikke hente spil-info',
+        });
+      }
+    })();
+
+    return () => {
+      isActive = false;
+    };
+  }, [gameId]);
+
+  const winningNumberSet = new Set(game?.winningNumbers ?? []);
 
   useEffect(() => {
     let isActive = true;
@@ -46,9 +87,10 @@ export default function GameSpecificTab() {
           return;
         }
 
-        const res = await getGameWinners(gameId, 1, 10);
+        const res = await getGameWinners(gameId, page, pageSize);
         if (!isActive) return;
 
+        console.log(res);
         setGameWinners(res.items);
         setTotalGameWinners(res.totalCount);
       } catch {
@@ -74,7 +116,45 @@ export default function GameSpecificTab() {
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center flex flex-col gap-2">
+      <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm w-full">
+        <CardBody className="p-4 gap-3">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-lg font-bold text-foreground">
+                Uge {game?.week} – {game?.year}
+              </div>
+              <p className="text-xs text-muted-foreground">{game?.totalPlays} bræt købt</p>
+              <p className="text-xs text-muted-foreground">{game?.totalPrizePool},- brugt ialt</p>
+            </div>
+
+            {game?.createdAt && (
+              <span className="text-xs text-muted-foreground">
+                Oprettet {new Date(game.createdAt).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+
+          <Divider />
+
+          {/* Winning numbers */}
+          {game?.winningNumbers?.length ? (
+            <div className="flex flex-wrap gap-2">
+              {game.winningNumbers.map((num) => (
+                <div
+                  key={num}
+                  className="h-8 w-8 flex items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium"
+                >
+                  {num}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">Ingen vinder-tal registreret</p>
+          )}
+        </CardBody>
+      </Card>
       <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm w-full">
         <CardBody className="p-4 gap-2 overflow-visible">
           {/* Header */}
@@ -99,7 +179,7 @@ export default function GameSpecificTab() {
                       <Pagination
                         showControls
                         page={page}
-                        total={totalGameWinners}
+                        total={totalPages}
                         onChange={setPage}
                         size="sm"
                       />
@@ -109,6 +189,7 @@ export default function GameSpecificTab() {
                   <TableHeader>
                     <TableColumn>Navn</TableColumn>
                     <TableColumn>Total spil</TableColumn>
+                    <TableColumn>Kostet</TableColumn>
                     <TableColumn>Vinder tal</TableColumn>
                   </TableHeader>
 
@@ -117,13 +198,57 @@ export default function GameSpecificTab() {
                     loadingContent={<Spinner label="Indlæser..." />}
                     emptyContent="Ingen spil fundet"
                   >
-                    {gameWinners.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.fullName}</TableCell>
-                        <TableCell className="font-medium">{user.winningPlays}</TableCell>
-                        <TableCell className="font-medium">{user.winningPlays}</TableCell>
-                      </TableRow>
-                    ))}
+                    {gameWinners.map((user) => {
+                      const playedNumbers = user.playedNumbers ?? [];
+                      const firstPlay = playedNumbers[0];
+
+                      return (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.fullName}</TableCell>
+                          <TableCell className="font-medium">{user.winningPlays}</TableCell>
+                          <TableCell className="font-medium">{user.totalSpent},-</TableCell>
+
+                          <TableCell className="flex flex-row gap-2">
+                            {firstPlay?.length ? (
+                              <div className="flex flex-wrap gap-1">
+                                {firstPlay.map((num, index) => {
+                                  const isWinning = winningNumberSet.has(num);
+
+                                  return (
+                                    <span
+                                      key={`${num}-${index}`}
+                                      className={`h-6 w-6 flex border items-center justify-center rounded-full text-xs font-medium
+                                        ${
+                                          isWinning
+                                            ? 'bg-success/20 text-green-900 border-success/30'
+                                            : 'bg-primary/10 text-primary border-primary/20'
+                                        }`}
+                                    >
+                                      {num}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground italic">–</span>
+                            )}
+
+                            {user.playedNumbers?.length && user.playedNumbers.length > 1 && (
+                              <button
+                                className="hover:underline cursor-pointer"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setSelectedNumbers(user.playedNumbers ?? []);
+                                  onOpen();
+                                }}
+                              >
+                                +{playedNumbers.length - 1} flere
+                              </button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </motion.div>
@@ -160,7 +285,7 @@ export default function GameSpecificTab() {
               <Pagination
                 showControls
                 page={page}
-                total={totalGameWinners}
+                total={totalPages}
                 onChange={setPage}
                 size="sm"
               />
@@ -168,6 +293,14 @@ export default function GameSpecificTab() {
           </div>
         </CardBody>
       </Card>
+
+      <WinningNumbersDrawer
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        winningNumbers={game?.winningNumbers}
+        user={selectedUser}
+        numbers={selectedNumbers}
+      />
     </div>
   );
 }

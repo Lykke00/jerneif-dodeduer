@@ -1,5 +1,6 @@
 import {
   type GameDto,
+  type GameExtendedDto,
   type GameUserPlayResponse,
   type PagedResultOfGameExtendedDto,
   type PagedResultOfUserWinnerDto,
@@ -23,6 +24,7 @@ type useGameTypes = {
     page: number,
     pageSize: number
   ) => Promise<PagedResultOfUserWinnerDto>;
+  getGameInfo: (gameId: string) => Promise<GameExtendedDto>;
   game: GameDto | null;
   isSubmitLoading: boolean;
   isUpdateLoading: boolean;
@@ -196,6 +198,28 @@ export const useGame = (): useGameTypes => {
     }
   };
 
+  const getGameInfo = async (gameId: string): Promise<GameExtendedDto> => {
+    try {
+      const response = await withLoading(() =>
+        makeApiCall(() => gameClient.getGameDetails(gameId))
+      );
+
+      var game = response.value;
+      if (game == null) {
+        throw new Error('En fejl skete ved at hente spil');
+      }
+
+      return game;
+    } catch (e) {
+      const apiError = extractApiErrors(e);
+      if (apiError) {
+        throw new Error(apiError);
+      }
+
+      throw e;
+    }
+  };
+
   return {
     getCurrent,
     play,
@@ -203,6 +227,7 @@ export const useGame = (): useGameTypes => {
     createGame,
     getAll,
     getGameWinners,
+    getGameInfo,
     game,
     isSubmitLoading,
     isUpdateLoading,

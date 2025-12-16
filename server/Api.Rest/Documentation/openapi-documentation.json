@@ -658,6 +658,44 @@
         ]
       }
     },
+    "/api/Game/details": {
+      "get": {
+        "tags": [
+          "Game"
+        ],
+        "operationId": "Game_GetGameDetails",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfGameExtendedDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": [
+              "admin"
+            ]
+          }
+        ]
+      }
+    },
     "/api/User/all": {
       "get": {
         "tags": [
@@ -1454,11 +1492,18 @@
               "playedNumbers": {
                 "type": "array",
                 "items": {
-                  "type": "integer",
-                  "format": "int32"
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
                 }
               },
               "winningPlays": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "totalSpent": {
                 "type": "integer",
                 "format": "int32"
               }
@@ -1551,6 +1596,42 @@
             }
           }
         ]
+      },
+      "ResultOfGameExtendedDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GameExtendedDto"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
       },
       "PagedResultOfUserDtoExtended": {
         "type": "object",
