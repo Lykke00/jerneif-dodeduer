@@ -1,10 +1,13 @@
 ﻿CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+DROP TABLE IF EXISTS "game_plays_numbers";
+DROP TABLE IF EXISTS "game_plays";
+DROP TABLE IF EXISTS "game_winning_numbers";
 DROP TABLE IF EXISTS "users_balance";
 DROP TABLE IF EXISTS "user_login_tokens";
 DROP TABLE IF EXISTS "deposits";
+DROP TABLE IF EXISTS "games";
 DROP TABLE IF EXISTS "users";
-DROP TABLE IF EXISTS "game";
 
 CREATE TABLE "users"
 (
@@ -31,19 +34,6 @@ CREATE TABLE user_login_tokens (
     "consumed_user_agent"    TEXT NULL
 );
 
-CREATE TABLE users_balance
-(
-    "id"         UUID PRIMARY KEY        DEFAULT uuid_generate_v4(),
-    "user_id"    UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    "amount"     NUMERIC(12, 2) NOT NULL,
-    "type"       TEXT           NOT NULL DEFAULT 'deposit',
-    "deposit_id" UUID           REFERENCES deposits (id) ON DELETE CASCADE,
-    "play_id"    UUID           REFERENCES game_plays (id) ON DELETE CASCADE,
-    "created_at" TIMESTAMPTZ    DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    
-    CONSTRAINT type_check CHECK ("type" IN ('deposit', 'play'))
-);
-
 CREATE TABLE deposits (
     "id"                     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "user_id"                UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -63,9 +53,18 @@ CREATE TABLE "games"
     "id"            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "week"          INT NOT NULL,
     "year"          INT NOT NULL,
-    "active"        BOOLEAN DEFAULT TRUE NOT NULL ,
     "created_at"    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE TABLE game_winning_numbers
+(
+    "game_id"    UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+    "number"     INT NOT NULL,
+
+    PRIMARY KEY (game_id, number),
+    CONSTRAINT number_range_check CHECK (number BETWEEN 1 AND 16)
+);
+
 
 CREATE TABLE "game_plays"
 (
@@ -73,6 +72,19 @@ CREATE TABLE "game_plays"
     "game_id"       UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     "user_id"       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     "created_at"    TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE users_balance
+(
+    "id"         UUID PRIMARY KEY        DEFAULT uuid_generate_v4(),
+    "user_id"    UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    "amount"     NUMERIC(12, 2) NOT NULL,
+    "type"       TEXT           NOT NULL DEFAULT 'deposit',
+    "deposit_id" UUID           REFERENCES deposits (id) ON DELETE CASCADE,
+    "play_id"    UUID           REFERENCES game_plays (id) ON DELETE CASCADE,
+    "created_at" TIMESTAMPTZ    DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    CONSTRAINT type_check CHECK ("type" IN ('deposit', 'play'))
 );
 
 CREATE TABLE "game_plays_numbers"
@@ -121,13 +133,6 @@ CREATE UNIQUE INDEX idx_users_balance_deposit_id
 
 CREATE INDEX idx_users_balance_user_created_at
     ON users_balance (user_id, created_at DESC);
-
-CREATE UNIQUE INDEX idx_users_balance_play_id
-    ON users_balance (play_id)
-    WHERE play_id IS NOT NULL;
-
-CREATE INDEX idx_games_active
-    ON games (active);
 
 CREATE UNIQUE INDEX idx_games_week_year
     ON games (week, year);

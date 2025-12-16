@@ -33,7 +33,7 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
     {
         // find det aktive spil
         var game = await context.Games
-            .FirstOrDefaultAsync(g => g.Active);
+            .FirstOrDefaultAsync(g => g.GameWinningNumbers.Count == 0);
 
         if (game == null)
             return Result<GameDto>.NotFound("No active game found.");

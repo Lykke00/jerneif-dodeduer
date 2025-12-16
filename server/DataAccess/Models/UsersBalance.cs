@@ -39,7 +39,7 @@ public partial class UsersBalance
     public virtual Deposit? Deposit { get; set; }
 
     [ForeignKey("PlayId")]
-    [InverseProperty("UsersBalance")]
+    [InverseProperty("UsersBalances")]
     public virtual GamePlay? Play { get; set; }
 
     [ForeignKey("UserId")]

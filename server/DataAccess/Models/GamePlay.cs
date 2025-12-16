@@ -35,5 +35,5 @@ public partial class GamePlay
     public virtual User User { get; set; } = null!;
 
     [InverseProperty("Play")]
-    public virtual UsersBalance? UsersBalance { get; set; }
+    public virtual ICollection<UsersBalance> UsersBalances { get; set; } = new List<UsersBalance>();
 }

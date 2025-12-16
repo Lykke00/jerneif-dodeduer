@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 namespace DataAccess.Models;
 
 [Table("games")]
-[Index("Active", Name = "idx_games_active")]
 [Index("Week", "Year", Name = "idx_games_week_year", IsUnique = true)]
 public partial class Game
 {
@@ -21,12 +20,12 @@ public partial class Game
     [Column("year")]
     public int Year { get; set; }
 
-    [Column("active")]
-    public bool Active { get; set; }
-
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
     [InverseProperty("Game")]
     public virtual ICollection<GamePlay> GamePlays { get; set; } = new List<GamePlay>();
+
+    [InverseProperty("Game")]
+    public virtual ICollection<GameWinningNumber> GameWinningNumbers { get; set; } = new List<GameWinningNumber>();
 }

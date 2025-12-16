@@ -20,6 +20,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<GamePlaysNumber> GamePlaysNumbers { get; set; }
 
+    public virtual DbSet<GameWinningNumber> GameWinningNumbers { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserLoginToken> UserLoginTokens { get; set; }
@@ -50,7 +52,6 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("games_pkey");
 
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
-            entity.Property(e => e.Active).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
@@ -71,6 +72,13 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => new { e.PlayId, e.Number }).HasName("game_plays_numbers_pkey");
 
             entity.HasOne(d => d.Play).WithMany(p => p.GamePlaysNumbers).HasConstraintName("game_plays_numbers_play_id_fkey");
+        });
+
+        modelBuilder.Entity<GameWinningNumber>(entity =>
+        {
+            entity.HasKey(e => new { e.GameId, e.Number }).HasName("game_winning_numbers_pkey");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.GameWinningNumbers).HasConstraintName("game_winning_numbers_game_id_fkey");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -101,10 +109,6 @@ public partial class AppDbContext : DbContext
                 .IsUnique()
                 .HasFilter("(deposit_id IS NOT NULL)");
 
-            entity.HasIndex(e => e.PlayId, "idx_users_balance_play_id")
-                .IsUnique()
-                .HasFilter("(play_id IS NOT NULL)");
-
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.Type).HasDefaultValueSql("'deposit'::text");
@@ -113,7 +117,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("users_balance_deposit_id_fkey");
 
-            entity.HasOne(d => d.Play).WithOne(p => p.UsersBalance)
+            entity.HasOne(d => d.Play).WithMany(p => p.UsersBalances)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("users_balance_play_id_fkey");
 
