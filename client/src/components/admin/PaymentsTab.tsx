@@ -118,7 +118,7 @@ export default function PaymentsTab() {
           <div className="flex flex-row justify-between gap-4 w-full">
             <Input
               className="max-w-2xs"
-              placeholder="Søg..."
+              placeholder="Søg betalingsid eller email..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -198,6 +198,9 @@ export default function PaymentsTab() {
 
                         <div className="text-sm font-medium text-foreground/80 truncate">
                           {payment.user?.email}
+                        </div>
+                        <div className="text-xs font-medium text-foreground/80 truncate">
+                          {payment.paymentId}
                         </div>
                       </div>
 

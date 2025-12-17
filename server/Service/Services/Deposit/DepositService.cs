@@ -95,12 +95,11 @@ public class DepositService(AppDbContext context, IUserBalanceService userBalanc
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var search = request.Search.Trim();
+            var search = $"%{request.Search.Trim()}%";
 
             query = query.Where(d =>
-                (d.PaymentId != null && d.PaymentId.Contains(search)) ||
-                d.User!.Email.Contains(search) ||
-                d.User!.Id.ToString().Contains(search)
+                (d.PaymentId != null && EF.Functions.ILike(d.PaymentId, search)) ||
+                EF.Functions.ILike(d.User!.Email, search)
             );
         }
 
