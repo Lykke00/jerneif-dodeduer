@@ -17,7 +17,7 @@ type useUserBoardTypes = {
     page: number,
     pageSize: number
   ): Promise<PagedResultOfUserGameBoardDto>;
-  create(numbers: number[], amount: number, repeatCount: number): Promise<UserGameBoardDto>;
+  create(numbers: number[], repeatCount: number): Promise<UserGameBoardDto>;
   deactivate(boardId: string): Promise<boolean>;
   history(boardId: string): Promise<UserGameBoardHistoryDto[]>;
   isCreateLoading: boolean;
@@ -59,15 +59,11 @@ export const useUserBoards = (): useUserBoardTypes => {
     }
   };
 
-  const create = async (
-    numbers: number[],
-    amount: number,
-    repeatCount: number
-  ): Promise<UserGameBoardDto> => {
+  const create = async (numbers: number[], repeatCount: number): Promise<UserGameBoardDto> => {
     // prøv at kald backend og se om vi kan logge brugeren ind
     try {
       const response = await withCreateLoading(() =>
-        makeApiCall(() => userBoardClient.createUserBoard({ numbers, amount, repeatCount }))
+        makeApiCall(() => userBoardClient.createUserBoard({ numbers, repeatCount }))
       );
 
       var createdBoard = response.value;

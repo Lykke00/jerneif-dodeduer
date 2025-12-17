@@ -1220,7 +1220,6 @@ export interface ResultOfUserGameBoardDto {
 
 export interface CreateUserGameBoardRequest {
     numbers: number[];
-    amount: number;
     repeatCount: number;
 }
 

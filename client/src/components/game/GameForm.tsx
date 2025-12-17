@@ -17,7 +17,12 @@ type GameFormProps = {
   maxSelections?: number;
   maxAmount?: number;
   isLoading: boolean;
-  onSubmit: (amount: number, numbers: number[]) => Promise<boolean>;
+  onSubmit: (data: {
+    amount: number;
+    numbers: number[];
+    autoBuyEnabled: boolean;
+    repeatCount: number;
+  }) => Promise<boolean>;
 };
 
 export default function GameForm({
@@ -30,6 +35,8 @@ export default function GameForm({
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [success, setSuccess] = useState(false);
+  const [autoBuyEnabled, setAutoBuyEnabled] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(1);
 
   const currentPrice = useMemo(() => {
     if (selectedNumbers.length >= minSelections && selectedNumbers.length <= maxSelections) {
@@ -72,7 +79,12 @@ export default function GameForm({
     e.preventDefault();
     if (!canSubmit) return;
 
-    const ok = await onSubmit(quantity, selectedNumbers);
+    const ok = await onSubmit({
+      amount: quantity,
+      numbers: selectedNumbers,
+      autoBuyEnabled,
+      repeatCount,
+    });
 
     if (ok) {
       setSuccess(true);
@@ -81,6 +93,7 @@ export default function GameForm({
         setSuccess(false);
         setSelectedNumbers([]);
         setQuantity(1);
+        setAutoBuyEnabled(false);
       }, 1500);
     }
   };
@@ -227,7 +240,26 @@ export default function GameForm({
         >
           {success ? 'Købt ✓' : `Køb ${quantity > 1 ? quantity : ''} bræt`}
         </Button>
-        <Checkbox>Auto-køb ugentligt</Checkbox>
+        <Checkbox isSelected={autoBuyEnabled} onValueChange={setAutoBuyEnabled}>
+          Auto-køb ugentligt
+        </Checkbox>
+        <AnimatePresence>
+          {autoBuyEnabled && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="w-full max-w-xs"
+            >
+              <NumberInput
+                label="Gentag i uger"
+                minValue={1}
+                value={repeatCount}
+                onValueChange={(v) => v && setRepeatCount(v)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </Form>
   );

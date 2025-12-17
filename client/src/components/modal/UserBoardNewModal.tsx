@@ -10,8 +10,6 @@ import {
   Button,
   Divider,
   Input,
-  Checkbox,
-  Spinner,
   Form,
   NumberInput,
 } from '@heroui/react';
@@ -19,20 +17,18 @@ import { useModal } from '../../contexts/ModalContext';
 
 type FormState = {
   numbers: number[];
-  amount: number;
   repeat: number;
 };
 
 type Props = {
   isOpen: boolean;
   onOpenChange: () => void;
-  createBoard: (numbers: number[], amount: number, repeat: number) => Promise<void>;
+  createBoard: (numbers: number[], repeat: number) => Promise<void>;
   loading: boolean;
 };
 
 const initialForm: FormState = {
   numbers: [],
-  amount: 1,
   repeat: 1,
 };
 
@@ -86,7 +82,7 @@ export const UserBoardNewModal: React.FC<Props> = ({
 
   const onSubmit = async () => {
     try {
-      await createBoard(form.numbers, form.amount, form.repeat);
+      await createBoard(form.numbers, form.repeat);
       setForm(initialForm);
       onOpenChange();
     } catch (err) {
@@ -98,7 +94,7 @@ export const UserBoardNewModal: React.FC<Props> = ({
     }
   };
 
-  const isSubmitDisabled = loading || !form.numbers || !form.amount || !form.repeat;
+  const isSubmitDisabled = loading || !form.numbers || !form.repeat;
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} backdrop="opaque">
@@ -127,29 +123,16 @@ export const UserBoardNewModal: React.FC<Props> = ({
                     isDisabled={loading}
                     isRequired
                   />
-                  <div className="flex flex-row gap-2">
-                    <NumberInput
-                      label="Antal"
-                      placeholder="1"
-                      minValue={1}
-                      value={form.amount}
-                      onValueChange={updateField('amount')}
-                      isDisabled={loading}
-                      isRequired
-                      name="firstName"
-                    />
-
-                    <NumberInput
-                      label="Ugentlige gentagelser"
-                      placeholder="1"
-                      minValue={1}
-                      value={form.repeat}
-                      onValueChange={updateField('repeat')}
-                      isDisabled={loading}
-                      isRequired
-                      name="lastName"
-                    />
-                  </div>
+                  <NumberInput
+                    label="Ugentlige gentagelser"
+                    placeholder="1"
+                    minValue={1}
+                    value={form.repeat}
+                    onValueChange={updateField('repeat')}
+                    isDisabled={loading}
+                    isRequired
+                    name="weeklyRepeat"
+                  />
                 </div>
               </ModalBody>
 

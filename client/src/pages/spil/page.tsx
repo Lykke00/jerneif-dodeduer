@@ -1,6 +1,6 @@
 import { addToast, Card, CardHeader, Spinner } from '@heroui/react';
-import { useEffect } from 'react';
-import { useGame } from '../../hooks';
+import { useEffect, useState } from 'react';
+import { useGame, useUserBoards } from '../../hooks';
 import ErrorState from '../../components/common/ErrorState';
 import GameForm from '../../components/game/GameForm';
 import { useModal } from '../../contexts/ModalContext';
@@ -8,7 +8,10 @@ import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function DeadPigeonsGame() {
   const { game, isLoading, isSubmitLoading, getCurrent, play } = useGame();
+  const { create } = useUserBoards();
   const { showModal } = useModal();
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(1);
 
   useEffect(() => {
     getCurrent();
@@ -16,14 +19,36 @@ export default function DeadPigeonsGame() {
 
   const formatNumbers = (numbers: number[]) => numbers.sort((a, b) => a - b).join('-');
 
-  const onSubmit = async (amount: number, numbers: number[]) => {
+  const onSubmit = async ({
+    amount,
+    numbers,
+    autoBuyEnabled,
+    repeatCount,
+  }: {
+    amount: number;
+    numbers: number[];
+    autoBuyEnabled: boolean;
+    repeatCount: number;
+  }): Promise<boolean> => {
     try {
       await play(amount, numbers);
 
+      if (autoBuyEnabled && repeatCount) {
+        await create(numbers, repeatCount);
+      }
+
+      const title = autoBuyEnabled ? 'Bræt købt og auto-køb oprettet' : 'Bræt blev købt';
+
+      const description = autoBuyEnabled
+        ? `Du har købt ${amount} bræt med numrene ${formatNumbers(
+            numbers
+          )}. Brættet bliver automatisk købt hver uge i ${repeatCount} uger.`
+        : `Du har købt ${amount} bræt med numrene ${formatNumbers(numbers)}.`;
+
       showModal({
         variant: 'success',
-        title: 'Bræt blev købt',
-        description: `Du har købt ${amount} bræt med numrene ${formatNumbers(numbers)}`,
+        title,
+        description,
       });
 
       return true;

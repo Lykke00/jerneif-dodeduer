@@ -75,7 +75,8 @@ export default function UserboardHistoryDrawer({
                     {/* Numbers */}
                     <div className="flex flex-wrap gap-1">
                       {play.numbers.map((num, i) => {
-                        const isWinning = hasAllWinningNumbers && winningNumberSet.has(num);
+                        const isWinning =
+                          hasAllWinningNumbers && winningNumberSet.has(num) && play.isSuccess;
 
                         return (
                           <span

@@ -15,10 +15,7 @@ public class CreateUserGameBoardRequestValidator : AbstractValidator<CreateUserG
             .WithMessage("Numbers must be between 1 and 16.")
             .Must(numbers => numbers.Count >= 5 && numbers.Count <= 8)
             .WithMessage("5-8 Numbers must be provided.");
-
-        RuleFor(x => x.Amount)
-            .GreaterThan(0).WithMessage("Amount must be greater than zero.");
-
+        
         RuleFor(x => x.RepeatCount)
             .GreaterThan(0).WithMessage("Repeat count must be greater than zero.");
     }

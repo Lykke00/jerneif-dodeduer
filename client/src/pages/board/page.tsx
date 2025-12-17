@@ -63,9 +63,9 @@ export default function UserBoardPage() {
     }
   };
 
-  const createBoard = async (numbers: number[], amount: number, repeat: number) => {
+  const createBoard = async (numbers: number[], repeat: number) => {
     try {
-      await create(numbers, amount, repeat);
+      await create(numbers, repeat);
 
       setReloadKey((k) => k + 1);
 
