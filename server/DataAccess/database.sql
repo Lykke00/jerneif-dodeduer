@@ -136,6 +136,8 @@ CREATE TABLE board_played_games (
     "board_id"         UUID NOT NULL REFERENCES game_boards(id),
     "game_id"          UUID NOT NULL REFERENCES games(id),
     "repeat_plan_id"   UUID NULL REFERENCES board_repeat_plans(id),
+    "success"          BOOLEAN NOT NULL DEFAULT FALSE,
+    "message"          TEXT NULL,
     
     "played_at"        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     

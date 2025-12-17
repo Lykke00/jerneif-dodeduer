@@ -171,7 +171,12 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         return Result<GameDto>.Ok(GameDto.FromDatabase(updatedGame));    
     }
     
-    public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
+public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
+{
+    await using var tx = await context.Database.BeginTransactionAsync(
+        IsolationLevel.Serializable);
+
+    try
     {
         // tjek om spillet allerede findes
         var activeGameExists = await context.Games
@@ -201,10 +206,106 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         };
 
         context.Games.Add(newGame);
+        await context.SaveChangesAsync(); // save game first to get the ID
+
+        // Hent alle aktive boards med deres repeat plans
+        var activeBoards = await context.GameBoards
+            .Include(b => b.GameBoardNumbers)
+            .Include(b => b.BoardRepeatPlans)
+            .Where(b => b.BoardRepeatPlans.Any(rp => rp.Active))
+            .Select(b => new
+            {
+                Board = b,
+                ActivePlan = b.BoardRepeatPlans.First(rp => rp.Active),
+                Numbers = b.GameBoardNumbers.Select(n => n.Number).ToList(),
+                NumberCount = b.GameBoardNumbers.Count
+            })
+            .ToListAsync();
+
+        // processer hvert aktiv board
+        foreach (var boardData in activeBoards)
+        {
+            var userId = boardData.Board.UserId;
+            var repeatCount = boardData.ActivePlan.RepeatCount;
+            var playedCount = boardData.ActivePlan.PlayedCount;
+            
+            // Tjek om board har nået sit limit
+            if (playedCount >= repeatCount)
+            {
+                // Deaktiver planen hvis den er færdig
+                boardData.ActivePlan.Active = false;
+                boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
+                continue;
+            }
+
+            // Beregn pris for dette board
+            var boardPrice = GamePricing.CalculateBoardPrice(boardData.NumberCount);
+
+            // Tjek brugerens balance
+            var balance = await context.UsersBalances
+                .Where(x => x.UserId == userId)
+                .SumAsync(x => x.Amount);
+
+            if (balance < boardPrice)
+            {
+                // Ikke nok balance - deaktiver planen
+                boardData.ActivePlan.Active = false;
+                boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
+
+                BoardPlayedGame playedGame = new BoardPlayedGame
+                {
+                    BoardId = boardData.Board.Id,
+                    GameId = newGame.Id,
+                    PlayedAt = DateTime.UtcNow,
+                    RepeatPlanId = boardData.ActivePlan.Id,
+                    Message = "Insufficient balance",
+                    Success = false
+                };
+                context.BoardPlayedGames.Add(playedGame);
+                continue;
+            }
+
+            // Opret spillet
+            var gamePlay = CreateGamePlay(userId, newGame.Id, boardData.Numbers);
+            context.GamePlays.Add(gamePlay);
+
+            // Træk beløbet fra balance
+            await balanceService.AddPlayAsync(userId, gamePlay.Id, boardPrice);
+
+            // Opdater played count
+            boardData.ActivePlan.PlayedCount++;
+
+            // Deaktiver hvis alle spil er brugt
+            if (boardData.ActivePlan.PlayedCount >= boardData.ActivePlan.RepeatCount)
+            {
+                boardData.ActivePlan.Active = false;
+                boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
+            }
+            
+            BoardPlayedGame played = new BoardPlayedGame
+            {
+                BoardId = boardData.Board.Id,
+                GameId = newGame.Id,
+                PlayedAt = DateTime.UtcNow,
+                RepeatPlanId = boardData.ActivePlan.Id,
+                Message = "Played successfully",
+                Success = true
+            };
+            context.BoardPlayedGames.Add(played);
+        }
+        
+
         await context.SaveChangesAsync();
+        await tx.CommitAsync();
 
         return Result<GameDto>.Ok(GameDto.FromDatabase(newGame));
     }
+    catch (Exception ex)
+    {
+        await tx.RollbackAsync();
+        return Result<GameDto>.InternalError($"An error occurred while creating the game: {ex.Message}");
+    }
+}
     
 public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
     Guid gameId,

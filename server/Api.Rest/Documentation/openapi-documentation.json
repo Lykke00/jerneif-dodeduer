@@ -704,13 +704,22 @@
         "operationId": "UserBoard_GetAllUserBoards",
         "parameters": [
           {
+            "name": "Active",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
             "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 1
+            "x-position": 2
           },
           {
             "name": "PageSize",
@@ -719,7 +728,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 2
+            "x-position": 3
           }
         ],
         "responses": {
@@ -766,6 +775,80 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResultOfUserGameBoardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/UserBoard/deactivate/{boardId}": {
+      "post": {
+        "tags": [
+          "UserBoard"
+        ],
+        "operationId": "UserBoard_DeactivateUserBoard",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfBoolean"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/UserBoard/{boardId}/history": {
+      "get": {
+        "tags": [
+          "UserBoard"
+        ],
+        "operationId": "UserBoard_GetUserBoardDetails",
+        "parameters": [
+          {
+            "name": "boardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfListOfUserGameBoardHistoryDto"
                 }
               }
             }
@@ -1860,6 +1943,86 @@
           "repeatCount": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ResultOfListOfUserGameBoardHistoryDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/UserGameBoardHistoryDto"
+            }
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "UserGameBoardHistoryDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "gameWeek",
+          "year",
+          "price",
+          "numbers",
+          "winningNumbers",
+          "message",
+          "isSuccess"
+        ],
+        "properties": {
+          "gameWeek": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "winningNumbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "isSuccess": {
+            "type": "boolean"
           }
         }
       },

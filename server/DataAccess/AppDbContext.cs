@@ -46,6 +46,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(e => e.PlayedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.Success).HasDefaultValue(false);
 
             entity.HasOne(d => d.Board).WithMany(p => p.BoardPlayedGames)
                 .OnDelete(DeleteBehavior.ClientSetNull)

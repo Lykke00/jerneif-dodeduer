@@ -23,6 +23,12 @@ public partial class BoardPlayedGame
     [Column("repeat_plan_id")]
     public Guid? RepeatPlanId { get; set; }
 
+    [Column("success")]
+    public bool Success { get; set; }
+
+    [Column("message")]
+    public string? Message { get; set; }
+
     [Column("played_at")]
     public DateTime PlayedAt { get; set; }
 

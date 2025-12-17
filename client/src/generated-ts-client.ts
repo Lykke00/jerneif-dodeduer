@@ -728,8 +728,10 @@ export class UserBoardClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    getAllUserBoards(page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfUserGameBoardDto> {
+    getAllUserBoards(active: boolean | null | undefined, page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfUserGameBoardDto> {
         let url_ = this.baseUrl + "/api/UserBoard/all?";
+        if (active !== undefined && active !== null)
+            url_ += "Active=" + encodeURIComponent("" + active) + "&";
         if (page === null)
             throw new globalThis.Error("The parameter 'page' cannot be null.");
         else if (page !== undefined)
@@ -804,6 +806,78 @@ export class UserBoardClient {
             });
         }
         return Promise.resolve<ResultOfUserGameBoardDto>(null as any);
+    }
+
+    deactivateUserBoard(boardId: string): Promise<ResultOfBoolean> {
+        let url_ = this.baseUrl + "/api/UserBoard/deactivate/{boardId}";
+        if (boardId === undefined || boardId === null)
+            throw new globalThis.Error("The parameter 'boardId' must be defined.");
+        url_ = url_.replace("{boardId}", encodeURIComponent("" + boardId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeactivateUserBoard(_response);
+        });
+    }
+
+    protected processDeactivateUserBoard(response: Response): Promise<ResultOfBoolean> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfBoolean;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfBoolean>(null as any);
+    }
+
+    getUserBoardDetails(boardId: string): Promise<ResultOfListOfUserGameBoardHistoryDto> {
+        let url_ = this.baseUrl + "/api/UserBoard/{boardId}/history";
+        if (boardId === undefined || boardId === null)
+            throw new globalThis.Error("The parameter 'boardId' must be defined.");
+        url_ = url_.replace("{boardId}", encodeURIComponent("" + boardId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserBoardDetails(_response);
+        });
+    }
+
+    protected processGetUserBoardDetails(response: Response): Promise<ResultOfListOfUserGameBoardHistoryDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfListOfUserGameBoardHistoryDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfListOfUserGameBoardHistoryDto>(null as any);
     }
 }
 
@@ -1148,6 +1222,23 @@ export interface CreateUserGameBoardRequest {
     numbers: number[];
     amount: number;
     repeatCount: number;
+}
+
+export interface ResultOfListOfUserGameBoardHistoryDto {
+    success: boolean;
+    value: UserGameBoardHistoryDto[] | undefined;
+    statusCode: number;
+    errors: { [key: string]: string[]; };
+}
+
+export interface UserGameBoardHistoryDto {
+    gameWeek: string;
+    year: string;
+    price: number;
+    numbers: number[];
+    winningNumbers: number[];
+    message: string;
+    isSuccess: boolean;
 }
 
 export interface PagedResultOfUserDtoExtended {

@@ -14,7 +14,7 @@ namespace Api.Rest.Controllers;
 public class UserBoardController(IUserBoardService userBoardService) : ControllerBase
 {
     [HttpGet("all")]
-    public async Task<PagedResult<UserGameBoardDto>> GetAllUserBoards([FromQuery] PaginationRequest request)
+    public async Task<PagedResult<UserGameBoardDto>> GetAllUserBoards([FromQuery] UserGameBoardAllRequest request)
     {
         var userId = User.GetUserId()
                      ?? throw new UnauthorizedAccessException("User ID not found in token.");
@@ -38,5 +38,14 @@ public class UserBoardController(IUserBoardService userBoardService) : Controlle
                      ?? throw new UnauthorizedAccessException("User ID not found in token.");
 
        return await userBoardService.DeactivateUserBoard(userId, boardId);
+    }
+    
+    [HttpGet("{boardId:guid}/history")]
+    public async Task<Result<List<UserGameBoardHistoryDto>>> GetUserBoardDetails([FromRoute] Guid boardId)
+    {
+        var userId = User.GetUserId()
+                     ?? throw new UnauthorizedAccessException("User ID not found in token.");
+
+       return await userBoardService.GetHistoryAsync(userId, boardId);
     }
 }

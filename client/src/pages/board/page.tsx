@@ -3,16 +3,29 @@ import { useUserBoards } from '../../hooks';
 import type { UserGameBoardDto } from '../../generated-ts-client';
 import { motion } from 'framer-motion';
 import UserBoardsTable from '../../components/userboards/UserBoardsTable';
-import { addToast, Button, Card, CardBody, CardHeader, useDisclosure } from '@heroui/react';
+import {
+  addToast,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Select,
+  SelectItem,
+  useDisclosure,
+} from '@heroui/react';
 import { UserBoardNewModal } from '../../components/modal/UserBoardNewModal';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function UserBoardPage() {
-  const { getAll, isLoading, create, isCreateLoading } = useUserBoards();
+  const { getAll, isLoading, create, deactivate, isDeactivateLoading, isCreateLoading } =
+    useUserBoards();
   const { showModal } = useModal();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [reloadKey, setReloadKey] = useState(0);
+  const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
+
+  const [activeFilter, setActiveFilter] = useState<boolean | null>(null);
 
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -21,19 +34,40 @@ export default function UserBoardPage() {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    getAll(page, pageSize).then((res) => {
+    getAll(activeFilter, page, pageSize).then((res) => {
       setData(res.items);
       setTotal(res.totalCount);
     });
-  }, [page, reloadKey]);
+  }, [page, reloadKey, activeFilter]);
+
+  const deactivateBoard = async (board: UserGameBoardDto) => {
+    try {
+      setDeactivatingId(board.id);
+
+      await deactivate(board.id);
+      setReloadKey((k) => k + 1);
+
+      addToast({
+        title: 'Bræt deaktiveret',
+        description: 'Brættet blev deaktiveret!',
+        color: 'success',
+      });
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    } finally {
+      setDeactivatingId(null);
+    }
+  };
 
   const createBoard = async (numbers: number[], amount: number, repeat: number) => {
     try {
-      const created = await create(numbers, amount, repeat);
+      await create(numbers, amount, repeat);
 
-      setData((prev) => [created, ...prev]);
       setReloadKey((k) => k + 1);
-      setTotal((prev) => prev + 1);
 
       addToast({
         title: 'Bræt oprettet',
@@ -47,6 +81,16 @@ export default function UserBoardPage() {
         title: 'En fejl opstod',
         description: errorToMessage(e),
       });
+    }
+  };
+
+  const handleFilterChange = (value: string) => {
+    if (value === 'all') {
+      setActiveFilter(null);
+    } else if (value === 'active') {
+      setActiveFilter(true);
+    } else if (value === 'inactive') {
+      setActiveFilter(false);
     }
   };
 
@@ -67,14 +111,32 @@ export default function UserBoardPage() {
             </div>
           </CardHeader>
           <CardBody className="flex flex-col gap-2">
-            <div className="flex flex-row space-y-2">
+            <div className="flex flex-row items-center justify-between gap-4">
+              <Select
+                label="Filtrer bræt"
+                placeholder="Vælg filter"
+                selectedKeys={[
+                  activeFilter === null ? 'all' : activeFilter ? 'active' : 'inactive',
+                ]}
+                onChange={(e) => handleFilterChange(e.target.value)}
+                className="max-w-xs"
+                size="sm"
+              >
+                <SelectItem key="all">Alle bræt</SelectItem>
+                <SelectItem key="active">Aktive bræt</SelectItem>
+                <SelectItem key="inactive">Inaktive bræt</SelectItem>
+              </Select>
+
               <Button onPress={() => onOpenChange()}>Tilføj nyt</Button>
             </div>
+
             <UserBoardsTable
               isLoading={isLoading}
               boards={data}
               page={page}
               setPage={setPage}
+              deactivateBoard={deactivateBoard}
+              deactivatingId={deactivatingId}
               total={totalPages}
             />
           </CardBody>
