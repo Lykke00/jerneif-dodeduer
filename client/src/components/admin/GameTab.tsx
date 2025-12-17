@@ -1,30 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-  Input,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  NumberInput,
-  Form,
-} from '@heroui/react';
+import { Card, CardBody, CardHeader, Button, NumberInput, Form } from '@heroui/react';
 import NumberListInput from '../common/NumberListInput';
 import { useGame } from '../../hooks';
 import { errorToMessage } from '../../helpers/errorToMessage';
 import { useModal } from '../../contexts/ModalContext';
-
-interface Winner {
-  id: string;
-  username: string;
-  winnings: number;
-}
 
 export default function GameTab() {
   const { game, getCurrent, isUpdateLoading, isCreateLoading, updateGame, createGame } = useGame();
@@ -65,7 +45,6 @@ export default function GameTab() {
 
       await createGame(weekNumber);
       setWeekNumber(undefined);
-      // opdater state her hvis relevant
     } catch (e) {
       showModal({
         variant: 'error',
@@ -74,12 +53,6 @@ export default function GameTab() {
       });
     }
   };
-
-  const [winners, setWinners] = useState<Winner[]>([
-    { id: '1', username: 'user_001', winnings: 5000 },
-    { id: '2', username: 'user_002', winnings: 3500 },
-    { id: '3', username: 'user_003', winnings: 2000 },
-  ]);
 
   const hasGame = game !== null;
   const hasWinningNumbers = (game?.winningNumbers?.length ?? 0) > 0;
@@ -91,7 +64,7 @@ export default function GameTab() {
       className="w-full space-y-6"
     >
       {hasGame && !hasWinningNumbers ? (
-        // Game is running - show form to enter winning numbers
+        // spil er kørende og aktiv - vis form til at ku putte ind vinder numre
         <>
           <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-primary/10">
@@ -128,80 +101,8 @@ export default function GameTab() {
             </Form>
           </Card>
         </>
-      ) : hasWinningNumbers ? (
-        // Game has winning numbers - show start new game + winners
-        <>
-          <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
-            <CardHeader className="border-b border-primary/10">
-              <div>
-                <div className="text-xl font-bold text-foreground">Start et nyt spil</div>
-                <p className="text-sm text-muted-foreground mt-1">Opret en ny spil uge</p>
-              </div>
-            </CardHeader>
-            <CardBody className="space-y-4 pt-4">
-              <Form onSubmit={create} className="w-full">
-                <NumberInput
-                  isDisabled={isCreateLoading}
-                  name="weekNumber"
-                  type="number"
-                  label="Uge nummer"
-                  value={weekNumber}
-                  onValueChange={setWeekNumber}
-                  placeholder="43"
-                  min="1"
-                />
-                <Button
-                  isLoading={isCreateLoading}
-                  type="submit"
-                  name="submit"
-                  disabled={!weekNumber}
-                  className="w-full h-11 font-semibold text-base bg-gradient-to-r from-primary to-primary/80 transition-all text-white"
-                >
-                  Start spil
-                </Button>
-              </Form>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
-            <CardHeader className="border-b border-primary/10">
-              <div>
-                <div className="text-lg font-bold text-foreground">Seneste vindere</div>
-                <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                  {winners.length} vinder{winners.length !== 1 ? 'e' : ''}
-                </p>
-              </div>
-            </CardHeader>
-            <CardBody className="p-2">
-              <AnimatePresence>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Table aria-label="Winners table" removeWrapper>
-                    <TableHeader>
-                      <TableColumn>EMAIL</TableColumn>
-                      <TableColumn align="end">GEVINSTER</TableColumn>
-                    </TableHeader>
-                    <TableBody>
-                      {winners.map((winner) => (
-                        <TableRow key={winner.id}>
-                          <TableCell>{winner.username}</TableCell>
-                          <TableCell className="text-right font-semibold">
-                            {winner.winnings.toLocaleString('en-US', {
-                              style: 'currency',
-                              currency: 'DKK',
-                              minimumFractionDigits: 0,
-                            })}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </motion.div>
-              </AnimatePresence>
-            </CardBody>
-          </Card>
-        </>
       ) : (
-        // No game - show start new game only
+        // intet nyt spil, vis start nyt spil
         <>
           <Card className="border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-primary/10">

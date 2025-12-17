@@ -106,33 +106,47 @@ export default function GameHistoryTab() {
                     loadingContent={<Spinner label="Indlæser..." />}
                     emptyContent="Ingen spil fundet"
                   >
-                    {games.map((game) => (
-                      <TableRow key={game.id}>
-                        <TableCell className="font-medium">Uge {game.week}</TableCell>
-                        <TableCell>{game.year}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {game.totalPlays}
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">{game.winners}</TableCell>
-                        <TableCell className="text-right font-semibold">
-                          {game.totalPrizePool},-
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex justify-end">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() => {
-                                navigate(`/admin/game/${game.id}`);
-                              }}
-                            >
-                              <BsEye className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {games.map((game) => {
+                      const isActive = game.winningNumbers?.length === 0;
+
+                      return (
+                        <TableRow key={game.id} className={!isActive ? 'opacity-80' : ''}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <span>Uge {game.week}</span>
+                              {isActive && (
+                                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                  Aktiv
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          <TableCell>{game.year}</TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {game.totalPlays}
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">{game.winners}</TableCell>
+                          <TableCell className="text-right font-semibold">
+                            {game.totalPrizePool},-
+                          </TableCell>
+
+                          <TableCell>
+                            <div className="flex justify-end">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant={'light'}
+                                color={'default'}
+                                onPress={() => navigate(`/admin/game/${game.id}`)}
+                              >
+                                <BsEye className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </motion.div>
