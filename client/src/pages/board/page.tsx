@@ -3,10 +3,17 @@ import { useUserBoards } from '../../hooks';
 import type { UserGameBoardDto } from '../../generated-ts-client';
 import { motion } from 'framer-motion';
 import UserBoardsTable from '../../components/userboards/UserBoardsTable';
-import { Button, Card, CardBody, CardHeader } from '@heroui/react';
+import { addToast, Button, Card, CardBody, CardHeader, useDisclosure } from '@heroui/react';
+import { UserBoardNewModal } from '../../components/modal/UserBoardNewModal';
+import { useModal } from '../../contexts/ModalContext';
+import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function UserBoardPage() {
-  const { getAll } = useUserBoards();
+  const { getAll, isLoading, create, isCreateLoading } = useUserBoards();
+  const { showModal } = useModal();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [reloadKey, setReloadKey] = useState(0);
+
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -18,7 +25,30 @@ export default function UserBoardPage() {
       setData(res.items);
       setTotal(res.totalCount);
     });
-  }, [page]);
+  }, [page, reloadKey]);
+
+  const createBoard = async (numbers: number[], amount: number, repeat: number) => {
+    try {
+      const created = await create(numbers, amount, repeat);
+
+      setData((prev) => [created, ...prev]);
+      setReloadKey((k) => k + 1);
+      setTotal((prev) => prev + 1);
+
+      addToast({
+        title: 'Bræt oprettet',
+        description: 'Det nye autospil bræt blev oprettet!',
+        color: 'success',
+      });
+    } catch (e) {
+      onOpenChange();
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -38,12 +68,25 @@ export default function UserBoardPage() {
           </CardHeader>
           <CardBody className="flex flex-col gap-2">
             <div className="flex flex-row space-y-2">
-              <Button>Tilføj nyt</Button>
+              <Button onPress={() => onOpenChange()}>Tilføj nyt</Button>
             </div>
-            <UserBoardsTable boards={data} page={page} setPage={setPage} total={totalPages} />
+            <UserBoardsTable
+              isLoading={isLoading}
+              boards={data}
+              page={page}
+              setPage={setPage}
+              total={totalPages}
+            />
           </CardBody>
         </Card>
       </div>
+
+      <UserBoardNewModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        createBoard={createBoard}
+        loading={isCreateLoading}
+      />
     </motion.div>
   );
 }

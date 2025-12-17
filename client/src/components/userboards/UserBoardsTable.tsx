@@ -20,10 +20,17 @@ interface UserBoardsTableProps {
   boards: UserGameBoardDto[];
   page: number;
   total: number;
+  isLoading: boolean;
   setPage: (page: number) => void;
 }
 
-export default function UserBoardsTable({ boards, page, total, setPage }: UserBoardsTableProps) {
+export default function UserBoardsTable({
+  boards,
+  page,
+  total,
+  setPage,
+  isLoading,
+}: UserBoardsTableProps) {
   return (
     <>
       <div className="hidden md:block">
@@ -47,7 +54,7 @@ export default function UserBoardsTable({ boards, page, total, setPage }: UserBo
               </TableHeader>
 
               <TableBody
-                isLoading={false}
+                isLoading={isLoading}
                 loadingContent={<Spinner label="Indlæser..." />}
                 emptyContent="Ingen bræt fundet"
               >

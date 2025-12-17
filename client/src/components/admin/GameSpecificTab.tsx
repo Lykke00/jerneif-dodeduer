@@ -25,7 +25,7 @@ import { useEffect, useState } from 'react';
 import { type GameExtendedDto, type UserWinnerDto } from '../../generated-ts-client';
 import { AnimatePresence, motion } from 'framer-motion';
 import WinningNumbersDrawer from '../drawer/WinningNumbersDrawer';
-import { BsArrowDown, BsDownload } from 'react-icons/bs';
+import { BsArrowDown } from 'react-icons/bs';
 import { exportCsv } from '../../helpers/export/exportCsv';
 import { exportXlsx } from '../../helpers/export/exportXlsx';
 import { exportPdf } from '../../helpers/export/exportPdf';
@@ -35,7 +35,7 @@ import { mapToExportModel } from '../../types/WinnersExportModel';
 export default function GameSpecificTab() {
   const { gameId } = useParams<{ gameId: string }>();
 
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedUser, setSelectedUser] = useState<UserWinnerDto | undefined>();
   const [selectedNumbers, setSelectedNumbers] = useState<number[][]>([]);
 

@@ -2,6 +2,7 @@
 using DataAccess.DTO;
 using DataAccess.Models;
 using DataAccess.Querying;
+using Microsoft.EntityFrameworkCore;
 using Service.DTO;
 using Service.DTO.User;
 using Service.Helpers;
@@ -12,6 +13,7 @@ public interface IUserBoardService
 {
     Task<PagedResult<UserGameBoardDto>> GetUserBoardsAsync(Guid userId, PaginationRequest request);
     Task<Result<UserGameBoardDto>> CreateUserBoardAsync(Guid userId, CreateUserGameBoardRequest request);
+    Task<Result<bool>> DeactivateUserBoard(Guid userId, Guid boardId);
 }
 
 public class UserBoardService(AppDbContext context) : IUserBoardService
@@ -21,11 +23,11 @@ public class UserBoardService(AppDbContext context) : IUserBoardService
         PaginationRequest request)
     {
         var query = context.GameBoards
-            .Where(b => b.UserId == userId)
+            .Where(b => b.UserId == userId && b.BoardRepeatPlans.Any(rp => rp.Active))
             .Select(b => new
             {
                 Board = b,
-                ActivePlan = b.BoardRepeatPlans.FirstOrDefault(rp => rp.Active),
+                ActivePlan = b.BoardRepeatPlans.First(rp => rp.Active),
                 NumberCount = b.GameBoardNumbers.Count,
                 Numbers = b.GameBoardNumbers
                     .OrderBy(n => n.Number)
@@ -42,17 +44,17 @@ public class UserBoardService(AppDbContext context) : IUserBoardService
         var dtos = pagedData.Items.Select(x =>
         {
             var pricePerGame = GamePricing.CalculateBoardPriceInt(x.NumberCount);
-            var repeatCount = x.ActivePlan?.RepeatCount ?? 0;
-        
+            var repeatCount = x.ActivePlan.RepeatCount;
+    
             return new UserGameBoardDto
             {
                 Id = x.Board.Id,
                 CreatedAt = x.Board.CreatedAt,
                 Numbers = x.Numbers,
                 RepeatCount = repeatCount,
-                PlayedCount = x.ActivePlan?.PlayedCount ?? 0,
-                Active = x.ActivePlan != null,
-                StoppedAt = x.ActivePlan?.StoppedAt,
+                PlayedCount = x.ActivePlan.PlayedCount,
+                Active = true,
+                StoppedAt = x.ActivePlan.StoppedAt,
                 PricePerGame = pricePerGame,
                 TotalPrice = pricePerGame * repeatCount
             };
@@ -65,8 +67,7 @@ public class UserBoardService(AppDbContext context) : IUserBoardService
             Page = pagedData.Page,
             PageSize = pagedData.PageSize
         };
-    }
-    public async Task<Result<UserGameBoardDto>> CreateUserBoardAsync(
+    }    public async Task<Result<UserGameBoardDto>> CreateUserBoardAsync(
         Guid userId,
         CreateUserGameBoardRequest request)
     {
@@ -112,5 +113,27 @@ public class UserBoardService(AppDbContext context) : IUserBoardService
         };
 
         return Result<UserGameBoardDto>.Ok(dto);
+    }
+    
+    public async Task<Result<bool>> DeactivateUserBoard(Guid userId, Guid boardId)
+    {
+        var gameBoard = await context.GameBoards
+            .Where(b => b.Id == boardId && b.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (gameBoard == null)
+            return Result<bool>.NotFound("Game board not found.");
+
+        var activePlans = await context.BoardRepeatPlans
+            .Where(rp => rp.BoardId == boardId && rp.Active)
+            .ToListAsync();
+
+        foreach (var plan in activePlans)
+            plan.Active = false;
+            plan.StoppedAt = DateTime.UtcNow;
+
+        await context.SaveChangesAsync();
+
+        return Result<bool>.Ok(true);
     }
 }

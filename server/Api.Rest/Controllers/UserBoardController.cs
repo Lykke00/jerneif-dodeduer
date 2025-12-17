@@ -30,4 +30,13 @@ public class UserBoardController(IUserBoardService userBoardService) : Controlle
 
        return await userBoardService.CreateUserBoardAsync(userId, request);
     }
+    
+    [HttpPost("deactivate/{boardId:guid}")]
+    public async Task<Result<bool>> DeactivateUserBoard([FromRoute] Guid boardId)
+    {
+        var userId = User.GetUserId()
+                     ?? throw new UnauthorizedAccessException("User ID not found in token.");
+
+       return await userBoardService.DeactivateUserBoard(userId, boardId);
+    }
 }
