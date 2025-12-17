@@ -718,6 +718,95 @@ export class GameClient {
     }
 }
 
+export class UserBoardClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAllUserBoards(page: number | undefined, pageSize: number | undefined): Promise<PagedResultOfUserGameBoardDto> {
+        let url_ = this.baseUrl + "/api/UserBoard/all?";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllUserBoards(_response);
+        });
+    }
+
+    protected processGetAllUserBoards(response: Response): Promise<PagedResultOfUserGameBoardDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfUserGameBoardDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfUserGameBoardDto>(null as any);
+    }
+
+    createUserBoard(request: CreateUserGameBoardRequest): Promise<ResultOfUserGameBoardDto> {
+        let url_ = this.baseUrl + "/api/UserBoard/create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateUserBoard(_response);
+        });
+    }
+
+    protected processCreateUserBoard(response: Response): Promise<ResultOfUserGameBoardDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ResultOfUserGameBoardDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<ResultOfUserGameBoardDto>(null as any);
+    }
+}
+
 export class UserClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -1027,6 +1116,38 @@ export interface ResultOfGameExtendedDto {
     value: GameExtendedDto | undefined;
     statusCode: number;
     errors: { [key: string]: string[]; };
+}
+
+export interface PagedResultOfUserGameBoardDto {
+    items: UserGameBoardDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export interface UserGameBoardDto {
+    id: string;
+    createdAt: string;
+    repeatCount: number;
+    playedCount: number;
+    active: boolean;
+    pricePerGame: number;
+    totalPrice: number;
+    numbers: number[];
+    stoppedAt: string | undefined;
+}
+
+export interface ResultOfUserGameBoardDto {
+    success: boolean;
+    value: UserGameBoardDto | undefined;
+    statusCode: number;
+    errors: { [key: string]: string[]; };
+}
+
+export interface CreateUserGameBoardRequest {
+    numbers: number[];
+    amount: number;
+    repeatCount: number;
 }
 
 export interface PagedResultOfUserDtoExtended {

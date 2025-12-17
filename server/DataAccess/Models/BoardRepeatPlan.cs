@@ -16,12 +16,6 @@ public partial class BoardRepeatPlan
     [Column("board_id")]
     public Guid BoardId { get; set; }
 
-    [Column("user_id")]
-    public Guid UserId { get; set; }
-
-    [Column("start_game_id")]
-    public Guid StartGameId { get; set; }
-
     [Column("repeat_count")]
     public int RepeatCount { get; set; }
 
@@ -41,11 +35,6 @@ public partial class BoardRepeatPlan
     [InverseProperty("BoardRepeatPlans")]
     public virtual GameBoard Board { get; set; } = null!;
 
-    [ForeignKey("StartGameId")]
-    [InverseProperty("BoardRepeatPlans")]
-    public virtual Game StartGame { get; set; } = null!;
-
-    [ForeignKey("UserId")]
-    [InverseProperty("BoardRepeatPlans")]
-    public virtual User User { get; set; } = null!;
+    [InverseProperty("RepeatPlan")]
+    public virtual ICollection<BoardPlayedGame> BoardPlayedGames { get; set; } = new List<BoardPlayedGame>();
 }

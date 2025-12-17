@@ -696,6 +696,88 @@
         ]
       }
     },
+    "/api/UserBoard/all": {
+      "get": {
+        "tags": [
+          "UserBoard"
+        ],
+        "operationId": "UserBoard_GetAllUserBoards",
+        "parameters": [
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfUserGameBoardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/UserBoard/create": {
+      "post": {
+        "tags": [
+          "UserBoard"
+        ],
+        "operationId": "UserBoard_CreateUserBoard",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserGameBoardRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOfUserGameBoardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/User/all": {
       "get": {
         "tags": [
@@ -1630,6 +1712,154 @@
                 "type": "string"
               }
             }
+          }
+        }
+      },
+      "PagedResultOfUserGameBoardDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "totalCount",
+          "page",
+          "pageSize"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserGameBoardDto"
+            }
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UserGameBoardDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "createdAt",
+          "repeatCount",
+          "playedCount",
+          "active",
+          "pricePerGame",
+          "totalPrice",
+          "numbers",
+          "stoppedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "repeatCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "pricePerGame": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPrice": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "stoppedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ResultOfUserGameBoardDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "value",
+          "statusCode",
+          "errors"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "value": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserGameBoardDto"
+              }
+            ]
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CreateUserGameBoardRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "numbers",
+          "amount",
+          "repeatCount"
+        ],
+        "properties": {
+          "numbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "repeatCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

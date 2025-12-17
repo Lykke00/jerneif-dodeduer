@@ -40,9 +40,6 @@ public partial class User
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
-    [InverseProperty("User")]
-    public virtual ICollection<BoardRepeatPlan> BoardRepeatPlans { get; set; } = new List<BoardRepeatPlan>();
-
     [InverseProperty("ApprovedByNavigation")]
     public virtual ICollection<Deposit> DepositApprovedByNavigations { get; set; } = new List<Deposit>();
 

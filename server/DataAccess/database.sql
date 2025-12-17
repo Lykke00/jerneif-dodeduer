@@ -119,9 +119,7 @@ CREATE TABLE game_board_numbers (
 CREATE TABLE board_repeat_plans (
     "id"              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     "board_id"        UUID NOT NULL REFERENCES game_boards(id) ON DELETE CASCADE,
-    "user_id"         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     
-    "start_game_id"   UUID NOT NULL REFERENCES games(id),
     "repeat_count"    INT NOT NULL, -- fx 10 uger
     "played_count"    INT NOT NULL DEFAULT 0,
     
@@ -131,6 +129,17 @@ CREATE TABLE board_repeat_plans (
     "created_at"      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
     
     CONSTRAINT repeat_count_positive CHECK (repeat_count > 0)
+);
+
+CREATE TABLE board_played_games (
+    "id"               UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "board_id"         UUID NOT NULL REFERENCES game_boards(id),
+    "game_id"          UUID NOT NULL REFERENCES games(id),
+    "repeat_plan_id"   UUID NULL REFERENCES board_repeat_plans(id),
+    
+    "played_at"        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    UNIQUE (board_id, game_id)
 );
 
 

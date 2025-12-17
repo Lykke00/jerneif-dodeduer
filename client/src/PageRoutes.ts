@@ -8,6 +8,7 @@ export const PageRoutes = {
   Deposit: '/indbetal',
   DepositHistory: '/indbetal/historik',
   Contact: '/kontakt',
+  Boards: '/boards',
   Admin: '/admin',
   AdminUsers: '/admin/users',
   AdminGame: '/admin/game/',

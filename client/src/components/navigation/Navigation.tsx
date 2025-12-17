@@ -29,6 +29,8 @@ export default function Navigation() {
 
   const links = [
     { label: 'Spil', href: PageRoutes.Game },
+    { label: 'Bræt', href: PageRoutes.Boards },
+
     { label: 'Indbetal', href: PageRoutes.Deposit },
     { label: 'Kontakt', href: PageRoutes.Contact },
   ];

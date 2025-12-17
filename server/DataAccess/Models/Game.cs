@@ -23,8 +23,8 @@ public partial class Game
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
-    [InverseProperty("StartGame")]
-    public virtual ICollection<BoardRepeatPlan> BoardRepeatPlans { get; set; } = new List<BoardRepeatPlan>();
+    [InverseProperty("Game")]
+    public virtual ICollection<BoardPlayedGame> BoardPlayedGames { get; set; } = new List<BoardPlayedGame>();
 
     [InverseProperty("Game")]
     public virtual ICollection<GamePlay> GamePlays { get; set; } = new List<GamePlay>();

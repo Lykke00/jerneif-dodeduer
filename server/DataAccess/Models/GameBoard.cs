@@ -20,6 +20,9 @@ public partial class GameBoard
     public DateTime CreatedAt { get; set; }
 
     [InverseProperty("Board")]
+    public virtual ICollection<BoardPlayedGame> BoardPlayedGames { get; set; } = new List<BoardPlayedGame>();
+
+    [InverseProperty("Board")]
     public virtual ICollection<BoardRepeatPlan> BoardRepeatPlans { get; set; } = new List<BoardRepeatPlan>();
 
     [InverseProperty("Board")]

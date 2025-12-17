@@ -12,6 +12,8 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<BoardPlayedGame> BoardPlayedGames { get; set; }
+
     public virtual DbSet<BoardRepeatPlan> BoardRepeatPlans { get; set; }
 
     public virtual DbSet<Deposit> Deposits { get; set; }
@@ -38,6 +40,24 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
 
+        modelBuilder.Entity<BoardPlayedGame>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("board_played_games_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.PlayedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasOne(d => d.Board).WithMany(p => p.BoardPlayedGames)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("board_played_games_board_id_fkey");
+
+            entity.HasOne(d => d.Game).WithMany(p => p.BoardPlayedGames)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("board_played_games_game_id_fkey");
+
+            entity.HasOne(d => d.RepeatPlan).WithMany(p => p.BoardPlayedGames).HasConstraintName("board_played_games_repeat_plan_id_fkey");
+        });
+
         modelBuilder.Entity<BoardRepeatPlan>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("board_repeat_plans_pkey");
@@ -48,12 +68,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PlayedCount).HasDefaultValue(0);
 
             entity.HasOne(d => d.Board).WithMany(p => p.BoardRepeatPlans).HasConstraintName("board_repeat_plans_board_id_fkey");
-
-            entity.HasOne(d => d.StartGame).WithMany(p => p.BoardRepeatPlans)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("board_repeat_plans_start_game_id_fkey");
-
-            entity.HasOne(d => d.User).WithMany(p => p.BoardRepeatPlans).HasConstraintName("board_repeat_plans_user_id_fkey");
         });
 
         modelBuilder.Entity<Deposit>(entity =>

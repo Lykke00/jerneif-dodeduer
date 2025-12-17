@@ -39,6 +39,7 @@ public static class ServiceStartupClass
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IUserBalanceService, UserBalanceService>();
         services.AddScoped<IGameService, GameService>();
+        services.AddScoped<IUserBoardService, UserBoardService>();
         
         return services;
     }

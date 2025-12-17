@@ -21,4 +21,10 @@ public static class GamePricing
 
         return price;
     }
+    
+    public static int CalculateBoardPriceInt(int fieldCount)
+    {
+        var pricePerGame = CalculateBoardPrice(fieldCount);
+        return (int)(pricePerGame);
+    }
 }
