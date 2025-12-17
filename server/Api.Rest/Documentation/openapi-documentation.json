@@ -1760,10 +1760,30 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "phone",
           "active",
           "admin"
         ],
         "properties": {
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
           "active": {
             "type": "boolean",
             "nullable": true

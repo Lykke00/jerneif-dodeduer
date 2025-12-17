@@ -34,18 +34,16 @@ import UserInfoDrawer from '../drawer/UserInfoDrawer';
 import { MdOutlineAdminPanelSettings, MdPersonOutline } from 'react-icons/md';
 import UserCard from './UserCard';
 
-interface User {
+export type UpdateUserPayload = {
   id: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  createdAt: Date;
-  balance: number;
-  totalDeposits: number;
-  isAdmin: boolean;
-  isActive: boolean;
-}
+  phone: string;
+};
 
 export default function UsersTab() {
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { isOpen, onOpenChange } = useDisclosure();
   const { isOpen: isOpenUserInfo, onOpenChange: onOpenChangeUserInfo } = useDisclosure();
 
   const [search, setSearch] = useState('');
@@ -61,7 +59,34 @@ export default function UsersTab() {
   const pageSize = 10;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const { getAll, update, create, isLoading } = useUsers();
+  const { getAll, update, create, isLoading, isUpdateLoading } = useUsers();
+
+  const updateUserInfo = async (payload: UpdateUserPayload) => {
+    try {
+      const updatedUser = await update(payload.id, {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        email: payload.email,
+        phone: payload.phone,
+      });
+
+      setAllUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+
+      showModal({
+        variant: 'success',
+        title: 'Bruger opdateret',
+        description: `Brugeren ${updatedUser.email} blev opdateret.`,
+      });
+
+      onOpenChangeUserInfo(); // luk drawer
+    } catch (e) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: errorToMessage(e),
+      });
+    }
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -107,7 +132,7 @@ export default function UsersTab() {
 
   const updateUserRole = async (id: string, admin: boolean) => {
     try {
-      const updatedUser = await update(id, undefined, admin);
+      const updatedUser = await update(id, { admin: admin });
 
       setAllUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
 
@@ -127,7 +152,7 @@ export default function UsersTab() {
 
   const updateActive = async (id: string, active: boolean) => {
     try {
-      const updatedUser = await update(id, active, undefined);
+      const updatedUser = await update(id, { active: active });
 
       setAllUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
 
@@ -360,9 +385,11 @@ export default function UsersTab() {
 
       <UserCreateModal createUser={createUser} isOpen={isOpen} onOpenChange={onOpenChange} />
       <UserInfoDrawer
+        onUpdate={updateUserInfo}
         user={currentUser}
         isOpen={isOpenUserInfo}
         onOpenChange={onOpenChangeUserInfo}
+        isLoading={isUpdateLoading}
       />
     </motion.div>
   );

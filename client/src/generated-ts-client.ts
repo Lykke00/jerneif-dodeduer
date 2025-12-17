@@ -1060,6 +1060,10 @@ export interface CreateUserRequest {
 }
 
 export interface UpdateUserRequest {
+    firstName: string | undefined;
+    lastName: string | undefined;
+    email: string | undefined;
+    phone: string | undefined;
     active: boolean | undefined;
     admin: boolean | undefined;
 }

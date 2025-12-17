@@ -236,30 +236,28 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
     // 3. Group og beregn matches i C# (client-side)
     var userMatches = gamePlaysWithNumbers
         .GroupBy(gp => gp.UserId)
-        .Select(g =>
+        .Select(g => new
         {
-            var playsWithMatches = g.Select(p => new
-            {
-                Play = p,
-                MatchCount = p.GamePlaysNumbers.Count(n => winningNumbers.Contains(n.Number)),
-                Cost = GamePricing.CalculateBoardPrice(p.GamePlaysNumbers.Count)
-            })
-            .Where(p => p.MatchCount >= 3) // Only winning plays
-            .ToList();
-
-            if (playsWithMatches.Count == 0)
-                return null;
-
-            return new
-            {
-                UserId = g.Key,
-                BestMatchCount = playsWithMatches.Max(p => p.MatchCount),
-                WinningPlaysCount = playsWithMatches.Count,
-                TotalCost = playsWithMatches.Sum(p => p.Cost),
-                PlayIds = playsWithMatches.Select(p => p.Play.Id).ToList()
-            };
+            UserId = g.Key,
+            PlaysWithMatches = g
+                .Select(p => new
+                {
+                    Play = p,
+                    MatchCount = p.GamePlaysNumbers.Count(n => winningNumbers.Contains(n.Number)),
+                    Cost = GamePricing.CalculateBoardPrice(p.GamePlaysNumbers.Count)
+                })
+                .Where(p => p.MatchCount >= 3)
+                .ToList()
         })
-        .Where(x => x != null)
+        .Where(x => x.PlaysWithMatches.Any())
+        .Select(x => new
+        {
+            x.UserId,
+            BestMatchCount = x.PlaysWithMatches.Max(p => p.MatchCount),
+            WinningPlaysCount = x.PlaysWithMatches.Count,
+            TotalCost = x.PlaysWithMatches.Sum(p => p.Cost),
+            PlayIds = x.PlaysWithMatches.Select(p => p.Play.Id).ToList()
+        })
         .OrderByDescending(x => x.BestMatchCount)
         .ThenByDescending(x => x.WinningPlaysCount)
         .ToList();

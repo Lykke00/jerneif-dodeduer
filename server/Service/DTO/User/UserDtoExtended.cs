@@ -10,7 +10,7 @@ public class UserDtoExtended : UserDto
     public string FullName => $"{FirstName} {LastName}";
     public int TotalDeposits { get; set; }
     
-    public static UserDtoExtended FromDatabase(DataAccess.Models.User u)
+    public static UserDtoExtended ExtendedFromDatabase(DataAccess.Models.User u)
     {
         var approvedDepositCount = u.UsersBalances
             .Count(b => b.BalanceEnum == UsersBalance.BalanceType.Deposit);

@@ -1,9 +1,21 @@
-import { type PagedResultOfUserDtoExtended, type UserDtoExtended } from '../generated-ts-client';
+import {
+  type PagedResultOfUserDtoExtended,
+  type UpdateUserRequest,
+  type UserDtoExtended,
+} from '../generated-ts-client';
 import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { userClient } from '../api/APIClients';
 import { useAuthContext } from '../contexts/AuthContext';
-import { act } from 'react';
+
+type UpdateUserInput = {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  active?: boolean;
+  admin?: boolean;
+};
 
 type useUsersTypes = {
   getAll(
@@ -19,12 +31,15 @@ type useUsersTypes = {
     email: string,
     admin: boolean
   ): Promise<UserDtoExtended>;
-  update(id: string, active?: boolean, admin?: boolean): Promise<UserDtoExtended>;
+  update(id: string, changes: UpdateUserInput): Promise<UserDtoExtended>;
+  isUpdateLoading: boolean;
   isLoading: boolean;
 };
 
 export const useUsers = (): useUsersTypes => {
   const { isLoading, withLoading } = useLoading();
+  const { isLoading: isUpdateLoading, withLoading: withUpdateLoading } = useLoading();
+
   const { makeApiCall } = useAuthContext();
 
   const getAll = async (
@@ -85,36 +100,38 @@ export const useUsers = (): useUsersTypes => {
     }
   };
 
-  const update = async (
-    id: string,
-    active?: boolean,
-    admin?: boolean
-  ): Promise<UserDtoExtended> => {
-    try {
-      const response = await withLoading(() =>
-        makeApiCall(() => userClient.update(id, { active: active, admin: admin }))
-      );
+  function toUpdateUserRequest(input: UpdateUserInput): UpdateUserRequest {
+    return {
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      phone: input.phone,
+      active: input.active,
+      admin: input.admin,
+    };
+  }
 
-      var updatedUser = response.value;
-      if (updatedUser == null) {
-        throw new Error('Brugeren blev ikke opdateret');
-      }
+  // dårlig api design.......
+  // burde seriøst omskrives
+  const update = async (id: string, changes: UpdateUserInput): Promise<UserDtoExtended> => {
+    const request = toUpdateUserRequest(changes);
 
-      return updatedUser;
-    } catch (e) {
-      const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
-      throw e;
+    const response = await withUpdateLoading(() =>
+      makeApiCall(() => userClient.update(id, request))
+    );
+    var updateUser = response.value;
+    if (updateUser == null) {
+      throw new Error('Brugeren blev ikke opdateret');
     }
+
+    return updateUser;
   };
 
   return {
     getAll,
     create,
     update,
+    isUpdateLoading,
     isLoading,
   };
 };

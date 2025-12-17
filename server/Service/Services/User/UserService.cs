@@ -53,7 +53,7 @@ public class UserService(IRepository<DbUser> userRepository, IUserBalanceService
             request.Page,
             request.PageSize,
             orderByDesc: x => x.CreatedAt,
-            selector: u => UserDtoExtended.FromDatabase(u)
+            selector: u => UserDtoExtended.ExtendedFromDatabase(u)
             );
     }
     
@@ -75,7 +75,7 @@ public class UserService(IRepository<DbUser> userRepository, IUserBalanceService
         };
 
         await userRepository.Add(newUser);
-        return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(newUser));
+        return Result<UserDtoExtended>.Ok(UserDtoExtended.ExtendedFromDatabase(newUser));
     }
     
     public async Task<Result<UserDtoExtended>> UpdateUserAsync(Guid userId, UpdateUserRequest request)
@@ -99,10 +99,10 @@ public class UserService(IRepository<DbUser> userRepository, IUserBalanceService
         if (!string.IsNullOrWhiteSpace(request.Email))
             user.Email = request.Email;
         
-        if (request.Phone.HasValue)
-            user.Phone = request.Phone.Value;
+        if (!string.IsNullOrWhiteSpace(request.Phone))
+            user.Phone = request.Phone;
         
         await userRepository.Update(user);
-        return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(user));
+        return Result<UserDtoExtended>.Ok(UserDtoExtended.ExtendedFromDatabase(user));
     }
 }
