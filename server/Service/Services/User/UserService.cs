@@ -90,6 +90,18 @@ public class UserService(IRepository<DbUser> userRepository, IUserBalanceService
         if (request.Admin.HasValue)
             user.Admin = request.Admin.Value;
         
+        if (!string.IsNullOrWhiteSpace(request.FirstName))
+            user.FirstName = request.FirstName;
+        
+        if (!string.IsNullOrWhiteSpace(request.LastName))
+            user.LastName = request.LastName;
+        
+        if (!string.IsNullOrWhiteSpace(request.Email))
+            user.Email = request.Email;
+        
+        if (request.Phone.HasValue)
+            user.Phone = request.Phone.Value;
+        
         await userRepository.Update(user);
         return Result<UserDtoExtended>.Ok(UserDtoExtended.FromDatabase(user));
     }

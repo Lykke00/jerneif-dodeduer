@@ -20,8 +20,8 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
             .When(x => !string.IsNullOrEmpty(x.Email));
         
         RuleFor(x => x.Phone)
-            .InclusiveBetween(10000000, 99999999)
+            .Matches(@"^\d{8}$")
             .WithMessage("Telefonnummer skal bestå af præcis 8 cifre")
-            .When(x => x.Phone.HasValue);
+            .When(x => !string.IsNullOrWhiteSpace(x.Phone));
     }
 }
