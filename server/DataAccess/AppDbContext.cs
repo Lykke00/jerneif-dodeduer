@@ -12,9 +12,15 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    public virtual DbSet<BoardRepeatPlan> BoardRepeatPlans { get; set; }
+
     public virtual DbSet<Deposit> Deposits { get; set; }
 
     public virtual DbSet<Game> Games { get; set; }
+
+    public virtual DbSet<GameBoard> GameBoards { get; set; }
+
+    public virtual DbSet<GameBoardNumber> GameBoardNumbers { get; set; }
 
     public virtual DbSet<GamePlay> GamePlays { get; set; }
 
@@ -31,6 +37,24 @@ public partial class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("uuid-ossp");
+
+        modelBuilder.Entity<BoardRepeatPlan>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("board_repeat_plans_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.Active).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.PlayedCount).HasDefaultValue(0);
+
+            entity.HasOne(d => d.Board).WithMany(p => p.BoardRepeatPlans).HasConstraintName("board_repeat_plans_board_id_fkey");
+
+            entity.HasOne(d => d.StartGame).WithMany(p => p.BoardRepeatPlans)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("board_repeat_plans_start_game_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.BoardRepeatPlans).HasConstraintName("board_repeat_plans_user_id_fkey");
+        });
 
         modelBuilder.Entity<Deposit>(entity =>
         {
@@ -53,6 +77,23 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<GameBoard>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("game_boards_pkey");
+
+            entity.Property(e => e.Id).HasDefaultValueSql("uuid_generate_v4()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasOne(d => d.User).WithMany(p => p.GameBoards).HasConstraintName("game_boards_user_id_fkey");
+        });
+
+        modelBuilder.Entity<GameBoardNumber>(entity =>
+        {
+            entity.HasKey(e => new { e.BoardId, e.Number }).HasName("game_board_numbers_pkey");
+
+            entity.HasOne(d => d.Board).WithMany(p => p.GameBoardNumbers).HasConstraintName("game_board_numbers_board_id_fkey");
         });
 
         modelBuilder.Entity<GamePlay>(entity =>

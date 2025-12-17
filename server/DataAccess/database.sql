@@ -1,13 +1,19 @@
 ﻿CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-DROP TABLE IF EXISTS "game_plays_numbers";
-DROP TABLE IF EXISTS "game_plays";
-DROP TABLE IF EXISTS "game_winning_numbers";
-DROP TABLE IF EXISTS "users_balance";
-DROP TABLE IF EXISTS "user_login_tokens";
-DROP TABLE IF EXISTS "deposits";
-DROP TABLE IF EXISTS "games";
-DROP TABLE IF EXISTS "users";
+DROP TABLE IF EXISTS game_plays_numbers;
+DROP TABLE IF EXISTS game_winning_numbers;
+DROP TABLE IF EXISTS game_board_numbers;
+DROP TABLE IF EXISTS users_balance;
+DROP TABLE IF EXISTS user_login_tokens;
+
+DROP TABLE IF EXISTS board_repeat_plans;
+DROP TABLE IF EXISTS game_plays;
+DROP TABLE IF EXISTS deposits;
+
+DROP TABLE IF EXISTS game_boards;
+DROP TABLE IF EXISTS games;
+
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE "users"
 (
@@ -94,6 +100,37 @@ CREATE TABLE "game_plays_numbers"
         
     PRIMARY KEY (play_id, number),
     CONSTRAINT number_range_check CHECK (number BETWEEN 1 AND 16)
+);
+
+CREATE TABLE game_boards (
+     "id"         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+     "user_id"    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     "created_at" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE game_board_numbers (
+    "board_id" UUID NOT NULL REFERENCES game_boards(id) ON DELETE CASCADE,
+    "number"   INT NOT NULL,
+    
+    PRIMARY KEY (board_id, number),
+    CONSTRAINT number_range_check CHECK (number BETWEEN 1 AND 16)
+);
+
+CREATE TABLE board_repeat_plans (
+    "id"              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    "board_id"        UUID NOT NULL REFERENCES game_boards(id) ON DELETE CASCADE,
+    "user_id"         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    
+    "start_game_id"   UUID NOT NULL REFERENCES games(id),
+    "repeat_count"    INT NOT NULL, -- fx 10 uger
+    "played_count"    INT NOT NULL DEFAULT 0,
+    
+    "active"          BOOLEAN NOT NULL DEFAULT TRUE,
+    "stopped_at"      TIMESTAMPTZ NULL,
+    
+    "created_at"      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    
+    CONSTRAINT repeat_count_positive CHECK (repeat_count > 0)
 );
 
 
