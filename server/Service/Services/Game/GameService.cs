@@ -176,10 +176,20 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         // tjek om spillet allerede findes
         var activeGameExists = await context.Games
             .AnyAsync(g => !g.GameWinningNumbers.Any());
-
-
+        
         if (activeGameExists)
             return Result<GameDto>.Conflict("game", "Game game already exists.");
+        
+        // eksisterer der en for denne uge og år
+        var existsForThisWeekYear = await context.Games
+            .AnyAsync(g => g.Week == request.WeekNumber &&
+                           g.Year == DateTime.UtcNow.Year);
+
+        if (existsForThisWeekYear)
+            return Result<GameDto>.Conflict(
+                "Week",
+                "Game game already exists for this week and year."
+            );
 
         // opret et nyt spil
         var newGame = new DataAccess.Models.Game
