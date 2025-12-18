@@ -135,33 +135,6 @@
         ]
       }
     },
-    "/api/Auth/test": {
-      "get": {
-        "tags": [
-          "Auth"
-        ],
-        "operationId": "Auth_Test",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResultOfString"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": [
-              "admin"
-            ]
-          }
-        ]
-      }
-    },
     "/api/Deposit/create": {
       "post": {
         "tags": [
@@ -1181,38 +1154,6 @@
                 "$ref": "#/components/schemas/UserDto"
               }
             ]
-          },
-          "statusCode": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "errors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      },
-      "ResultOfString": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "success",
-          "value",
-          "statusCode",
-          "errors"
-        ],
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
           },
           "statusCode": {
             "type": "integer",

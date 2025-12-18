@@ -32,7 +32,6 @@ export default function Navigation() {
     { label: 'Bræt', href: PageRoutes.Boards },
 
     { label: 'Indbetal', href: PageRoutes.Deposit },
-    { label: 'Kontakt', href: PageRoutes.Contact },
   ];
 
   const logUserOut = async () => {
@@ -217,7 +216,20 @@ export default function Navigation() {
                             : 'text-neutral-700'
                         }`}
                       >
-                        Spil
+                        Nuværende spil
+                      </Link>
+                    </NavbarMenuItem>
+                    <NavbarMenuItem>
+                      <Link
+                        to={PageRoutes.AdminGameHistory}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`block py-2 text-base ${
+                          isActiveRoute(pathname, PageRoutes.AdminGameHistory)
+                            ? 'text-primary font-semibold'
+                            : 'text-neutral-700'
+                        }`}
+                      >
+                        Spil historik
                       </Link>
                     </NavbarMenuItem>
                   </div>

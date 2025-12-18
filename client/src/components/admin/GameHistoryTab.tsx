@@ -173,7 +173,7 @@ export default function GameHistoryTab() {
                         variant="light"
                         className="mt-2"
                         onPress={() => {
-                          // navigate(`/games/${game.id}`)
+                          navigate(`/admin/game/${game.id}`);
                         }}
                       >
                         Se spil
