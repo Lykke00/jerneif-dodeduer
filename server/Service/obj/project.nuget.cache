@@ -1,9 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "doJnOnozAH0=",
+  "dgSpecHash": "LNL2gQoinA0=",
   "success": true,
   "projectFilePath": "C:\\jerneif\\jerneif-dodeduer\\server\\Service\\Service.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\mathi\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\docker.dotnet.enhanced\\3.128.5\\docker.dotnet.enhanced.3.128.5.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\docker.dotnet.enhanced.x509\\3.128.5\\docker.dotnet.enhanced.x509.3.128.5.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\fluentvalidation\\11.9.2\\fluentvalidation.11.9.2.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\konscious.security.cryptography.argon2\\1.3.1\\konscious.security.cryptography.argon2.1.3.1.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\konscious.security.cryptography.blake2\\1.1.1\\konscious.security.cryptography.blake2.1.1.1.nupkg.sha512",
@@ -35,9 +38,13 @@
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.4\\npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\resend\\0.1.6\\resend.0.1.6.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\sharpziplib\\1.4.2\\sharpziplib.1.4.2.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\ssh.net\\2024.2.0\\ssh.net.2024.2.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.identitymodel.tokens.jwt\\8.15.0\\system.identitymodel.tokens.jwt.8.15.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.io.pipelines\\8.0.0\\system.io.pipelines.8.0.0.nupkg.sha512",
-    "C:\\Users\\mathi\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512"
+    "C:\\Users\\mathi\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\testcontainers\\4.7.0\\testcontainers.4.7.0.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\testcontainers.postgresql\\4.7.0\\testcontainers.postgresql.4.7.0.nupkg.sha512"
   ],
   "logs": []
 }

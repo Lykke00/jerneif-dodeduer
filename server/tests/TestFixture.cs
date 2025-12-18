@@ -1,5 +1,6 @@
 ﻿using DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace tests;
 

@@ -2,6 +2,43 @@
   "version": 3,
   "targets": {
     "net9.0": {
+      "BouncyCastle.Cryptography/2.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Docker.DotNet.Enhanced/3.128.5": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3"
+        },
+        "compile": {
+          "lib/net9.0/Docker.DotNet.dll": {}
+        },
+        "runtime": {
+          "lib/net9.0/Docker.DotNet.dll": {}
+        }
+      },
+      "Docker.DotNet.Enhanced.X509/3.128.5": {
+        "type": "package",
+        "dependencies": {
+          "Docker.DotNet.Enhanced": "3.128.5"
+        },
+        "compile": {
+          "lib/net9.0/Docker.DotNet.X509.dll": {}
+        },
+        "runtime": {
+          "lib/net9.0/Docker.DotNet.X509.dll": {}
+        }
+      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -687,6 +724,35 @@
           }
         }
       },
+      "SharpZipLib/1.4.2": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/ICSharpCode.SharpZipLib.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "SSH.NET/2024.2.0": {
+        "type": "package",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.4.0"
+        },
+        "compile": {
+          "lib/net8.0/Renci.SshNet.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Renci.SshNet.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.CodeDom/6.0.0": {
         "type": "package",
         "compile": {
@@ -911,10 +977,100 @@
         "build": {
           "buildTransitive/net6.0/_._": {}
         }
+      },
+      "Testcontainers/4.7.0": {
+        "type": "package",
+        "dependencies": {
+          "Docker.DotNet.Enhanced": "3.128.5",
+          "Docker.DotNet.Enhanced.X509": "3.128.5",
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "SSH.NET": "2024.2.0",
+          "SharpZipLib": "1.4.2"
+        },
+        "compile": {
+          "lib/net9.0/Testcontainers.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Testcontainers.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Testcontainers.PostgreSql/4.7.0": {
+        "type": "package",
+        "dependencies": {
+          "Testcontainers": "4.7.0"
+        },
+        "compile": {
+          "lib/net9.0/Testcontainers.PostgreSql.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Testcontainers.PostgreSql.dll": {
+            "related": ".xml"
+          }
+        }
       }
     }
   },
   "libraries": {
+    "BouncyCastle.Cryptography/2.4.0": {
+      "sha512": "SwXsAV3sMvAU/Nn31pbjhWurYSjJ+/giI/0n6tCrYoupEK34iIHCuk3STAd9fx8yudM85KkLSVdn951vTng/vQ==",
+      "type": "package",
+      "path": "bouncycastle.cryptography/2.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "bouncycastle.cryptography.2.4.0.nupkg.sha512",
+        "bouncycastle.cryptography.nuspec",
+        "lib/net461/BouncyCastle.Cryptography.dll",
+        "lib/net461/BouncyCastle.Cryptography.xml",
+        "lib/net6.0/BouncyCastle.Cryptography.dll",
+        "lib/net6.0/BouncyCastle.Cryptography.xml",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
+        "packageIcon.png"
+      ]
+    },
+    "Docker.DotNet.Enhanced/3.128.5": {
+      "sha512": "RmhcxDmS/zEuWhV9XA5M/xwFinfGe8IRyyNuEu/7EmnLam35dxlIXabi1Kp/MeEWr1fNPjPFrgxKieZfPeOOqw==",
+      "type": "package",
+      "path": "docker.dotnet.enhanced/3.128.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "docker.dotnet.enhanced.3.128.5.nupkg.sha512",
+        "docker.dotnet.enhanced.nuspec",
+        "icon.png",
+        "lib/net8.0/Docker.DotNet.dll",
+        "lib/net9.0/Docker.DotNet.dll",
+        "lib/netstandard2.0/Docker.DotNet.dll",
+        "lib/netstandard2.1/Docker.DotNet.dll"
+      ]
+    },
+    "Docker.DotNet.Enhanced.X509/3.128.5": {
+      "sha512": "ofHQIPpv5HillvBZwk66wEGzHjV/G/771Ta1HjbOtcG8+Lv3bKNH19+fa+hgMzO4sZQCWGDIXygyDralePOKQA==",
+      "type": "package",
+      "path": "docker.dotnet.enhanced.x509/3.128.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "docker.dotnet.enhanced.x509.3.128.5.nupkg.sha512",
+        "docker.dotnet.enhanced.x509.nuspec",
+        "icon.png",
+        "lib/net8.0/Docker.DotNet.X509.dll",
+        "lib/net9.0/Docker.DotNet.X509.dll",
+        "lib/netstandard2.0/Docker.DotNet.X509.dll",
+        "lib/netstandard2.1/Docker.DotNet.X509.dll"
+      ]
+    },
     "Humanizer.Core/2.14.1": {
       "sha512": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "type": "package",
@@ -2386,6 +2542,52 @@
         "postgresql.png"
       ]
     },
+    "SharpZipLib/1.4.2": {
+      "sha512": "yjj+3zgz8zgXpiiC3ZdF/iyTBbz2fFvMxZFEBPUcwZjIvXOf37Ylm+K58hqMfIBt5JgU/Z2uoUS67JmTLe973A==",
+      "type": "package",
+      "path": "sharpziplib/1.4.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "images/sharpziplib-nuget-256x256.png",
+        "lib/net6.0/ICSharpCode.SharpZipLib.dll",
+        "lib/net6.0/ICSharpCode.SharpZipLib.pdb",
+        "lib/net6.0/ICSharpCode.SharpZipLib.xml",
+        "lib/netstandard2.0/ICSharpCode.SharpZipLib.dll",
+        "lib/netstandard2.0/ICSharpCode.SharpZipLib.pdb",
+        "lib/netstandard2.0/ICSharpCode.SharpZipLib.xml",
+        "lib/netstandard2.1/ICSharpCode.SharpZipLib.dll",
+        "lib/netstandard2.1/ICSharpCode.SharpZipLib.pdb",
+        "lib/netstandard2.1/ICSharpCode.SharpZipLib.xml",
+        "sharpziplib.1.4.2.nupkg.sha512",
+        "sharpziplib.nuspec"
+      ]
+    },
+    "SSH.NET/2024.2.0": {
+      "sha512": "9r+4UF2P51lTztpd+H7SJywk7WgmlWB//Cm2o96c6uGVZU5r58ys2/cD9pCgTk0zCdSkfflWL1WtqQ9I4IVO9Q==",
+      "type": "package",
+      "path": "ssh.net/2024.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "SS-NET-icon-h500.png",
+        "lib/net462/Renci.SshNet.dll",
+        "lib/net462/Renci.SshNet.xml",
+        "lib/net6.0/Renci.SshNet.dll",
+        "lib/net6.0/Renci.SshNet.xml",
+        "lib/net7.0/Renci.SshNet.dll",
+        "lib/net7.0/Renci.SshNet.xml",
+        "lib/net8.0/Renci.SshNet.dll",
+        "lib/net8.0/Renci.SshNet.xml",
+        "lib/netstandard2.0/Renci.SshNet.dll",
+        "lib/netstandard2.0/Renci.SshNet.xml",
+        "lib/netstandard2.1/Renci.SshNet.dll",
+        "lib/netstandard2.1/Renci.SshNet.xml",
+        "ssh.net.2024.2.0.nupkg.sha512",
+        "ssh.net.nuspec"
+      ]
+    },
     "System.CodeDom/6.0.0": {
       "sha512": "CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA==",
       "type": "package",
@@ -2773,12 +2975,59 @@
         "system.threading.channels.nuspec",
         "useSharedDesignerContext.txt"
       ]
+    },
+    "Testcontainers/4.7.0": {
+      "sha512": "Nx4HR4e7XcKV5BVIqYdCpF8PAYFpukZ8QpoBe+sY9FL5q0RDtsy81MElVXIJVO4Wg3Q6j2f39QaF7i+2jf6YjA==",
+      "type": "package",
+      "path": "testcontainers/4.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "README.md",
+        "docs/banner.png",
+        "docs/logo.png",
+        "lib/net8.0/Testcontainers.dll",
+        "lib/net8.0/Testcontainers.xml",
+        "lib/net9.0/Testcontainers.dll",
+        "lib/net9.0/Testcontainers.xml",
+        "lib/netstandard2.0/Testcontainers.dll",
+        "lib/netstandard2.0/Testcontainers.xml",
+        "lib/netstandard2.1/Testcontainers.dll",
+        "lib/netstandard2.1/Testcontainers.xml",
+        "testcontainers.4.7.0.nupkg.sha512",
+        "testcontainers.nuspec"
+      ]
+    },
+    "Testcontainers.PostgreSql/4.7.0": {
+      "sha512": "RwR8cZIWaZLFYtXtIlwjMbGwUcbdQqcJj6zuUNN+RQooDmkbAlrp5WpPwVkMDSdNTi4BF3wiMnsw62j20OI6FA==",
+      "type": "package",
+      "path": "testcontainers.postgresql/4.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "README.md",
+        "docs/banner.png",
+        "docs/logo.png",
+        "lib/net8.0/Testcontainers.PostgreSql.dll",
+        "lib/net8.0/Testcontainers.PostgreSql.xml",
+        "lib/net9.0/Testcontainers.PostgreSql.dll",
+        "lib/net9.0/Testcontainers.PostgreSql.xml",
+        "lib/netstandard2.0/Testcontainers.PostgreSql.dll",
+        "lib/netstandard2.0/Testcontainers.PostgreSql.xml",
+        "lib/netstandard2.1/Testcontainers.PostgreSql.dll",
+        "lib/netstandard2.1/Testcontainers.PostgreSql.xml",
+        "testcontainers.postgresql.4.7.0.nupkg.sha512",
+        "testcontainers.postgresql.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
       "Microsoft.EntityFrameworkCore.Design >= 9.0.4",
-      "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.4"
+      "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.4",
+      "Testcontainers.PostgreSql >= 4.7.0"
     ]
   },
   "packageFolders": {
@@ -2842,6 +3091,10 @@
           "Npgsql.EntityFrameworkCore.PostgreSQL": {
             "target": "Package",
             "version": "[9.0.4, )"
+          },
+          "Testcontainers.PostgreSql": {
+            "target": "Package",
+            "version": "[4.7.0, )"
           }
         },
         "imports": [

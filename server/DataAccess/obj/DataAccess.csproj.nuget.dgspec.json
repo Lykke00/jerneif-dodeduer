@@ -60,6 +60,10 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[9.0.4, )"
+            },
+            "Testcontainers.PostgreSql": {
+              "target": "Package",
+              "version": "[4.7.0, )"
             }
           },
           "imports": [

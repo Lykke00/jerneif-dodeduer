@@ -1,9 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "SfFhAikfbC0=",
+  "dgSpecHash": "wdr2zAH20iM=",
   "success": true,
   "projectFilePath": "C:\\jerneif\\jerneif-dodeduer\\server\\DataAccess\\DataAccess.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\mathi\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\docker.dotnet.enhanced\\3.128.5\\docker.dotnet.enhanced.3.128.5.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\docker.dotnet.enhanced.x509\\3.128.5\\docker.dotnet.enhanced.x509.3.128.5.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\7.0.0\\microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\microsoft.build.framework\\17.8.3\\microsoft.build.framework.17.8.3.nupkg.sha512",
@@ -32,6 +35,8 @@
     "C:\\Users\\mathi\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\9.0.4\\npgsql.entityframeworkcore.postgresql.9.0.4.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\sharpziplib\\1.4.2\\sharpziplib.1.4.2.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\ssh.net\\2024.2.0\\ssh.net.2024.2.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.collections.immutable\\7.0.0\\system.collections.immutable.7.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.composition\\7.0.0\\system.composition.7.0.0.nupkg.sha512",
@@ -44,7 +49,9 @@
     "C:\\Users\\mathi\\.nuget\\packages\\system.reflection.metadata\\7.0.0\\system.reflection.metadata.7.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
     "C:\\Users\\mathi\\.nuget\\packages\\system.text.json\\9.0.4\\system.text.json.9.0.4.nupkg.sha512",
-    "C:\\Users\\mathi\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512"
+    "C:\\Users\\mathi\\.nuget\\packages\\system.threading.channels\\7.0.0\\system.threading.channels.7.0.0.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\testcontainers\\4.7.0\\testcontainers.4.7.0.nupkg.sha512",
+    "C:\\Users\\mathi\\.nuget\\packages\\testcontainers.postgresql\\4.7.0\\testcontainers.postgresql.4.7.0.nupkg.sha512"
   ],
   "logs": []
 }

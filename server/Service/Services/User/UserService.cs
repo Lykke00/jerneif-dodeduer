@@ -95,12 +95,19 @@ public class UserService(IRepository<DbUser> userRepository) : IUserService
         
         if (!string.IsNullOrWhiteSpace(request.LastName))
             user.LastName = request.LastName;
-        
+
         if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            var exists = await  userRepository.Query().AnyAsync(u => u.Email.ToLower() == request.Email.ToLower());
+            if (exists) 
+                return Result<UserDtoExtended>.BadRequest("email", "A user with this email already exists.");
+
             user.Email = request.Email;
-        
+        }
+
         if (!string.IsNullOrWhiteSpace(request.Phone))
             user.Phone = request.Phone;
+        
         
         await userRepository.Update(user);
         return Result<UserDtoExtended>.Ok(UserDtoExtended.ExtendedFromDatabase(user));

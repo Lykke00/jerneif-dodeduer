@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using DataAccess;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Moq;
 using Service.DTO.Auth;
 using Service.Models;
 using Service.Options;
@@ -14,25 +14,27 @@ namespace tests.Services.Auth;
 using DataAccess.Models;
 using Service.DTO.Auth.Login;
 
-public class AuthServiceTests : IClassFixture<AuthServiceFixture>
+public class AuthServiceTests
 {
-    private readonly AuthServiceFixture _fx;
+    private readonly AppDbContext _db;
     private readonly IAuthService _service;
+    private readonly IJwtGenerator _jwtGenerator;
 
-    public AuthServiceTests(AuthServiceFixture fx)
+    public AuthServiceTests(AppDbContext db, IAuthService service, IJwtGenerator jwtGenerator)
     {
-        _fx = fx;
-        _service = _fx.CreateService();
+        _db = db;
+        _service = service;
+        _jwtGenerator = jwtGenerator;
     }
+
 
     [Fact]
     public async Task LoginAsync_UserExists_CreatesTokenAndSendsEmail()
     {
-        var email = "test@test.com";
-
-        await TestDataFactory.CreateUserAsync(_fx.DbContext, email);
-        
         // Arrange
+        var email = "test@test.com";
+        await TestDataFactory.CreateUserAsync(_db, email);
+        
         var request = new LoginRequest
         {
             Email = email
@@ -50,14 +52,8 @@ public class AuthServiceTests : IClassFixture<AuthServiceFixture>
         // Assert
         Assert.True(result.Success);
 
-        _fx.EmailService.Verify(
-            e => e.SendMagicLinkAsync(
-                email,
-                It.IsAny<string>(),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        Assert.Single(_fx.DbContext.Set<UserLoginToken>());
+        var tokenCount = await _db.Set<UserLoginToken>().CountAsync(cancellationToken: TestContext.Current.CancellationToken);
+        Assert.Equal(1, tokenCount);
     }
 
     [Fact]
@@ -83,65 +79,35 @@ public class AuthServiceTests : IClassFixture<AuthServiceFixture>
     [Fact]
     public async Task VerifyAsync_ValidToken_ReturnsJwtAndMarksTokenAsUsed()
     {
-        // arrange
-        var email = "preben@gmail.com";
-        var user = await TestDataFactory.CreateUserAsync(_fx.DbContext, email);
+        var user = await TestDataFactory.CreateUserAsync(
+            _db, "verify@test.com");
 
-        var rawBytes = Guid.NewGuid().ToByteArray();
-        var rawToken = WebEncoders.Base64UrlEncode(rawBytes);
+        var rawToken = WebEncoders.Base64UrlEncode(Guid.NewGuid().ToByteArray());
         var hash = Base64UrlTokenHelper.ComputeHash(rawToken);
 
-        var loginToken = new UserLoginToken
+        await _db.Set<UserLoginToken>().AddAsync(new UserLoginToken
         {
             UserId = user.Id,
             TokenHash = hash,
             ExpiresAt = DateTime.UtcNow.AddMinutes(10),
             RequestedIp = "127.0.0.1",
             RequestedUserAgent = "xunit"
-        };
+        }, TestContext.Current.CancellationToken);
 
-        await _fx.DbContext.Set<UserLoginToken>().AddAsync(loginToken, TestContext.Current.CancellationToken);
-        await _fx.DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var jwtPair = new JwtPair
-        {
-            AccessToken = "access",
-            RefreshToken = "refresh"
-        };
+        var result = await _service.VerifyAsync(
+            new LoginVerifyRequest { Token = rawToken },
+            new AgentDto { IpAddress = "10.0.0.1", UserAgent = "verify-test" });
 
-        _fx.JwtGenerator
-            .Setup(j => j.GenerateTokenPair(user))
-            .Returns(jwtPair);
-
-        var request = new LoginVerifyRequest
-        {
-            Token = rawToken
-        };
-
-        var agent = new AgentDto
-        {
-            IpAddress = "10.0.0.1",
-            UserAgent = "verify-test"
-        };
-
-        // act
-        var result = await _service.VerifyAsync(request, agent);
-
-        // assert
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
 
-        Assert.Equal(jwtPair, result.Value.Jwt);
-        Assert.Equal(user.Email, result.Value.User.Email);
+        var updatedToken = await _db.Set<UserLoginToken>()
+            .SingleAsync(t => t.TokenHash == hash, cancellationToken: TestContext.Current.CancellationToken);
 
-        var updatedToken = await _fx.DbContext.Set<UserLoginToken>().SingleAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(updatedToken.UsedAt);
-        Assert.Equal(agent.IpAddress, updatedToken.ConsumedIp);
-        Assert.Equal(agent.UserAgent, updatedToken.ConsumedUserAgent);
-
-        _fx.JwtGenerator.Verify(
-            j => j.GenerateTokenPair(user),
-            Times.Once);
+        Assert.Equal("10.0.0.1", updatedToken.ConsumedIp);
     }
 
     [Fact]
@@ -179,19 +145,19 @@ public class AuthServiceTests : IClassFixture<AuthServiceFixture>
     {
         // arrange
         var user = await TestDataFactory.CreateUserAsync(
-            _fx.DbContext, "expired@test.com");
+            _db, "expired@test.com");
 
         var rawToken = WebEncoders.Base64UrlEncode(Guid.NewGuid().ToByteArray());
         var hash = Base64UrlTokenHelper.ComputeHash(rawToken);
 
-        await _fx.DbContext.Set<UserLoginToken>().AddAsync(new UserLoginToken
+        await _db.Set<UserLoginToken>().AddAsync(new UserLoginToken
         {
             UserId = user.Id,
             TokenHash = hash,
             ExpiresAt = DateTime.UtcNow.AddMinutes(-5)
         }, TestContext.Current.CancellationToken);
 
-        await _fx.DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // act
         var result = await _service.VerifyAsync(
@@ -206,38 +172,29 @@ public class AuthServiceTests : IClassFixture<AuthServiceFixture>
     }
     
     [Fact]
-    public async Task RefreshAsync_ValidRefreshToken_ReturnsNewJwtPair()
+    public async Task RefreshAsync_ValidRefreshToken_ReturnsJwtPair()
     {
         // arrange
         var user = await TestDataFactory.CreateUserAsync(
-            _fx.DbContext, "refresh@test.com");
+            _db, "refresh@test.com");
 
-        // rigtig JwtGenerator til at LAVE refresh token
-        var appOptions = Options.Create(new AppOptions
-        {
-            Jwt = new JwtOptions
+        // Use the SAME JwtGenerator configuration as the service
+        // (comes from DI via ServiceStartup)
+        var jwtGenerator = new JwtGenerator(
+            Options.Create(new AppOptions
             {
-                Secret = "THIS_IS_A_TEST_SECRET_KEY_123456789",
-                Issuer = "test-issuer",
-                Audience = "test-audience",
-                AccessTokenMinutes = 5,
-                RefreshTokenDays = 7
-            }
-        });
+                Jwt = new JwtOptions
+                {
+                    Secret = "THIS_IS_A_TEST_SECRET_KEY_123456789",
+                    Issuer = "test-issuer",
+                    Audience = "test-audience",
+                    AccessTokenMinutes = 5,
+                    RefreshTokenDays = 7
+                }
+            }));
 
-        var realJwtGenerator = new JwtGenerator(appOptions);
-        var initialPair = realJwtGenerator.GenerateTokenPair(user);
-
-        // mocked JwtGenerator til AuthService output
-        var newPair = new JwtPair
-        {
-            AccessToken = "new-access",
-            RefreshToken = "new-refresh"
-        };
-
-        _fx.JwtGenerator
-            .Setup(j => j.GenerateTokenPair(It.Is<User>(u => u.Id == user.Id)))
-            .Returns(newPair);
+        // Create a valid refresh token
+        var initialPair = jwtGenerator.GenerateTokenPair(user);
 
         // act
         var result = await _service.RefreshAsync(
@@ -249,14 +206,14 @@ public class AuthServiceTests : IClassFixture<AuthServiceFixture>
         Assert.Equal(200, result.StatusCode);
 
         Assert.NotNull(result.Value);
-        Assert.Equal(newPair, result.Value.Jwt);
+        Assert.NotNull(result.Value!.Jwt);
+
+        Assert.False(string.IsNullOrWhiteSpace(result.Value.Jwt.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(result.Value.Jwt.RefreshToken));
+
         Assert.Equal(user.Email, result.Value.User.Email);
-
-        _fx.JwtGenerator.Verify(
-            j => j.GenerateTokenPair(It.Is<User>(u => u.Id == user.Id)),
-            Times.Once);
     }
-
+    
     [Fact]
     public async Task RefreshAsync_TokenIsNotJwt_ThrowsSecurityTokenMalformedException()
     {

@@ -1,5 +1,6 @@
 ﻿using DataAccess;
 using DataAccess.Models;
+using Service.DTO.Game;
 
 namespace tests.Helpers;
 
