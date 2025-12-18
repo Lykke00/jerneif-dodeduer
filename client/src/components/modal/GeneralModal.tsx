@@ -40,7 +40,7 @@ export const GeneralModal: React.FC<Props> = ({
   description,
   backdrop = 'opaque',
 }) => {
-  const { color, Icon } = variantsConfig[variant];
+  const { Icon } = variantsConfig[variant];
 
   return (
     <Modal backdrop={backdrop} isOpen={isOpen} onClose={onClose}>

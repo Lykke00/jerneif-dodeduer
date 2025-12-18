@@ -38,7 +38,7 @@ export default function UserBoardsTable({
   deactivatingId,
   isLoading,
 }: UserBoardsTableProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpenChange } = useDisclosure();
   const [activeBoard, setActiveBoard] = useState<string>('');
 
   const openHistory = (board: UserGameBoardDto) => {

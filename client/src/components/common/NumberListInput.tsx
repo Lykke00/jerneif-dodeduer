@@ -2,11 +2,10 @@ import { Input } from '@heroui/react';
 import { useState } from 'react';
 
 interface NumberListInputProps {
-  value: number[];
   onChange: (numbers: number[]) => void;
 }
 
-export default function NumberListInput({ value, onChange }: NumberListInputProps) {
+export default function NumberListInput({ onChange }: NumberListInputProps) {
   const [text, setText] = useState('');
   const [error, setError] = useState('');
 

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardBody, CardHeader, Image } from '@heroui/react';
+import { Card, CardBody, CardHeader } from '@heroui/react';
 import type { GetDepositsResponse } from '../../generated-ts-client';
 import type { Variants } from 'framer-motion';
 import { ImagePreviewModal } from '../images/ImagePreview';

@@ -16,7 +16,6 @@ export default function DepositForm({ onSubmit, submitting }: Props) {
   const [receiptId, setReceiptId] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [errors, setErrors] = useState({});
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -57,7 +56,7 @@ export default function DepositForm({ onSubmit, submitting }: Props) {
           </p>
         </CardHeader>
 
-        <Form validationErrors={errors} onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit}>
           <CardBody className="space-y-5 pt-6">
             <div>
               <label className="text-sm font-semibold text-foreground block mb-2">

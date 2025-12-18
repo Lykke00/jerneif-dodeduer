@@ -1,6 +1,4 @@
 import { Navigate } from 'react-router-dom';
-import type { RouteProps } from 'react-router-dom';
-import { useEffect } from 'react';
 import { Spinner } from '@heroui/react';
 import { useAuthContext } from '../../contexts/AuthContext';
 

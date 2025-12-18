@@ -1,5 +1,5 @@
-import { addToast, Card, CardHeader, Spinner } from '@heroui/react';
-import { useEffect, useState } from 'react';
+import { Card, CardHeader, Spinner } from '@heroui/react';
+import { useEffect } from 'react';
 import { useGame, useUserBoards } from '../../hooks';
 import ErrorState from '../../components/common/ErrorState';
 import GameForm from '../../components/game/GameForm';
@@ -11,8 +11,6 @@ export default function DeadPigeonsGame() {
   const { game, isLoading, isSubmitLoading, getCurrent, play } = useGame();
   const { create } = useUserBoards();
   const { showModal } = useModal();
-  const [autoPlayEnabled, setAutoPlayEnabled] = useState(false);
-  const [repeatCount, setRepeatCount] = useState(1);
 
   useEffect(() => {
     getCurrent();

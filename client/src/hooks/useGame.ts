@@ -40,7 +40,7 @@ export const useGame = (): useGameTypes => {
 
   const { makeApiCall } = useAuthContext();
   const [game, setCurrentGame] = useAtom(gameAtom);
-  const [user, setUser] = useAtom(userAtom);
+  const [_, setUser] = useAtom(userAtom);
 
   const getCurrent = async (): Promise<GameDto> => {
     try {

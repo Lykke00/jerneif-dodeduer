@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { atomWithStorage, createJSONStorage } from 'jotai/utils';
+import { atomWithStorage } from 'jotai/utils';
 import type { UserDto } from '../generated-ts-client';
 
 export const TOKEN_KEY = 'token';

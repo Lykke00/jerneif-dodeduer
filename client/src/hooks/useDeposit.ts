@@ -29,8 +29,6 @@ export const useDeposit = (): useDepositTypes => {
   const { isLoading, withLoading } = useLoading();
   const { makeApiCall } = useAuthContext();
 
-  const [allDeposits, setAllDeposits] = useState<PagedResultOfGetDepositsResponse>();
-
   // anmod om at modtage token
   const deposit = async (
     amount: number,
@@ -76,8 +74,6 @@ export const useDeposit = (): useDepositTypes => {
       if (allDeposits == null) {
         throw new Error('Ingen indbetalninger fundet');
       }
-
-      setAllDeposits(allDeposits);
 
       return allDeposits;
       // hvis en fejl sker, så extract fejlene og kast en error så vores

@@ -1,8 +1,5 @@
 import {
-  type PagedResultOfUserDtoExtended,
   type PagedResultOfUserGameBoardDto,
-  type UpdateUserRequest,
-  type UserDtoExtended,
   type UserGameBoardDto,
   type UserGameBoardHistoryDto,
 } from '../generated-ts-client';

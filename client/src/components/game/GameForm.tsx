@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Form, Button, NumberInput, Checkbox, Divider } from '@heroui/react';
+import { Form, Button, NumberInput, Checkbox } from '@heroui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GamePickCard from '../GamePickCard';
 import { BiMinus, BiPlus } from 'react-icons/bi';

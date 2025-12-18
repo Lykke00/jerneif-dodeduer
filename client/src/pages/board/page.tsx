@@ -18,10 +18,9 @@ import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
 
 export default function UserBoardPage() {
-  const { getAll, isLoading, create, deactivate, isDeactivateLoading, isCreateLoading } =
-    useUserBoards();
+  const { getAll, isLoading, create, deactivate, isCreateLoading } = useUserBoards();
   const { showModal } = useModal();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpenChange } = useDisclosure();
   const [reloadKey, setReloadKey] = useState(0);
   const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
 

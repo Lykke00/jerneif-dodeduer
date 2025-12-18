@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { isValidEmail } from '../../helpers/isValidEmail';
 import { useAuth } from '../../hooks';
-import { GeneralModal } from '../../components/modal/GeneralModal';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
 
@@ -12,10 +11,7 @@ export default function IndexPage() {
   const { showModal } = useModal();
 
   const [email, setEmail] = useState<string>('');
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const canSubmit = isValidEmail(email);
 
@@ -60,7 +56,7 @@ export default function IndexPage() {
               </div>
             </CardHeader>
 
-            <Form validationErrors={errors} onSubmit={onSubmit}>
+            <Form onSubmit={onSubmit}>
               <CardBody className="p-4">
                 <Input
                   isRequired

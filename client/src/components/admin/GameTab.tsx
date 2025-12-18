@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card, CardBody, CardHeader, Button, NumberInput, Form } from '@heroui/react';
 import NumberListInput from '../common/NumberListInput';
 import { useGame } from '../../hooks';
@@ -88,7 +88,7 @@ export default function GameTab() {
                     Startet den {new Date(game.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <NumberListInput value={winningNumbers} onChange={setWinningNumbers} />
+                <NumberListInput onChange={setWinningNumbers} />
                 <Button
                   name="submit"
                   type="submit"
