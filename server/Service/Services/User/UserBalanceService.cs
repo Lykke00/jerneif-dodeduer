@@ -24,6 +24,7 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
 {
     public async Task<decimal> GetUserBalanceAsync(Guid userId)
     {
+        // få fat i usersbalance hvor userId = request.userId og udregn sum af amount for alle rækker
         return await context.UsersBalances
             .Where(ub => ub.UserId == userId)
             .SumAsync(ub => ub.Amount);
@@ -34,6 +35,7 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
         Guid depositId,
         decimal amount)
     {
+        // opret en ny usersbalance
         var userBalance = new UsersBalance
         {
             Id = Guid.NewGuid(),
@@ -44,6 +46,7 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
             CreatedAt = DateTime.UtcNow
         };
 
+        //gem i databasen
         await context.UsersBalances.AddAsync(userBalance);
     }
     
@@ -52,6 +55,7 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
         Guid playId,
         decimal amount)
     {
+        // tilføj et spil træk
         var userBalance = new UsersBalance
         {
             Id = Guid.NewGuid(),
@@ -62,6 +66,7 @@ public class UserBalanceService(AppDbContext context) : IUserBalanceService
             CreatedAt = DateTime.UtcNow
         };
 
+        // gem i databasen
         await context.UsersBalances.AddAsync(userBalance);
     }
 }

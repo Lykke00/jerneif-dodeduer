@@ -27,11 +27,12 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
 {
     public async Task<Result<GameDto>> GetGameByIdAsync(Guid gameId)
     {
-        // find et spil ud fra game id
+        // find et spil ud fra game id, inkluder/join vindertal på og hvor gameId = request id
         var game = await context.Games
             .Include(g => g.GameWinningNumbers)
             .FirstOrDefaultAsync(g => g.Id == gameId);
         
+        // hvis game er null, så må den ikke eksisterer
         if (game == null)
             return Result<GameDto>.NotFound("game", "Game not found.");
 
@@ -45,9 +46,11 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         var game = await context.Games
             .FirstOrDefaultAsync(g => g.GameWinningNumbers.Count == 0);
 
+        // hvis game er null, så må den ikke eksisterer
         if (game == null)
             return Result<GameDto>.NotFound("No active game found.");
 
+        // returner til bruger
         return Result<GameDto>.Ok(GameDto.FromDatabase(game));
     }
     
@@ -56,6 +59,7 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         Guid gameId,
         IEnumerable<int> numbers)
     {
+        // lav et nyt ID
         var playId = Guid.NewGuid();
 
         // opret et nyt spil
@@ -77,6 +81,7 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
             });
         }
 
+        // returner
         return gamePlay;
     }
 
@@ -102,20 +107,28 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
             var fieldCount = request.Numbers.Count;
             var boardPrice = GamePricing.CalculateBoardPrice(fieldCount);
 
+            // få fat i brugerens balance og udregn sum
             var balance = await context.UsersBalances
                 .Where(x => x.UserId == userId)
                 .SumAsync(x => x.Amount);
 
+            // total pris er brættetspris * antal man vil spille den
             var totalPrice = boardPrice * request.Amount;
+            
+            // hvis balancen er mindre end total pris, så har man ikke råd
             if (balance < totalPrice)
                 return Result<GameUserPlayResponse>.Conflict("balance", "Insufficient balance to play this board.");
 
-            // opret spillet og træk beløbet fra brugerens balance
+            // for hver gang man vil spille
             for (var i = 0; i < request.Amount; i++)
             {
+                // opret et nyt gameplay (træk)
                 var gamePlay = CreateGamePlay(userId, gameId, request.Numbers);
 
+                // træk fra brugerens balance
                 await balanceService.AddPlayAsync(userId, gamePlay.Id, boardPrice);
+                
+                // tilføj til databasen
                 context.GamePlays.Add(gamePlay);
             }
             
@@ -123,11 +136,12 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
             await context.SaveChangesAsync();
             await tx.CommitAsync();
 
+            // få fat i den nye opdateret balance
             var newBalance = await context.UsersBalances
                 .Where(x => x.UserId == userId)
                 .SumAsync(x => x.Amount);
-
             
+            // returner til brugeren
             return Result<GameUserPlayResponse>.Ok(new GameUserPlayResponse
             {
                 TotalPrice = totalPrice,
@@ -136,6 +150,7 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
         }
         catch
         {
+            // hvis en fejl sker, så roll ændringer tilbage og returner en fejl.
             await tx.RollbackAsync();
             return Result<GameUserPlayResponse>.InternalError("An error occurred while processing the game play.");
         }
@@ -143,18 +158,22 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
     
     public async Task<Result<GameDto>> UpdateGameAsync(Guid gameId, GameUpdateRequest request)
     {
-        // find spillet
+        // find spillet, inkluder/join vindertal på og tjek gameId = request.gameId
         var game = await context.Games
             .Include(g => g.GameWinningNumbers)
             .FirstOrDefaultAsync(g => g.Id == gameId);
 
+        // hvis spillet er null, så må den ikke eksisterer
         if (game == null)
             return Result<GameDto>.NotFound("game", "Game not found.");
 
         // opdater spillets vindende numre
         game.GameWinningNumbers.Clear();
+        
+        // for hver nummer i vindertal numre.
         foreach (var number in request.WinningNumbers)
         {
+            // tilføj hvert nummer til tabellen med gameId og nummeret.
             game.GameWinningNumbers.Add(new GameWinningNumber
             {
                 GameId = gameId,
@@ -162,17 +181,22 @@ public class GameService(AppDbContext context, IUserService userService, IUserBa
             });
         }
         
+        // gem i databasen
         await context.SaveChangesAsync();
+        
+        // få fat i det opdateret spil, inkluder/join vindertal på og tjek gameId = request.Id
         var updatedGame = await context.Games
             .Include(g => g.GameWinningNumbers)
             .AsNoTracking()
             .FirstAsync(g => g.Id == gameId);
 
+        // returner til brugeren
         return Result<GameDto>.Ok(GameDto.FromDatabase(updatedGame));    
     }
     
 public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
 {
+    // skal køres i en transaktion da "auto" brætne også spilles her
     await using var tx = await context.Database.BeginTransactionAsync(
         IsolationLevel.Serializable);
 
@@ -182,6 +206,7 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
         var activeGameExists = await context.Games
             .AnyAsync(g => !g.GameWinningNumbers.Any());
         
+        // hvis spillet findes, så kan vi ikke fortsætte
         if (activeGameExists)
             return Result<GameDto>.Conflict("game", "Game game already exists.");
         
@@ -190,6 +215,7 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
             .AnyAsync(g => g.Week == request.WeekNumber &&
                            g.Year == DateTime.UtcNow.Year);
 
+        // hvis den eksisterer for denne uge og år, så meld fejl tilbage
         if (existsForThisWeekYear)
             return Result<GameDto>.Conflict(
                 "Week",
@@ -205,10 +231,11 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
             CreatedAt = DateTime.UtcNow
         };
 
+        // tilføj til databasen
         context.Games.Add(newGame);
-        await context.SaveChangesAsync(); // save game first to get the ID
+        await context.SaveChangesAsync();
 
-        // Hent alle aktive boards med deres repeat plans
+        // hent alle aktive boards med deres repeat plans
         var activeBoards = await context.GameBoards
             .Include(b => b.GameBoardNumbers)
             .Include(b => b.BoardRepeatPlans)
@@ -229,26 +256,26 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
             var repeatCount = boardData.ActivePlan.RepeatCount;
             var playedCount = boardData.ActivePlan.PlayedCount;
             
-            // Tjek om board har nået sit limit
+            // tjek om board har nået sit limit
             if (playedCount >= repeatCount)
             {
-                // Deaktiver planen hvis den er færdig
+                // deaktiver planen hvis den er færdig
                 boardData.ActivePlan.Active = false;
                 boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
                 continue;
             }
 
-            // Beregn pris for dette board
+            // beregn pris for dette board
             var boardPrice = GamePricing.CalculateBoardPrice(boardData.NumberCount);
 
-            // Tjek brugerens balance
+            // tjek brugerens balance
             var balance = await context.UsersBalances
                 .Where(x => x.UserId == userId)
                 .SumAsync(x => x.Amount);
 
             if (balance < boardPrice)
             {
-                // Ikke nok balance - deaktiver planen
+                // ikke nok balance - deaktiver planen
                 boardData.ActivePlan.Active = false;
                 boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
 
@@ -265,23 +292,24 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
                 continue;
             }
 
-            // Opret spillet
+            // opret spillet
             var gamePlay = CreateGamePlay(userId, newGame.Id, boardData.Numbers);
             context.GamePlays.Add(gamePlay);
 
-            // Træk beløbet fra balance
+            // træk beløbet fra balance
             await balanceService.AddPlayAsync(userId, gamePlay.Id, boardPrice);
 
-            // Opdater played count
+            // opdater played count
             boardData.ActivePlan.PlayedCount++;
 
-            // Deaktiver hvis alle spil er brugt
+            // deaktiver hvis alle spil er brugt
             if (boardData.ActivePlan.PlayedCount >= boardData.ActivePlan.RepeatCount)
             {
                 boardData.ActivePlan.Active = false;
                 boardData.ActivePlan.StoppedAt = DateTime.UtcNow;
             }
             
+            // det spillet brækt, skal gemmes i databasen så de kan se det i historikken.
             BoardPlayedGame played = new BoardPlayedGame
             {
                 BoardId = boardData.Board.Id,
@@ -294,14 +322,16 @@ public async Task<Result<GameDto>> CreateGameAsync(GameCreateRequest request)
             context.BoardPlayedGames.Add(played);
         }
         
-
+        // gem ændringer i databasen og commit transaktionen
         await context.SaveChangesAsync();
         await tx.CommitAsync();
 
+        // returner til brugeren
         return Result<GameDto>.Ok(GameDto.FromDatabase(newGame));
     }
     catch (Exception ex)
     {
+        // hvis en fejl sker, så roll ændringer tilbage og returner en fejl til brugeren
         await tx.RollbackAsync();
         return Result<GameDto>.InternalError($"An error occurred while creating the game: {ex.Message}");
     }
@@ -311,12 +341,13 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
     Guid gameId,
     PaginationRequest request)
 {
-    // 1. Hent vindertal
+    // 1. hent vindertal, hvor gameId = request.gameId og vælg kun alle numre og lav dem til en liste.
     var winningNumbers = await context.GameWinningNumbers
         .Where(x => x.GameId == gameId)
         .Select(x => x.Number)
         .ToListAsync();
 
+    // hvis der ikke er nogle vindertal, så er der en fejl og ingen gyldige.
     if (winningNumbers.Count == 0)
     {
         return new PagedResult<UserWinnerDto>
@@ -328,13 +359,13 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         };
     }
 
-    // 2. Hent alle GamePlays med deres numbers for dette spil
+    // 2. hent alle GamePlays med deres numbers for dette spil
     var gamePlaysWithNumbers = await context.GamePlays
         .Where(gp => gp.GameId == gameId)
         .Include(gp => gp.GamePlaysNumbers)
         .ToListAsync();
 
-    // 3. Group og beregn matches i C# (client-side)
+    // 3. group og beregn matches i C# (client-side)
     var userMatches = gamePlaysWithNumbers
         .GroupBy(gp => gp.UserId)
         .Select(g => new
@@ -363,7 +394,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         .ThenByDescending(x => x.WinningPlaysCount)
         .ToList();
 
-    // 4. Apply pagination in memory
+    // 4. brug pagination men i memory/ram
     var totalCount = userMatches.Count;
     var page = Math.Max(1, request.Page);
     var pageSize = Math.Clamp(request.PageSize, 1, 100);
@@ -384,7 +415,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         };
     }
 
-    // 5. Hent user data
+    // 5. hent bruger data
     var userIds = pagedMatches.Select(x => x.UserId).ToList();
     var users = await context.Users
         .Where(u => userIds.Contains(u.Id))
@@ -395,7 +426,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         })
         .ToDictionaryAsync(x => x.User.Id);
 
-    // 6. Hent matched numbers - grouped by PlayId to keep winning plays separate
+    // 6. hent matched numbers - grouped af playid for at holder vinderplays separeret
     var playIds = pagedMatches.SelectMany(x => x.PlayIds).ToList();
     var playedNumbersLookup = await context.GamePlaysNumbers
         .Where(gpn => playIds.Contains(gpn.PlayId))
@@ -405,7 +436,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             g => g.Select(x => x.Number).OrderBy(n => n).ToList()
         );
 
-    // 7. Build the winning numbers array for each user
+    // 7. byg vindertals array for hver bruger
     var userWinningNumbersLookup = pagedMatches.ToDictionary(
         x => x.UserId,
         x => x.PlayIds
@@ -414,7 +445,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             .ToList()
     );
 
-    // 8. Byg DTO'er
+    // 8. byg DTO'er
     var winners = pagedMatches.Select(x =>
     {
         var userData = users[x.UserId];
@@ -427,6 +458,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         );
     }).ToList();
 
+    // returner til brugeren
     return new PagedResult<UserWinnerDto>
     {
         Items = winners,
@@ -439,13 +471,13 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
     {
         // vi skal først have alt data...
         var pagedGames = await context.Games
-            .Include(g => g.GamePlays)
-            .ThenInclude(p => p.GamePlaysNumbers)
-            .Include(g => g.GameWinningNumbers)
-            .OrderByDescending(g => g.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
+            .Include(g => g.GamePlays)                      // join gameplays
+            .ThenInclude(p => p.GamePlaysNumbers)           // derefter join gameplaynumbers
+            .Include(g => g.GameWinningNumbers)             // join gamewinningnumbers
+            .OrderByDescending(g => g.CreatedAt)            // sørg for nyeste står først
+            .Skip((request.Page - 1) * request.PageSize)    // brug pagination
+            .Take(request.PageSize)                         // tag kun så mange med, så stor siden er
+            .ToListAsync();                                 // lav om til en liste
 
         var totalCount = await context.Games.CountAsync();
 
@@ -454,6 +486,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         {
             var playCount = g.GamePlays.Count;
 
+            // tjek omsætning af spillet, ved at udregne sum
             var totalRevenue = g.GamePlays.Sum(p =>
             {
                 var fieldCount = p.GamePlaysNumbers.Count;
@@ -481,6 +514,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             );
         }).ToList();
 
+        // returner til brugeren
         return new PagedResult<GameExtendedDto>
         {
             Items = items,
@@ -499,12 +533,14 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             .Include(g => g.GameWinningNumbers)
             .FirstOrDefaultAsync(g => g.Id == gameId);
 
+        // hvis spillet er null, så må det ikke eksisterer
         if (game == null)
             return Result<GameExtendedDto>.NotFound("game", "Game not found.");
 
         // udregn statistik
         var playCount = game.GamePlays.Count;
 
+        // total omsætning fra spillet
         var totalRevenue = game.GamePlays.Sum(p =>
         {
             var fieldCount = p.GamePlaysNumbers.Count;
@@ -515,7 +551,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         // udregn alle vindere
         var winningNumbers = game.GameWinningNumbers.Select(wn => wn.Number).ToList();
         var totalWinners = 0;
-
+        
         if (winningNumbers.Count > 0)
         {
             totalWinners = game.GamePlays
@@ -531,6 +567,7 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             totalWinners
         );
 
+        // returner til bruger
         return Result<GameExtendedDto>.Ok(gameDto);
     }
     

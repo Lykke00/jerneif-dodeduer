@@ -61,23 +61,32 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
     
     public async Task<Result<LoginVerifyResponse>> VerifyAsync(LoginVerifyRequest request, AgentDto agentDto)
     {
+        // start med at compute hash fra den token som er i mailen
         var hash = Base64UrlTokenHelper.ComputeHash(request.Token);
+        
+        // tjek derefter om den hash eksisterer i databasen
         var token = await userTokenRepository.Query().SingleOrDefaultAsync(t => t.TokenHash == hash);
             
+        // hvis den ikke eksisterer, er brugt eller udløbet så meld fejl tilbage
         if (token == null || token.UsedAt != null || token.ExpiresAt <= DateTime.UtcNow)
             return Result<LoginVerifyResponse>.ValidationError(nameof(token), "Ugyldig eller udløbet token.");
         
+        // få fat i brugeren
         var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.UserId);
         
+        // hvis brugeren ikke eksisterer, så returner en fejl
         if (user == null)
             return Result<LoginVerifyResponse>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
         
+        // opdater selve token, for at vise den er brugt
         token.UsedAt = DateTime.UtcNow;
         token.ConsumedIp = agentDto.IpAddress;
         token.ConsumedUserAgent = agentDto.UserAgent;
         
+        // gem token
         await userTokenRepository.Update(token);
 
+        // opret ny access og refresh token til brugeren
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
@@ -85,19 +94,25 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
             User = UserDto.FromDatabase(user)
         };
         
+        // returner jwt
         return Result<LoginVerifyResponse>.Ok(response);
     }
     
     public async Task<Result<LoginVerifyResponse>> RefreshAsync(string refreshToken, AgentDto agentDto)
     {
+        // valider refersh token
         var token = JwtValidator.ValidateRefreshToken(refreshToken);
+        
+        // hvis token er null, så er den ugyldig
         if (token == null)
             return Result<LoginVerifyResponse>.ValidationError(nameof(token), "Ugyldig refresh token.");
 
+        // få fat i brugeren fra token af
         var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.Value);
         if (user == null)
             return Result<LoginVerifyResponse>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
 
+        // lav ny access og refresh token til brugeren
         var jwt = jwtGenerator.GenerateTokenPair(user);
         var response = new LoginVerifyResponse
         {
@@ -105,6 +120,7 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
             User = UserDto.FromDatabase(user)
         };
         
+        // send tilbage til brugeren
         return Result<LoginVerifyResponse>.Ok(response);
     }
 }
