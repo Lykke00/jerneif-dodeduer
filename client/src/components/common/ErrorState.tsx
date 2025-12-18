@@ -11,9 +11,7 @@ interface ErrorStateProps {
   onRetry?: () => void;
   retryLabel?: string;
   className?: string;
-  contactUrl?: string;
   showBackButton?: boolean;
-  showContactButton?: boolean;
   showButtons?: boolean;
 }
 
@@ -25,9 +23,7 @@ export default function ErrorState({
   onRetry,
   retryLabel = 'Prøv igen',
   className = '',
-  contactUrl = '/kontakt',
   showBackButton = true,
-  showContactButton = true,
   showButtons = true,
 }: ErrorStateProps) {
   // React-Icons component lookup
@@ -39,11 +35,7 @@ export default function ErrorState({
     else window.location.href = '/';
   };
 
-  const handleContact = () => {
-    window.location.href = contactUrl;
-  };
-
-  const showAnyButton = showButtons && (onRetry || showBackButton || showContactButton);
+  const showAnyButton = showButtons && (onRetry || showBackButton);
 
   return (
     <div
@@ -102,18 +94,6 @@ export default function ErrorState({
             >
               <Icons.FiArrowLeft className="w-4 h-4" />
               Gå tilbage
-            </Button>
-          )}
-
-          {showContactButton && (
-            <Button
-              color="secondary"
-              variant="flat"
-              onPress={handleContact}
-              className="flex items-center gap-2"
-            >
-              <Icons.FiMail className="w-4 h-4" />
-              Kontakt os
             </Button>
           )}
         </div>
