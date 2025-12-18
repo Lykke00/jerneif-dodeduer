@@ -15,7 +15,7 @@ public interface IUserService
     Task<Result<UserDtoExtended>> UpdateUserAsync(Guid userId, UpdateUserRequest request);
 }
 
-public class UserService(IRepository<DbUser> userRepository, IUserBalanceService userBalanceService) : IUserService
+public class UserService(IRepository<DbUser> userRepository) : IUserService
 {
     public async Task<Result<UserDto>> GetByIdAsync(Guid userId)
     {
