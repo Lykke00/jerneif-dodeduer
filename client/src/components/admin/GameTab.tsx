@@ -122,7 +122,7 @@ export default function GameTab() {
                   value={weekNumber}
                   onValueChange={setWeekNumber}
                   placeholder="43"
-                  minValue="1"
+                  minValue={1}
                 />
                 <Button
                   name="weekNumber"

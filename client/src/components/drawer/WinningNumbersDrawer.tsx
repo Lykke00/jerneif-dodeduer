@@ -36,7 +36,7 @@ export default function WinningNumbersDrawer({
             <DrawerBody className="flex flex-col gap-4">
               {numbers.map((play, playIndex) => (
                 <div key={playIndex} className="flex flex-col gap-1">
-                  <div className="text-sm font-semibold">Spil {playIndex + 1}</div>
+                  <div className="text-sm font-semibold">Bræt {playIndex + 1}</div>
 
                   <div className="flex flex-wrap gap-1">
                     {play.map((num, index) => {
