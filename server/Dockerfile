@@ -1,6 +1,8 @@
 ﻿﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /
 
+#der skal ændringer til før den gider at commites igen
+
 COPY . .
 
 ARG PROJECT=Api.Rest/Api.Rest.csproj
