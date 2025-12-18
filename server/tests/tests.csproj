@@ -6,8 +6,6 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>tests</RootNamespace>
     <TargetFramework>net9.0</TargetFramework>
-    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>

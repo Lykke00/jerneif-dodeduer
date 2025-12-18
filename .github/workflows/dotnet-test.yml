@@ -34,12 +34,11 @@ jobs:
       # 5. test (xUnit v3 via CLI)
       - name: Run tests
         run: |
-          mkdir -p ${{ github.workspace }}/TestResults
           dotnet test \
             --configuration Release \
             --no-build \
-            -- --report-trx \
-            --report-trx-filename ${{ github.workspace }}/TestResults/test-results.trx
+            --logger trx \
+            --results-directory ${{ github.workspace }}/TestResults
 
       - name: Debug - Find all test results
         if: always()
