@@ -5,6 +5,7 @@ import ErrorState from '../../components/common/ErrorState';
 import GameForm from '../../components/game/GameForm';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
+import { motion } from 'framer-motion';
 
 export default function DeadPigeonsGame() {
   const { game, isLoading, isSubmitLoading, getCurrent, play } = useGame();
@@ -80,7 +81,11 @@ export default function DeadPigeonsGame() {
   }
 
   return (
-    <div className="flex justify-center">
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mx-auto justify-center flex"
+    >
       <Card className="max-w-3xl w-full border border-primary/20 shadow-lg bg-card/70 backdrop-blur-sm">
         <CardHeader className="flex flex-col text-center border-b border-primary/10">
           <div className="text-3xl font-bold">Døde Duer</div>
@@ -89,6 +94,6 @@ export default function DeadPigeonsGame() {
 
         <GameForm isLoading={isSubmitLoading} onSubmit={onSubmit} />
       </Card>
-    </div>
+    </motion.div>
   );
 }

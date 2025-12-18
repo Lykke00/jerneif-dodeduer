@@ -1,23 +1,16 @@
-using System.IdentityModel.Tokens.Jwt;
 using Api.Rest.Extensions;
 using Api.Rest.Http;
 using DataAccess;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using NSwag;
-using NSwag.Generation.Processors.Security;
 using Serilog;
 using Service;
 using Service.Options;
-using System.Text;
 using Api.Rest.Controllers;
 using Api.Rest.Documentation;
 using Api.Rest.Middleware;
 using Api.Rest.Security;
 using FluentValidation;
 
-using Service.DTO;
 
 namespace Api.Rest;
 
@@ -40,11 +33,21 @@ public class Program
             .Get<AppOptions>()!;
         var jwtOptions = appOptions.Jwt;
 
-        builder.Services.AddDbContext<AppDbContext>(config =>
+        if (builder.Environment.IsEnvironment("Testing"))
         {
-            config.UseNpgsql(appOptions.DbConnectionString);
-            config.EnableSensitiveDataLogging();
-        });
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseInMemoryDatabase("TestDb");
+            });
+        }
+        else
+        {
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseNpgsql(appOptions.DbConnectionString);
+                options.EnableSensitiveDataLogging();
+            });
+        }
 
         //---------------- SERVICES ----------------//
         builder.Services.ServiceStartup();
