@@ -3,3 +3,6 @@
 
 # mac
 *.DS_Store
+
+# JetBrains user-specific settings
+*.DotSettings.user
