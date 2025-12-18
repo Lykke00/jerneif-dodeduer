@@ -22,4 +22,22 @@ public static class TestDataFactory
         await db.SaveChangesAsync();
         return user;
     }
+
+    public static async Task<UsersBalance> UpdateBalanceAsync(
+        AppDbContext db,
+        Guid userId,
+        int amount)
+    {
+        var newBalance = new UsersBalance
+        {
+            UserId = userId,
+            Amount = amount,
+            BalanceEnum = UsersBalance.BalanceType.Deposit,
+            CreatedAt = DateTime.UtcNow,
+        };
+        
+        db.UsersBalances.Add(newBalance);
+        await db.SaveChangesAsync();
+        return newBalance;
+    }
 }

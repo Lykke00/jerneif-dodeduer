@@ -1,6 +1,12 @@
 ﻿using DataAccess;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Moq;
 using Service.DTO.Deposit;
+using Service.Options;
 using Service.Services.Deposit;
+using Service.Services.Files;
+using Service.Services.User;
 using tests.Helpers;
 
 namespace tests.Services.Deposit;
@@ -10,10 +16,45 @@ public class DepositServiceTests
     private readonly AppDbContext _db;
     private readonly IDepositService _service;
 
-    public DepositServiceTests(AppDbContext db, IDepositService service)
+    public DepositServiceTests()
     {
-        _db = db;
-        _service = service;
+        // 1. Lokal database (én pr. testklasse)
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        _db = new AppDbContext(options);
+
+        // 2. Afhængige services (lokale)
+        var userBalanceService = new UserBalanceService(_db);
+
+        // 3. FileService → mock (IKKE rigtig fil-I/O i service-tests)
+        var fileService = new Mock<IFileService>();
+
+        // 4. AppOptions → test-options
+        var appOptions = Options.Create(new AppOptions
+        {
+            FrontendUrl = "http://localhost",
+            BackendUrl = "http://localhost",
+            DbConnectionString = "InMemory",
+            ResendApiKey = "test",
+            Jwt = new JwtOptions
+            {
+                Secret = "TEST_SECRET_123456789",
+                Issuer = "test",
+                Audience = "test",
+                AccessTokenMinutes = 5,
+                RefreshTokenDays = 1
+            }
+        });
+
+        // 5. Service under test
+        _service = new DepositService(
+            _db,
+            userBalanceService,
+            fileService.Object,
+            appOptions
+        );
     }
     
     [Fact]

@@ -1,12 +1,15 @@
 ﻿using DataAccess;
+using DataAccess.Repository;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Moq;
 using Service.DTO.Auth;
 using Service.Models;
 using Service.Options;
 using Service.Services.Auth;
+using Service.Services.Email;
 using tests.Helpers;
 
 namespace tests.Services.Auth;
@@ -18,15 +21,36 @@ public class AuthServiceTests
 {
     private readonly AppDbContext _db;
     private readonly IAuthService _service;
-    private readonly IJwtGenerator _jwtGenerator;
 
-    public AuthServiceTests(AppDbContext db, IAuthService service, IJwtGenerator jwtGenerator)
+    private readonly Mock<IJwtGenerator> _jwtGenerator;
+    private readonly Mock<IEmailService> _emailService;
+
+    public AuthServiceTests()
     {
-        _db = db;
-        _service = service;
-        _jwtGenerator = jwtGenerator;
-    }
+        // 1. lokal DB (én pr. testklasse)
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
 
+        _db = new AppDbContext(options);
+
+        // 2. repositories
+        var userRepo = new UserRepository(_db);
+        var tokenRepo = new UserLoginTokenRepository(_db);
+
+        // 3. mocks
+        _jwtGenerator = new Mock<IJwtGenerator>();
+        
+        _emailService = new Mock<IEmailService>();
+
+        // 4. service under test
+        _service = new AuthService(
+            _jwtGenerator.Object,
+            userRepo,
+            tokenRepo,
+            _emailService.Object
+        );
+    }
 
     [Fact]
     public async Task LoginAsync_UserExists_CreatesTokenAndSendsEmail()
@@ -177,10 +201,8 @@ public class AuthServiceTests
         // arrange
         var user = await TestDataFactory.CreateUserAsync(
             _db, "refresh@test.com");
-
-        // Use the SAME JwtGenerator configuration as the service
-        // (comes from DI via ServiceStartup)
-        var jwtGenerator = new JwtGenerator(
+        
+        var realGenerator = new JwtGenerator(
             Options.Create(new AppOptions
             {
                 Jwt = new JwtOptions
@@ -192,15 +214,22 @@ public class AuthServiceTests
                     RefreshTokenDays = 7
                 }
             }));
+        
+        var inputPair = realGenerator.GenerateTokenPair(user);
+        
+        var fakeJwtPair = new JwtPair
+        {
+            AccessToken = "access-token",
+            RefreshToken = "refresh-token"
+        };
 
-        // Create a valid refresh token
-        var initialPair = jwtGenerator.GenerateTokenPair(user);
+        _jwtGenerator
+            .Setup(j => j.GenerateTokenPair(It.Is<User>(u => u.Id == user.Id)))
+            .Returns(fakeJwtPair);
 
         // act
-        var result = await _service.RefreshAsync(
-            initialPair.RefreshToken,
-            new AgentDto());
-
+        var result = await _service.RefreshAsync(inputPair.RefreshToken, new AgentDto());
+        
         // assert
         Assert.True(result.Success);
         Assert.Equal(200, result.StatusCode);

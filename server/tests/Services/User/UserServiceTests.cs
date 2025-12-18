@@ -1,4 +1,6 @@
 ﻿using DataAccess;
+using DataAccess.Repository;
+using Microsoft.EntityFrameworkCore;
 using Service.DTO.User;
 using Service.Services.User;
 using tests.Helpers;
@@ -10,10 +12,14 @@ public class UserServiceTests
     private readonly AppDbContext _db;
     private readonly IUserService _service;
 
-    public UserServiceTests(AppDbContext db, IUserService service)
+    public UserServiceTests()
     {
-        _db = db;
-        _service = service;
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        _db = new AppDbContext(options);
+        _service = new UserService(new UserRepository(_db));
     }
 
     [Fact]
@@ -149,6 +155,27 @@ public class UserServiceTests
         Assert.Equal(200, updatedUser.StatusCode);
         Assert.Equal(user.Id, updatedUser.Value.Id);
         Assert.NotEqual(oldEmail, updatedUser.Value.Email);
+    }
+
+    [Fact]
+    public async Task UpdateUser_UserEmailAlreadyExists_ReturnsError()
+    {
+        // arrange
+        var email = "torben@gmail.com";
+        var user = await TestDataFactory.CreateUserAsync(_db, email);
+
+        var request = new UpdateUserRequest
+        {
+            Email = email
+        };
+        
+        // act
+        var updatedUser = await _service.UpdateUserAsync(user.Id, request);
+        
+        // assert
+        Assert.Null(updatedUser.Value);
+        Assert.Equal(400, updatedUser.StatusCode);
+        Assert.False(updatedUser.Success);
     }
 
     [Fact]

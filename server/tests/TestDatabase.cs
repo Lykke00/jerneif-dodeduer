@@ -1,6 +1,6 @@
 ﻿using DataAccess;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using Testcontainers.PostgreSql;
 
 namespace tests;
@@ -15,26 +15,29 @@ public sealed class TestDatabase : IAsyncLifetime
     public TestDatabase(IServiceProvider services)
     {
         _services = services;
-    }
-
-    
-    public async ValueTask InitializeAsync()
-    {
+        
+        // opret en ny testcontainer
         _container = new PostgreSqlBuilder()
             .WithImage("postgres:16-alpine")
             .WithDatabase("testdb")
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
+        
+        // start containeren
+        _container.StartAsync().GetAwaiter().GetResult();
+        
+        // opret db skema som er VORES fra scaffolded db context
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseNpgsql(ConnectionString)
+            .Options;
 
-        await _container.StartAsync();
+        using var db = new AppDbContext(options);
+        db.Database.EnsureCreated();
 
-        // 👇 THIS is what actually makes EF use your DB
-        using var scope = _services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        await db.Database.EnsureCreatedAsync();
     }
+    
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public async ValueTask DisposeAsync()
     {
