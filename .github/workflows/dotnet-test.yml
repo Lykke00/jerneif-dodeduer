@@ -38,8 +38,8 @@ jobs:
           dotnet test \
             --configuration Release \
             --no-build \
-            --results-directory ${{ github.workspace }}/TestResults \
-            --logger trx
+            -- --report-trx \
+            --report-trx-filename ${{ github.workspace }}/TestResults/test-results.trx
 
       - name: Debug - List files
         if: always()
