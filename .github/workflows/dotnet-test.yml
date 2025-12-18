@@ -41,14 +41,17 @@ jobs:
             -- --report-trx \
             --report-trx-filename ${{ github.workspace }}/TestResults/test-results.trx
 
-      - name: Debug - List files
+      - name: Debug - Find all test results
         if: always()
         run: |
-          echo "=== Contents of TestResults directory ==="
-          ls -la ${{ github.workspace }}/TestResults || echo "TestResults directory does not exist"
+          echo "=== Finding all TRX files ==="
+          find ${{ github.workspace }} -name "*.trx" -type f
           echo ""
-          echo "=== All TRX files in workspace ==="
-          find ${{ github.workspace }} -name "*.trx" -type f || echo "No TRX files found"
+          echo "=== Finding all TestResults directories ==="
+          find ${{ github.workspace }} -name "TestResults" -type d
+          echo ""
+          echo "=== Finding all log files ==="
+          find ${{ github.workspace }} -name "*.log" -type f
 
       # 6. vis flotte resultater med dorny
       - name: Publish test results
