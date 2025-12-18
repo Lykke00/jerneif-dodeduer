@@ -14,8 +14,11 @@ COPY . .
 # Build the app
 RUN npm run build
 
+# Install serve globally
+RUN npm install -g serve
+
 # Expose port
 EXPOSE 210
 
-# Start with Node's built-in http-server for better control
-CMD ["npx", "http-server", "dist", "-p", "210", "-a", "0.0.0.0"]
+# Start the app
+CMD ["serve", "-s", "dist", "-l", "210", "-n"]
