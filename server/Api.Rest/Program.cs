@@ -10,6 +10,8 @@ using Api.Rest.Documentation;
 using Api.Rest.Middleware;
 using Api.Rest.Security;
 using FluentValidation;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.Extensions.Options;
 
 
 namespace Api.Rest;
@@ -28,44 +30,40 @@ public class Program
 
         builder.AddAppOptions();
 
-        var appOptions = builder.Configuration
-            .GetSection(nameof(AppOptions))
-            .Get<AppOptions>()!;
-        var jwtOptions = appOptions.Jwt;
+        builder.Services.Configure<AppOptions>(
+            builder.Configuration.GetSection(nameof(AppOptions)));
+        
+        builder.Services.Configure<JwtOptions>(
+            builder.Configuration.GetSection("AppOptions:Jwt"));
 
-        if (builder.Environment.IsEnvironment("Testing"))
+
+        builder.Services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            builder.Services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseInMemoryDatabase("TestDb");
-            });
-        }
-        else
-        {
-            builder.Services.AddDbContext<AppDbContext>(options =>
-            {
-                options.UseNpgsql(appOptions.DbConnectionString);
-                options.EnableSensitiveDataLogging();
-            });
-        }
+            var appOptions = sp.GetRequiredService<IOptions<AppOptions>>().Value;
+            options.UseNpgsql(appOptions.DbConnectionString);
+        });
 
         //---------------- SERVICES ----------------//
         builder.Services.ServiceStartup();
         builder.Services.AddSingleton<ICookieService, CookieService>();
 
         //---------------- AUTHENTICATION ----------//
-        builder.Services.AddAuthentication(jwtOptions);
+        builder.Services.AddAuthenticationRest();
         
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("Frontend", p =>
+        builder.Services.AddCors();
+        builder.Services.AddOptions<CorsOptions>()
+            .Configure<IOptions<AppOptions>>((cors, app) =>
             {
-                p.WithOrigins(appOptions.FrontendUrl)
-                    .AllowCredentials()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
+                var appOptions = app.Value;
+
+                cors.AddPolicy("Frontend", policy =>
+                {
+                    policy.WithOrigins(appOptions.FrontendUrl)
+                        .AllowCredentials()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
             });
-        });
 
         //---------------- API ---------------------//
         builder.Services.AddControllers(options =>
