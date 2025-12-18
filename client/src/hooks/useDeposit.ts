@@ -7,7 +7,6 @@ import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { depositClient } from '../api/APIClients';
 import { useAuthContext } from '../contexts/AuthContext';
-import { useState } from 'react';
 
 // "" er alle
 export type DepositStatus = '' | 'approved' | 'declined' | 'pending';
