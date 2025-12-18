@@ -31,11 +31,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Api.Rest\Api.Rest.csproj" />
-    <ProjectReference Include="..\dataaccess\dataaccess.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\Service\Service.csproj" />
+    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
   </ItemGroup>
 
 </Project>
