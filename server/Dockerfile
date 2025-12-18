@@ -1,5 +1,7 @@
-﻿﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /
+
+# kommentar
 
 COPY . .
 
@@ -19,4 +21,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "Startup.dll"]
+ENTRYPOINT ["dotnet", "Api.Rest.dll"]
