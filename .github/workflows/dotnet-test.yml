@@ -40,6 +40,15 @@ jobs:
             --results-directory ${{ github.workspace }}/TestResults \
             --logger "trx;LogFileName=test-results.trx"
 
+      - name: Debug - List files
+        if: always()
+        run: |
+          echo "=== Contents of TestResults directory ==="
+          ls -la ${{ github.workspace }}/TestResults || echo "TestResults directory does not exist"
+          echo ""
+          echo "=== All TRX files in workspace ==="
+          find ${{ github.workspace }} -name "*.trx" -type f || echo "No TRX files found"
+
       # 6. vis flotte resultater med dorny
       - name: Publish test results
         if: always()
