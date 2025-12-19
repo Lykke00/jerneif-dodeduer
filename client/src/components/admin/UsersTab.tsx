@@ -101,7 +101,7 @@ export default function UsersTab() {
     return () => {
       isActive = false;
     };
-  }, [page, debouncedSearch, sortActive]);
+  }, [page, debouncedSearch, sortActive, getAll]);
 
   const createUser = async (
     firstName: string,
