@@ -3,16 +3,17 @@
 DROP TABLE IF EXISTS game_plays_numbers;
 DROP TABLE IF EXISTS game_winning_numbers;
 DROP TABLE IF EXISTS game_board_numbers;
+DROP TABLE IF EXISTS board_played_games;
+DROP TABLE IF EXISTS board_repeat_plans;
 DROP TABLE IF EXISTS users_balance;
 DROP TABLE IF EXISTS user_login_tokens;
 
-DROP TABLE IF EXISTS board_repeat_plans;
 DROP TABLE IF EXISTS game_plays;
 DROP TABLE IF EXISTS deposits;
 
 DROP TABLE IF EXISTS game_boards;
-DROP TABLE IF EXISTS games;
 
+DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE "users"
