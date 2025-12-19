@@ -7,6 +7,7 @@ import { extractApiErrors } from '../api/extractApiErrors';
 import { useLoading } from './useLoading';
 import { userClient } from '../api/APIClients';
 import { useAuthContext } from '../contexts/AuthContext';
+import { useCallback } from 'react';
 
 type UpdateUserInput = {
   firstName?: string;
@@ -42,63 +43,69 @@ export const useUsers = (): useUsersTypes => {
 
   const { makeApiCall } = useAuthContext();
 
-  const getAll = async (
-    search: string,
-    page: number,
-    pageSize: number,
-    active?: boolean
-  ): Promise<PagedResultOfUserDtoExtended> => {
-    // prøv at kald backend og se om vi kan logge brugeren ind
-    try {
-      const response = await withLoading(() =>
-        makeApiCall(() => userClient.getUsers(search, active, page, pageSize))
-      );
+  const getAll = useCallback(
+    async (
+      search: string,
+      page: number,
+      pageSize: number,
+      active?: boolean
+    ): Promise<PagedResultOfUserDtoExtended> => {
+      // prøv at kald backend og se om vi kan logge brugeren ind
+      try {
+        const response = await withLoading(() =>
+          makeApiCall(() => userClient.getUsers(search, active, page, pageSize))
+        );
 
-      var allUsers = response;
-      if (allUsers == null) {
-        throw new Error('Ingen brugere fundet');
+        var allUsers = response;
+        if (allUsers == null) {
+          throw new Error('Ingen brugere fundet');
+        }
+
+        return allUsers;
+        // hvis en fejl sker, så extract fejlene og kast en error så vores
+        // visningsside kan håndtere den korrekt med try catch.
+      } catch (e) {
+        const apiError = extractApiErrors(e);
+        if (apiError) {
+          throw new Error(apiError);
+        }
+
+        throw e;
       }
+    },
+    [withLoading, makeApiCall]
+  );
 
-      return allUsers;
-      // hvis en fejl sker, så extract fejlene og kast en error så vores
-      // visningsside kan håndtere den korrekt med try catch.
-    } catch (e) {
-      const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
+  const create = useCallback(
+    async (
+      firstName: string,
+      lastName: string,
+      phone: string,
+      email: string,
+      admin: boolean
+    ): Promise<UserDtoExtended> => {
+      try {
+        const response = await withLoading(() =>
+          makeApiCall(() => userClient.createUser({ firstName, lastName, phone, email, admin }))
+        );
+
+        var createdUser = response.value;
+        if (createdUser == null) {
+          throw new Error('Brugeren blev ikke oprettet');
+        }
+
+        return createdUser;
+      } catch (e) {
+        const apiError = extractApiErrors(e);
+        if (apiError) {
+          throw new Error(apiError);
+        }
+
+        throw e;
       }
-
-      throw e;
-    }
-  };
-
-  const create = async (
-    firstName: string,
-    lastName: string,
-    phone: string,
-    email: string,
-    admin: boolean
-  ): Promise<UserDtoExtended> => {
-    try {
-      const response = await withLoading(() =>
-        makeApiCall(() => userClient.createUser({ firstName, lastName, phone, email, admin }))
-      );
-
-      var createdUser = response.value;
-      if (createdUser == null) {
-        throw new Error('Brugeren blev ikke oprettet');
-      }
-
-      return createdUser;
-    } catch (e) {
-      const apiError = extractApiErrors(e);
-      if (apiError) {
-        throw new Error(apiError);
-      }
-
-      throw e;
-    }
-  };
+    },
+    [withLoading, makeApiCall]
+  );
 
   function toUpdateUserRequest(input: UpdateUserInput): UpdateUserRequest {
     return {
@@ -111,21 +118,22 @@ export const useUsers = (): useUsersTypes => {
     };
   }
 
-  // dårlig api design.......
-  // burde seriøst omskrives
-  const update = async (id: string, changes: UpdateUserInput): Promise<UserDtoExtended> => {
-    const request = toUpdateUserRequest(changes);
+  const update = useCallback(
+    async (id: string, changes: UpdateUserInput): Promise<UserDtoExtended> => {
+      const request = toUpdateUserRequest(changes);
 
-    const response = await withUpdateLoading(() =>
-      makeApiCall(() => userClient.update(id, request))
-    );
-    var updateUser = response.value;
-    if (updateUser == null) {
-      throw new Error('Brugeren blev ikke opdateret');
-    }
+      const response = await withUpdateLoading(() =>
+        makeApiCall(() => userClient.update(id, request))
+      );
+      var updateUser = response.value;
+      if (updateUser == null) {
+        throw new Error('Brugeren blev ikke opdateret');
+      }
 
-    return updateUser;
-  };
+      return updateUser;
+    },
+    [withUpdateLoading, makeApiCall]
+  );
 
   return {
     getAll,
