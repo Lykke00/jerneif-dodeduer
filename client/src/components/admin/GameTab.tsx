@@ -118,17 +118,21 @@ export default function GameTab() {
                   name="weekNumber"
                   type="number"
                   label="Uge nummer"
-                  required
+                  isRequired
                   value={weekNumber}
                   onValueChange={setWeekNumber}
                   placeholder="43"
                   minValue={1}
+                  formatOptions={{
+                    signDisplay: 'never',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }}
                 />
                 <Button
-                  name="weekNumber"
                   type="submit"
                   isLoading={isCreateLoading}
-                  disabled={!weekNumber}
+                  isDisabled={!weekNumber}
                   className="w-full h-11 font-semibold text-base bg-gradient-to-r from-primary to-primary/80 transition-all text-white"
                 >
                   Start spil

@@ -498,8 +498,10 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
             var winningNumbers = g.GameWinningNumbers.Select(wn => wn.Number).ToList();
             var totalWinners = 0;
 
+            // hvis vindertal er højere end 0 så
             if (winningNumbers.Count > 0)
             {
+                // udregn hvor mange vindere der er ialt
                 totalWinners = g.GamePlays
                     .Count(play =>
                         play.GamePlaysNumbers.Count(n => winningNumbers.Contains(n.Number)) >= 3
@@ -552,8 +554,10 @@ public async Task<PagedResult<UserWinnerDto>> GetWinnersAsync(
         var winningNumbers = game.GameWinningNumbers.Select(wn => wn.Number).ToList();
         var totalWinners = 0;
         
+        // hvis vindertal er højere end 0 så
         if (winningNumbers.Count > 0)
         {
+            // udregn hvor mange vindere der er ialt
             totalWinners = game.GamePlays
                 .Count(play =>
                     play.GamePlaysNumbers.Count(n => winningNumbers.Contains(n.Number)) >= 3

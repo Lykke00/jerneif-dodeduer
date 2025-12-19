@@ -108,6 +108,10 @@ public class AuthController(IAuthService service, IUserService userService, ICoo
         var id = User.GetUserId();
         if (id == null) return Result<UserDto>.Unauthorized("Not logged in");
 
+        var result = await userService.GetByIdAsync(id.Value);
+        if (result.Value == null || !result.Value.IsActive)
+            return Result<UserDto>.Unauthorized("User is inactive");
+
         return await userService.GetByIdAsync(id.Value);
     }
 }

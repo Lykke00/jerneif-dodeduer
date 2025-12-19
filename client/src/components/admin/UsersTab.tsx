@@ -258,7 +258,7 @@ export default function UsersTab() {
                         >
                           {user.fullName}
                         </TableCell>
-                        <TableCell className="text-right font-semibold">{user.balance}</TableCell>
+                        <TableCell className="text-right font-semibold">{user.balance},-</TableCell>
                         <TableCell className="text-right font-semibold">
                           {user.totalDeposits}
                         </TableCell>

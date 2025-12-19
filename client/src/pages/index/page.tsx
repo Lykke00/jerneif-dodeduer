@@ -33,9 +33,9 @@ export default function IndexPage() {
         title: 'En fejl opstod',
         description: errorToMessage(e),
       });
+    } finally {
+      setIsSubmitting(false);
     }
-    setEmail('');
-    setIsSubmitting(false);
   };
 
   return (

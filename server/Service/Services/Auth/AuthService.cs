@@ -30,11 +30,13 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         // hvis brugeren er null, så smider vi en fejl
         if (user is null)
             return Result<bool>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
+        
+        // hvis brugeren er inaktiv, så ikke tillad at sende token
+        if (!user.Active)
+            return Result<bool>.Forbidden(nameof(user), "Brugeren er ikke aktiv");
 
         // opret en rå token der skal sendes til email
         var raw = TokenService.GenerateRawToken();
-        
-        Console.WriteLine(raw);
         
         // opret en hash token fra den rå token til at gemme i databasen
         var hash = TokenService.ComputeHash(raw);
@@ -111,6 +113,10 @@ public class AuthService(IJwtGenerator jwtGenerator, IRepository<DbUser> userRep
         var user = await userRepository.Query().SingleOrDefaultAsync(u => u.Id == token.Value);
         if (user == null)
             return Result<LoginVerifyResponse>.NotFound(nameof(user), "Brugeren eksisterer ikke.");
+
+        // hvis brugeren er inaktiv, så ikke tillad et login
+        if (user.Active == false)
+            return Result<LoginVerifyResponse>.Forbidden(nameof(user), "Brugeren er ikke aktiv");
 
         // lav ny access og refresh token til brugeren
         var jwt = jwtGenerator.GenerateTokenPair(user);
