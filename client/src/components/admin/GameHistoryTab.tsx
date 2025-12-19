@@ -18,13 +18,11 @@ import {
 } from '@heroui/react';
 import { BsEye } from 'react-icons/bs';
 import { useGame } from '../../hooks';
-import { useModal } from '../../contexts/ModalContext';
 import type { GameExtendedDto } from '../../generated-ts-client';
 import { useNavigate } from 'react-router-dom';
 
 export default function GameHistoryTab() {
   const { getAll, isLoading } = useGame();
-  const { showModal } = useModal();
   const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
