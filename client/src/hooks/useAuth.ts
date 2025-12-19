@@ -108,7 +108,9 @@ export const useAuth = (): useAuthTypes => {
       const u = response.value;
       if (!u) throw new Error('Ingen user fra me()');
 
-      if (u.isAdmin != user?.isAdmin) refresh();
+      if (user != null && u.isAdmin != user?.isAdmin) {
+        refresh();
+      }
 
       setUser(u);
 
