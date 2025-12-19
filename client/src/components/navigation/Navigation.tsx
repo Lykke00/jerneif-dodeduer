@@ -11,17 +11,17 @@ import {
   Chip,
 } from '@heroui/react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks';
 import { PageRoutes } from '../../PageRoutes';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
 import { Fragment, useState } from 'react';
 import { isActiveRoute } from '../../helpers/isActiveRoute';
 import { BiChevronDown, BiChevronRight } from 'react-icons/bi';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 export default function Navigation() {
   const { pathname } = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
   const { showModal } = useModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isAdminPage = isActiveRoute(pathname, PageRoutes.Admin);

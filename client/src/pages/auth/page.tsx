@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../hooks';
 import { errorToMessage } from '../../helpers/errorToMessage';
 import { Spinner } from '@heroui/react';
 import { motion } from 'framer-motion';
 import ErrorState from '../../components/common/ErrorState';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 export const AuthVerify = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
-  const { verify, isLoading } = useAuth();
+  const { verify, isLoading } = useAuthContext();
   const [errors, setErrors] = useState<string>();
 
   useEffect(() => {

@@ -2,12 +2,12 @@ import { Button, Card, CardBody, CardFooter, CardHeader, Form, Input } from '@he
 import { motion } from 'framer-motion';
 import { useState, type FormEvent } from 'react';
 import { isValidEmail } from '../../helpers/isValidEmail';
-import { useAuth } from '../../hooks';
 import { useModal } from '../../contexts/ModalContext';
 import { errorToMessage } from '../../helpers/errorToMessage';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 export default function IndexPage() {
-  const { requestLogin } = useAuth();
+  const { requestLogin } = useAuthContext();
   const { showModal } = useModal();
 
   const [email, setEmail] = useState<string>('');
