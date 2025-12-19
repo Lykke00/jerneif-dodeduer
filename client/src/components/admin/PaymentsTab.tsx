@@ -67,18 +67,10 @@ export default function PaymentsTab() {
   const { adminGetAll, adminUpdateStatus } = useDeposit();
 
   useEffect(() => {
-    let isActive = true;
-
-    (async () => {
-      const res = await adminGetAll(search, status, page, pageSize);
-      if (!isActive) return;
+    adminGetAll(search, status, page, pageSize).then((res) => {
       setAllDeposits(res.items);
       setTotalCount(res.totalCount);
-    })();
-
-    return () => {
-      isActive = false;
-    };
+    });
   }, [page, debouncedSearch, status]);
 
   const updateStatus = async (id: string, status: DepositStatus) => {

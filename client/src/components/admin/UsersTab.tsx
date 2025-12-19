@@ -89,18 +89,10 @@ export default function UsersTab() {
   };
 
   useEffect(() => {
-    let isActive = true;
-
-    (async () => {
-      const res = await getAll(search, page, pageSize, sortActive);
-      if (!isActive) return;
+    getAll(debouncedSearch, page, pageSize, sortActive).then((res) => {
       setAllUsers(res.items);
       setTotalCount(res.totalCount);
-    })();
-
-    return () => {
-      isActive = false;
-    };
+    });
   }, [page, debouncedSearch, sortActive]);
 
   const createUser = async (

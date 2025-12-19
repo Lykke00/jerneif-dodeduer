@@ -36,27 +36,10 @@ export default function GameHistoryTab() {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
-    let isActive = true;
-
-    (async () => {
-      try {
-        const res = await getAll(page, pageSize);
-        if (!isActive) return;
-
-        setGames(res.items);
-        setTotalCount(res.totalCount);
-      } catch {
-        showModal({
-          variant: 'error',
-          title: 'En fejl opstod',
-          description: 'Kunne ikke hente spil-historik',
-        });
-      }
-    })();
-
-    return () => {
-      isActive = false;
-    };
+    getAll(page, pageSize).then((res) => {
+      setGames(res.items);
+      setTotalCount(res.totalCount);
+    });
   }, [page]);
 
   return (

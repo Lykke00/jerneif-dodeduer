@@ -49,35 +49,26 @@ export default function GameSpecificTab() {
   const totalPages = Math.ceil(totalGameWinners / pageSize);
 
   useEffect(() => {
-    let isActive = true;
+    if (gameId == null) {
+      showModal({
+        variant: 'error',
+        title: 'En fejl opstod',
+        description: 'Kunne ikke hente spil-info',
+      });
+      return;
+    }
 
-    (async () => {
-      try {
-        if (gameId == null) {
-          showModal({
-            variant: 'error',
-            title: 'En fejl opstod',
-            description: 'Kunne ikke hente spil-info',
-          });
-          return;
-        }
-
-        const gameInfo = await getGameInfo(gameId);
-        if (!isActive) return;
-
+    getGameInfo(gameId)
+      .then((gameInfo) => {
         setCurrentGame(gameInfo);
-      } catch {
+      })
+      .catch(() => {
         showModal({
           variant: 'error',
           title: 'En fejl opstod',
           description: 'Kunne ikke hente spil-info',
         });
-      }
-    })();
-
-    return () => {
-      isActive = false;
-    };
+      });
   }, [gameId]);
 
   const winningNumberSet = new Set(game?.winningNumbers ?? []);
