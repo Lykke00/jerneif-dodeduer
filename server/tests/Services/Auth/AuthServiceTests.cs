@@ -79,7 +79,34 @@ public class AuthServiceTests
         var tokenCount = await _db.Set<UserLoginToken>().CountAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(1, tokenCount);
     }
+    
+    [Fact]
+    public async Task LoginAsync_UserExistsButIsInActive_ReturnsError()
+    {
+        // Arrange
+        var email = "inactive@test.com";
+        await TestDataFactory.CreateUserAsync(_db, email, false);
+        
+        var request = new LoginRequest
+        {
+            Email = email
+        };
 
+        var agent = new AgentDto
+        {
+            IpAddress = "127.0.0.1",
+            UserAgent = "xunit"
+        };
+        
+        // Act
+        var result = await _service.LoginAsync(request, agent);
+        
+        // Assert
+        Assert.False(result.Success);
+        Assert.False(result.Value);
+        Assert.Equal(403, result.StatusCode);
+    }
+    
     [Fact]
     public async Task LoginAsync_UserDoesNotExist_ReturnsError()
     {

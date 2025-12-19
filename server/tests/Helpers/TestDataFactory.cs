@@ -8,13 +8,15 @@ public static class TestDataFactory
 {
     public static async Task<User>  CreateUserAsync(
         AppDbContext db,
-        string email)
+        string email,
+        bool active = true)
     {
         var user = new User
         {
             FirstName = "Test",
             LastName = "User",
             Phone =  "1234567890",
+            Active = active,
             Email = email
         };
 
