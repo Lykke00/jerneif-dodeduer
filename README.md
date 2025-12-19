@@ -53,6 +53,12 @@ The application is split into a backend API and a frontend client.
 
 No secrets or environment-specific values are committed to the repository.
 
+### Database
+The application uses **PostgreSQL 16**.
+
+The database schema is defined in SQL and can be found here:
+- https://github.com/Lykke00/jerneif-dodeduer/blob/main/server/DataAccess/database.sql
+  
 ## Deployment
 
 The application is deployed using **EasyPanel**.
